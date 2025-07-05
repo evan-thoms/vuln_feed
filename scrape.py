@@ -33,16 +33,18 @@ except json.decoder.JSONDecodeError as exc:
 
 print("GOT IT", retrieved_json)
 
-# data = response.json()
-# print("json")
-# for row in data["data"]:
-#     date = row["date_published"]
-#     # `description` contains an <a> tag with link
-#     soup = BeautifulSoup(row["description"], "html.parser")
-#     title_link = soup.find("a")
-#     title = title_link.text.strip()
-#     link = "https://www.exploit-db.com" + title_link["href"]
+exploits = retrieved_json["data"]
 
-#     print(f"Date: {date}")
-#     print(f"Title: {title}")
-#     print(f"Link: {link}\n")
+for exploit in exploits:
+    date = exploit["date_published"]
+    # `description` contains an <a> tag with link
+    id = exploit["id"]
+    link = "https://www.exploit-db.com/exploits/"+id
+    title = exploit["description"][1]
+
+    print(f"Date: {date}")
+    print(f"Title: {title}")
+    print(f"Link: {link}\n")
+
+with open("cves.json", "w") as f:
+    json.dump(exploits, f, indent=2)
