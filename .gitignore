@@ -2,5 +2,6 @@ scrapers/ex.py
 .DS_Store
 src/__pycache__/
 __pycache__/
-
+scrapers/ex.py
+scrapers/scrape.py
 venv/

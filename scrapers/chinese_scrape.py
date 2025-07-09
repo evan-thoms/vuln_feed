@@ -15,11 +15,11 @@ class ChineseScraper:
         vulns = []
         cutoff_date = datetime.now() - timedelta(days=days_back)
         
-        for entry in feed.entries[:15]:
+        for entry in feed.entries[:5]:
             try:
                 
                 title_original_ = entry.title
-                title_translated_ = entry.title
+                title_translated_ = self.translator.translate(title_original_) if title_original_ else "No title."
                 print(title_original_, title_translated_)
 
                 description_original_ = getattr(entry, 'summary', '')
@@ -41,14 +41,15 @@ class ChineseScraper:
                     description_original=description_original_,
                     description_translated=description_translated_,
                     severity='TBD',
-                    cvss_score=5.0,
+                    cvss_score=-1.0,
                     published_date=pub_date,
+                    original_language="zh",
                     source='FreeBuf',
                     url=link,
                     affected_products=[]
                 )
                 vulns.append(vuln)
-
+                print(vuln, "\n")
             except Exception as e:
                 print(f"[FreeBuf] Parse error: {e}")
                 continue

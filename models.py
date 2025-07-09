@@ -2,6 +2,16 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import List
 
+@dataclass
+class NewsItem:
+    title_original: str
+    title_translated: str
+    description_original: str
+    description_translated: str
+    published_date: datetime
+    original_language: str
+    source: str
+    url: str        
 
 @dataclass
 class Vulnerability:
@@ -23,3 +33,4 @@ class Vulnerability:
         recency = max(0, 30-days_old)/30
         severity = self.cvss_score /10 
         return (severity * .7) + (recency*.3)
+    
