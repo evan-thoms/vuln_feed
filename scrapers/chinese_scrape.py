@@ -2,6 +2,8 @@ import feedparser
 from datetime import datetime, timedelta
 from models import Vulnerability
 from deep_translator import GoogleTranslator  # or your LangChain helper
+import requests
+from bs4 import BeautifulSoup
 
 class ChineseScraper:
     def __init__(self):
@@ -56,12 +58,101 @@ class ChineseScraper:
 
         print(f"[FreeBuf] Scraped {len(vulns)} fresh vulnerabilities.")
         return vulns
+    def fetch_article_content(self, url):
+            if not url.startswith("http"):
+                url = "https://" + url
+            r = requests.get(url)
+            if r.status_code == 404:
+                print(f"Skipping 404 URL: {url}")
+                return "404"
+            soup = BeautifulSoup(r.text, "html.parser")
+            # content_div = soup.find("div", class_="entry-content")
+            content_div = soup.find("div", id="js-article")
+            if content_div:
+                paragraphs = content_div.stripped_strings
+                return "\n".join(paragraphs)
+            else:
+                print("No div.entry-content found!")
+            return ""
+    def scrape_anquanke(self):
+        # url = 'https://www.anquanke.com/tag/%E6%BC%8F%E6%B4%9E'
+        # response = requests.get(url)
+        # soup = BeautifulSoup(response.content, 'html.parser')
+        # post_list = soup.find('div', id='post-list')
+        # article_items = post_list.find_all('div', class_='article-item')
+        # links = []
+
+        # for item in article_items:
+        #     a_tag = item.find('a')
+        #     if a_tag and a_tag.get('href'):
+        #         link = a_tag['href']
+        #         if not link.startswith('http'):
+        #             link = f"https://www.anquanke.com{link}"
+        #         links.append(link)
+
+        # print(links)
+        API_URL = "https://api.anquanke.com/data/v1/posts"
+        TAG = "漏洞"
+        pages = 1
+        articles = []
+
+        for page in range(1, pages + 1):
+            params = {
+                "page": page,
+                "size": 10,
+                "tag": TAG
+            }
+            r = requests.get(API_URL, params=params)
+            data = r.json()
+            for post in data['data']:
+                # Build original Chinese article URL using post id
+                original_url = f"https://www.anquanke.com/post/id/{post['id']}"
+                articles.append({
+                    "title": post['title'],
+                    "url": original_url,
+                    "date": post['date']
+                })
+
+        print(f"Grabbed {len(articles)} articles")
+
+        for art in articles:
+            print(f"Fetching: {art['title']} ({art['url']})")
+            content = self.fetch_article_content(art['url'])
+            print(f"Content preview:\n{content[:300]}...\n")  # show 300 chars preview
+
+
+        # for page in range(1, pages + 1):
+        #     params = {
+        #         "page": page,
+        #         "size": 10,
+        #         "tag": TAG
+        #     }
+        #     r = requests.get(API_URL, params=params)
+        #     data = r.json()
+        #     for post in data['data']:
+        #         url = post['url']
+        #         if "anquanke.com" not in url:
+        #             # Try to find the original anquanke URL or skip / handle differently
+        #             print(f"Skipping non-Chinese original: {url}")
+        #             continue
+        #         articles.append({
+        #             "title": post['title'],
+        #             "url": post['url'],
+        #             "date": post['date']
+        #         })
+        # print("Grabbed ", len(articles), " articles")
+        
+        # for art in articles:
+        #     print(f"Fetching: {art['title']} ({art['url']})")
+        #     content = self.fetch_article_content(art['url'])
+        #     print(f"Content preview: {content[:100]}...\n")
+    
 
 if __name__ == "__main__":
     scraper = ChineseScraper()
-    vulns = scraper.scrape_freebuf()
-    for v in vulns:
-        print(v)
+    vulns = scraper.scrape_anquanke()
+    # for v in vulns:
+    #     print(v)
 
 
 # # scrapers/chinese_scrape.py
