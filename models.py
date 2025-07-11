@@ -32,3 +32,12 @@ class Vulnerability:
         severity = self.cvss_score /10 
         return (severity * .7) + (recency*.3)
     
+@dataclass
+class Article:
+    id: int | None
+    source: str
+    title: str
+    link: str
+    raw_content: str
+    language: str
+    scraped_at: datetime
