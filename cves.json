@@ -1,0 +1,28 @@
+[
+  {
+    "cve_id": "CVE-2025-47162",
+    "title_original": "微软 Office 漏洞允许攻击者执行远程代码",
+    "title_translated": "Microsoft Office bug allows the assailant to execute remote code",
+    "summary": "Microsoft Office has multiple vulnerabilities that allow attackers to enforce random codes on affected systems, including stack-based buffer spills and type confusion. These exploits can be triggered without user interaction by downloading or previewing malicious documents. Affected machines include Windows, MacOS, and Android platforms.",
+    "severity": "High",
+    "cvss_score": 8.4,
+    "published_date": "2025-07-11T16:05:40.343023",
+    "original_language": "zh",
+    "source": "FreeBuf",
+    "url": "https://www.anquanke.com/post/id/308412",
+    "affected_products": []
+  },
+  {
+    "cve_id": "Unknown",
+    "title_original": "人工智能可能修复帮助传播了 15 年的漏洞",
+    "title_translated": "The repair of artificial intelligence may have helped spread a 15-year gap.",
+    "summary": "The vulnerability is a long-standing loophole in Node.js that allows attackers to navigate outside the specified directory. The loophole has been embedded in the culture of developers and training data of AI models, making it difficult to eliminate. Remediation efforts involve scanning public GitHub repositories for the loophole and generating patches using GPT-4.",
+    "severity": "High",
+    "cvss_score": 7.5,
+    "published_date": "2025-07-11T16:05:41.788328",
+    "original_language": "zh",
+    "source": "FreeBuf",
+    "url": "https://www.anquanke.com/post/id/308401",
+    "affected_products": []
+  }
+]

@@ -37,7 +37,9 @@ class Article:
     id: int | None
     source: str
     title: str
+    translated_title: str
     link: str
-    raw_content: str
+    content: str
+    translated_content: str
     language: str
     scraped_at: datetime

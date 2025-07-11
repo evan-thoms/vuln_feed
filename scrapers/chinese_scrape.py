@@ -47,8 +47,10 @@ class ChineseScraper:
                     id= article_url,
                     source= "FreeBuf",
                     title= title,
+                    translated_title="",
                     link= article_url,
-                    raw_content= full_text,
+                    content= full_text,
+                    translated_content="",
                     language= "zh",
                     scraped_at= datetime.now()
                 )
@@ -108,8 +110,10 @@ class ChineseScraper:
                         id= article["url"],
                         source= "FreeBuf",
                         title= article["title"],
+                        translated_title="",
                         link= article["url"],
-                        raw_content= content,
+                        content= content,
+                        translated_content="",
                         language= "zh",
                         scraped_at= datetime.now()
                     )
@@ -133,5 +137,5 @@ if __name__ == "__main__":
         print(f"Link: {art.link}")
         print(f"Language: {art.language}")
         print(f"Scraped at: {art.scraped_at}")
-        print(f"Content preview:\n{art.raw_content[:300]}")  # first 300 chars
+        print(f"Content preview:\n{art.content[:300]}")  # first 300 chars
         print("-" * 40)
