@@ -1,63 +1,66 @@
 import feedparser
-from datetime import datetime, timedelta
-from models import Vulnerability
-from deep_translator import GoogleTranslator  # or your LangChain helper
+from datetime import datetime
+from models import Article
 import requests
 from bs4 import BeautifulSoup
+import time
 
 class ChineseScraper:
-    def __init__(self):
-        self.translator = GoogleTranslator(source='auto', target='en')
-
     def scrape_freebuf(self, days_back: int = 7):
         print("[FreeBuf] Starting RSS scrape...")
         feed_url = "https://www.freebuf.com/feed"
         feed = feedparser.parse(feed_url)
+        print(f"Found {len(feed.entries)} articles in the RSS feed.")
 
-        vulns = []
-        cutoff_date = datetime.now() - timedelta(days=days_back)
-        
-        for entry in feed.entries[:5]:
+        articles = []
+
+        for entry in feed.entries[:3]:
+            article_url = entry.link
+            print(f"\nFetching: {article_url}")
+            
             try:
+                headers = {"User-Agent": "Mozilla/5.0"}
+                res = requests.get(article_url, headers=headers)
+                res.raise_for_status()
                 
-                title_original_ = entry.title
-                title_translated_ = self.translator.translate(title_original_) if title_original_ else "No title."
-                print(title_original_, title_translated_)
-
-                description_original_ = getattr(entry, 'summary', '')
-                description_translated_ = self.translator.translate(description_original_) if description_original_ else "No description."
-
-                link = entry.link
-
-                pub_date = datetime.now()
-                if hasattr(entry, 'published_parsed'):
-                    pub_date = datetime(*entry.published_parsed[:6])
-
-                if pub_date < cutoff_date:
+                soup = BeautifulSoup(res.text, "html.parser")
+                
+                title = soup.find("div", class_="title")
+                if not title:
+                    title = soup.find("h1")
+                title = title.get_text(strip=True) if title else entry.title
+                
+                body_div = soup.find("div", class_="artical-body")
+                if not body_div:
+                    print("No artical-body found, skipping.")
                     continue
+                paragraphs = [p.get_text(strip=True) for p in body_div.find_all("p")]
+                code_blocks = [pre.get_text(strip=True) for pre in body_div.find_all("pre")]
+                full_text = "\n\n".join(paragraphs + code_blocks)
 
-                vuln = Vulnerability(
-                    cve_id=f"FreeBuf-{hash(title_original_) % 10000}",
-                    title_original=title_original_,
-                    title_translated=title_translated_,
-                    description_original=description_original_,
-                    description_translated=description_translated_,
-                    severity='TBD',
-                    cvss_score=-1.0,
-                    published_date=pub_date,
-                    original_language="zh",
-                    source='FreeBuf',
-                    url=link,
-                    affected_products=[]
+                print("Title:", entry.title)
+                print("PubDate:", entry.published)
+                print("Link:", article_url)
+                print("First 300 chars:", full_text[:300], "...")
+                
+                article = Article(
+                    id= article_url,
+                    source= "FreeBuf",
+                    title= title,
+                    link= article_url,
+                    raw_content= full_text,
+                    language= "zh",
+                    scraped_at= datetime.now()
                 )
-                vulns.append(vuln)
-                print(vuln, "\n")
-            except Exception as e:
-                print(f"[FreeBuf] Parse error: {e}")
-                continue
+                articles.append(article)
 
-        print(f"[FreeBuf] Scraped {len(vulns)} fresh vulnerabilities.")
-        return vulns
+            except Exception as e:
+                print("Error fetching article:", e)
+            
+            time.sleep(1)   
+        print("articles: ", articles[1].title, articles[0].language)
+        return articles
+               
     def fetch_article_content_an(self, url):
             if not url.startswith("http"):
                 url = "https://" + url
@@ -66,7 +69,6 @@ class ChineseScraper:
                 print(f"Skipping 404 URL: {url}")
                 return "404"
             soup = BeautifulSoup(r.text, "html.parser")
-            # content_div = soup.find("div", class_="entry-content")
             content_div = soup.find("div", id="js-article")
             if content_div:
                 paragraphs = content_div.stripped_strings
@@ -78,34 +80,58 @@ class ChineseScraper:
         API_URL = "https://api.anquanke.com/data/v1/posts"
         TAG = "漏洞"
         pages = 1
-        articles = []
+        articles_meta = []
 
         for page in range(1, pages + 1):
             params = {
                 "page": page,
-                "size": 1,
+                "size": 3,
                 "tag": TAG
             }
             r = requests.get(API_URL, params=params)
             data = r.json()
             for post in data['data']:
-                # Build original Chinese article URL using post id
                 original_url = f"https://www.anquanke.com/post/id/{post['id']}"
-                articles.append({
+                articles_meta.append({
                     "title": post['title'],
                     "url": original_url,
                     "date": post['date']
                 })
 
-        print(f"Grabbed {len(articles)} articles")
-
-        for art in articles:
-            print(f"Fetching: {art['title']} ({art['url']})")
-            content = self.fetch_article_content_an(art['url'])
+        print(f"Grabbed {len(articles_meta)} articles")
+        articles = []
+        for article in articles_meta:
+            print(f"Fetching: {article['title']} ({article['url']})")
+            content = self.fetch_article_content_an(article['url'])
             print(f"Content preview:\n{content[:300]}...\n") 
+            article = Article(
+                        id= article["url"],
+                        source= "FreeBuf",
+                        title= article["title"],
+                        link= article["url"],
+                        raw_content= content,
+                        language= "zh",
+                        scraped_at= datetime.now()
+                    )
+            articles.append(article)
+        return articles
+    def scrape_all(self):
+        freeBuf = self.scrape_freebuf()
+        anquanke = self.scrape_anquanke()
+        print("anquan len, ", len(anquanke), " freebuf len ", len(freeBuf))
+        freeBuf.extend(anquanke)
+        return freeBuf
+
 
 if __name__ == "__main__":
     scraper = ChineseScraper()
-    vulns = scraper.scrape_anquanke()
-    # for v in vulns:
-    #     print(v)
+    articles = scraper.scrape_all()
+    for art in articles:
+        print(f"ID: {art.id}")
+        print(f"Source: {art.source}")
+        print(f"Title: {art.title}")
+        print(f"Link: {art.link}")
+        print(f"Language: {art.language}")
+        print(f"Scraped at: {art.scraped_at}")
+        print(f"Content preview:\n{art.raw_content[:300]}")  # first 300 chars
+        print("-" * 40)
