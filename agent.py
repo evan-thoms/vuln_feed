@@ -1,0 +1,39 @@
+from langchain_ollama import ChatOllama
+from langchain_core.prompts import ChatPromptTemplate
+import json
+import re
+
+llm = ChatOllama(model="llama3")
+
+prompt = ChatPromptTemplate.from_template("""
+You are a security threat intelligence assistant.
+Given this text:
+---
+{article}
+---
+1. Is this describing a unique and identifiable CVE (yes/no)?
+2. If yes, extract:
+   - CVE number (or say 'Unknown'). Store multiple CVEs found as a list of strings
+   - Severity (Low/Medium/High/Critical). Give your best estimate from these 4 choices
+   - CVSS score if known
+3. Provide a 3-4 sentence summary of the details the vulnerability, exploitation process, and affected machines
+
+Return JSON:
+{{"type":"CVE"|"News","cve_id":"[]", "severity":"Low"|"Medium"|"High"|"Critical", "cvss_score":"", "summary":""}}
+""")
+
+def classify_article(article: str) -> dict:
+    chain = prompt | llm | (lambda x: x.content)
+    result = chain.invoke({"article": article})
+    print("result ", result)
+    match = re.search(r"\{[\s\S]*\}", result)
+    if not match:
+        raise ValueError("No JSON found in response:\n" + result)
+
+    return json.loads(match.group(0))
+
+
+if __name__ == "__main__":
+    # example_text = "在Fortinet VPN产品中发现了一个新的远程代码执行漏洞，编号CVE-2024-12345，CVSS评分9.8..."
+    example_text = "Microsoft Office 中的多个关键漏洞可能允许攻击者在受影响的系统上执行任意代码。这些漏洞被跟踪为CVE-2025-47162,CVE-2025-47953,CVE-2025-47164和CVE-2025-47167,所有漏洞的CVSS得分为8.4分(满分10分),并影响Windows,Mac和Android平台的众多Office版本。安全研究员0x140ce发现了这些缺陷,这些缺陷利用了基本的内存管理弱点,包括基于堆的缓冲区溢出,无使用条件和类型混淆错误。此漏洞(CWE-122)源于在 Office 文件解析例程中内存分配期间的不当边界检查。CVE-2025-47162:"
+    print(classify_article(example_text))

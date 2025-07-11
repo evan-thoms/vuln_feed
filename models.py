@@ -6,8 +6,7 @@ from typing import List
 class NewsItem:
     title_original: str
     title_translated: str
-    description_original: str
-    description_translated: str
+    summary: str
     published_date: datetime
     original_language: str
     source: str
@@ -18,8 +17,7 @@ class Vulnerability:
     cve_id: str
     title_original: str
     title_translated: str
-    description_original: str
-    description_translated: str
+    summary: str
     severity: str
     cvss_score: float
     published_date: datetime
