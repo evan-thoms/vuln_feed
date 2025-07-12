@@ -1,38 +1,11 @@
 [
   {
-    "title_original": "信息收集思路小结",
+    "title": "信息收集思路小结",
     "title_translated": "Synopsis of information collection",
-    "summary": "The article describes a sequence of information collection, including subdomain enumeration, port scanning, and HTTP probing. It provides various tools and techniques for security testing and vulnerability discovery.",
-    "published_date": "2025-07-11T16:05:31.678513",
+    "summary": "This article provides information on various tools and techniques for conducting security threat intelligence, including subdomain enumeration, port scanning, HTTPX, and Wappalyzer. It also discusses the importance of cataloging and using dictionaries for fuzz testing.",
+    "published_date": "2025-07-12T15:43:56.789002",
     "original_language": "zh",
     "source": "FreeBuf",
     "url": "https://www.freebuf.com/articles/web/438797.html"
-  },
-  {
-    "title_original": "信息泄露-常见敏感文件",
-    "title_translated": "Information leaks - common sensitive documents",
-    "summary": "Multiple vulnerabilities described, including Git leaks, SVN leaks, Mercurial leaks, Vim file disclosure, and Heapdump leak. These leaks can lead to sensitive information exposure, authentication bypass, and code execution. Affected machines are those using these version control systems.",
-    "published_date": "2025-07-11T16:05:33.820245",
-    "original_language": "zh",
-    "source": "FreeBuf",
-    "url": "https://www.freebuf.com/articles/web/438795.html"
-  },
-  {
-    "title_original": "银狐情报共享第1期：Att&CK视角下的最新活跃技战术分享",
-    "title_translated": "Silver Fox Intelligence Sharing Issue 1: Att & CK Perspectives for the latest active tactical sharing",
-    "summary": "The Silver Fox group uses a combination of technical complexities, social engineering fraud, and legitimate service communications to bypass security software detection/blocking process. They implant a malicious payload in the system's StartUp directory, creating virtual devices and mapping them to the Startup directory. This allows them to execute the payload without being detected by security software.",
-    "published_date": "2025-07-11T16:05:36.122776",
-    "original_language": "zh",
-    "source": "FreeBuf",
-    "url": "https://www.freebuf.com/articles/vuls/438775.html"
-  },
-  {
-    "title_original": "美国CISA警告 SinoTrack GPS 跟踪器存在远程控制漏洞",
-    "title_translated": "US CISA warning SinoTrack GPS tracker has remote control gaps",
-    "summary": "SinoTrack GPS equipment has critical loopholes allowing remote control and tracking of vehicles, with potential to cut fuel supply.",
-    "published_date": "2025-07-11T16:05:43.208133",
-    "original_language": "zh",
-    "source": "FreeBuf",
-    "url": "https://www.anquanke.com/post/id/308398"
   }
 ]

@@ -5,6 +5,17 @@ from agent import classify_article
 import json
 import argostranslate.package
 import argostranslate.translate
+from models import Article
+import datetime
+from db import (
+    init_db,
+    insert_raw_article,
+    is_article_scraped,
+    mark_as_processed,
+    get_unprocessed_articles,
+    insert_cve,
+    insert_newsitem,
+)
 
 def truncate_text(text, max_length=3000):
     return text[:max_length]
@@ -29,18 +40,16 @@ def setup_argos():
 def translate_articles(articles):
     for i, art in enumerate(articles):
         print(f"Translating article {i+1}/{len(articles)} title")
-        art.translated_title = translate(art.title, art.language)
+        art.title_translated = translate(art.title, art.language)
         print(f"Translating article {i+1}/{len(articles)} content")
-        art.translated_content = translate(art.content, art.language)
+        art.content_translated = translate(art.content, art.language)
     return articles
 
 def chunk_text(text, max_length=5000):
-    # split by sentences or paragraphs roughly, here by 3000 chars for safety
     chunks = []
     start = 0
     while start < len(text):
         end = min(start + max_length, len(text))
-        # try to break on last newline or space before max_length
         chunk = text[start:end]
         last_newline = chunk.rfind('\n')
         last_space = chunk.rfind(' ')
@@ -50,6 +59,8 @@ def chunk_text(text, max_length=5000):
         chunks.append(text[start:end])
         start = end
     return chunks
+
+
 def translate_argos(text: str, source_lang: str, target_lang: str = "en") -> str:
     return argostranslate.translate.translate(text, source_lang, target_lang)
 
@@ -71,33 +82,33 @@ def classify_articles(articles):
     news = []
 
     for art in articles:
-        result = classify_article(art.translated_content)
+        result = classify_article(art.content_translated)
         print(f"Agent result: {result}")
 
         if result["type"] == "CVE":
             vul = Vulnerability(
                 cve_id=result["cve_id"][0] if result["cve_id"] else "Unknown",
-                title_original=art.title,
-                title_translated=art.translated_title,
+                title=art.title,
+                title_translated=art.title_translated,
                 summary=result["summary"],
                 severity=result["severity"],
                 cvss_score=float(result["cvss_score"]) if result["cvss_score"] else 0.0,
                 published_date=art.scraped_at,
                 original_language=art.language,
                 source=art.source,
-                url=art.link,
+                url=art.url,
                 affected_products=[], 
             )
             cves.append(vul)
         else:
             news_item = NewsItem(
-                title_original=art.title,
-                title_translated=art.translated_title,
+                title=art.title,
+                title_translated=art.title_translated,
                 summary=result["summary"],
                 published_date=art.scraped_at,
                 original_language=art.language,
                 source=art.source,
-                url=art.link,
+                url=art.url,
             )
             news.append(news_item)
 
@@ -108,6 +119,7 @@ def save_to_json(items, path):
         json.dump([vars(item) for item in items], f, ensure_ascii=False, indent=2)
 
 def main():
+    init_db()
     setup_argos()
 
     articles = []
@@ -119,6 +131,14 @@ def main():
 
     # e_scraper = EnglishScraper()
     # articles+= c_scraper.scrape_all()
+
+
+    unprocessed_rows = get_unprocessed_articles()
+    if unprocessed_rows:
+        print("processing " ,len(unprocessed_rows), " unprocessed rows")
+    leftover_articles = [row_to_article(row) for row in unprocessed_rows]
+
+    articles+= leftover_articles
     for art in articles:
         art.content = truncate_text(art.content, max_length=3000)
     print(f"Scraped {len(articles)} articles")
@@ -127,29 +147,38 @@ def main():
     
     print(f"Translated {len(translated_articles)} articles")
 
-    cves, newsitems = classify_articles(translated_articles)
-    for item in cves + newsitems:
-        if hasattr(item, "published_date"):
-            item.published_date = item.published_date.isoformat()
-        if hasattr(item, "scraped_at"):
-            item.scraped_at = item.scraped_at.isoformat()
-    # for articles in articles:
-    #     save_to_db(article)
+    for art in translated_articles:
+        print("Inserted ", art.title_translated)
+        insert_raw_article(art)
 
+    cves, newsitems = classify_articles(translated_articles)
+ 
+    for cve in cves:
+        print("Inserted CVE ", cve.title_translated)
+        insert_cve(cve)
+
+    for newsitem in newsitems:
+        print("Inserted News ", newsitem.title_translated)
+        insert_newsitem(newsitem)
+    
     save_to_json(cves, "cves.json")
     save_to_json(newsitems, "newsitems.json")
         
+def row_to_article(row):
+    return Article(
+        id=row[0],
+        source=row[1],
+        title=row[2],
+        title_translated=row[3],
+        url=row[4],
+        content=row[5],
+        content_translated=row[6],
+        language=row[7],
+        scraped_at=row[8]
+    )
 
-# translate raw data
-
-
-#classify as CVE or NewsItem, add properties
-
-#Store in two diff SWL tables for newsitem and CVE
-
-
-# Then get top CVES andn generate general news
-cool = """Researchers use OpenAI o3 model to discover remote zero-day vulnerability in Linux kernel
+def test_classify_example():
+    example_text = """Researchers use OpenAI o3 model to discover remote zero-day vulnerability in Linux kernel
 Yixin Security
 2025-05-27 15:42:39
 11000
@@ -225,6 +254,9 @@ The author inputs the relevant code of ksmbd (about 12,000 lines) into the o3 mo
 
 2. Model Analysis
 The o3 model identifies potential vulnerability points through static analysis and semantic understanding. In particular, it can:"""
+    result = classify_article(example_text)
+    print(f"Agent result: {result}")
+
 if __name__ == "__main__":
     # result = classify_article(cool)
     # print(f"Agent result: {result}")

@@ -4,6 +4,7 @@ from models import Article
 import requests
 from bs4 import BeautifulSoup
 import time
+from db import is_article_scraped
 
 class ChineseScraper:
     def scrape_freebuf(self, days_back: int = 7):
@@ -14,8 +15,11 @@ class ChineseScraper:
 
         articles = []
 
-        for entry in feed.entries[:3]:
+        for entry in feed.entries[:1]:
             article_url = entry.link
+            if is_article_scraped(article_url):
+                print("Article ", article_url, " already scraped, moving on")
+                continue
             print(f"\nFetching: {article_url}")
             
             try:
@@ -47,12 +51,12 @@ class ChineseScraper:
                     id= article_url,
                     source= "FreeBuf",
                     title= title,
-                    translated_title="",
-                    link= article_url,
+                    title_translated="",
+                    url= article_url,
                     content= full_text,
-                    translated_content="",
+                    content_translated="",
                     language= "zh",
-                    scraped_at= datetime.now()
+                    scraped_at= datetime.now().isoformat()
                 )
                 articles.append(article)
 
@@ -60,7 +64,6 @@ class ChineseScraper:
                 print("Error fetching article:", e)
             
             time.sleep(1)   
-        print("articles: ", articles[1].title, articles[0].language)
         return articles
                
     def fetch_article_content_an(self, url):
@@ -87,7 +90,7 @@ class ChineseScraper:
         for page in range(1, pages + 1):
             params = {
                 "page": page,
-                "size": 3,
+                "size": 1,
                 "tag": TAG
             }
             r = requests.get(API_URL, params=params)
@@ -103,6 +106,9 @@ class ChineseScraper:
         print(f"Grabbed {len(articles_meta)} articles")
         articles = []
         for article in articles_meta:
+            if is_article_scraped(article["url"]):
+                print("Article ", article["url"], " already scraped, moving on")
+                continue
             print(f"Fetching: {article['title']} ({article['url']})")
             content = self.fetch_article_content_an(article['url'])
             print(f"Content preview:\n{content[:300]}...\n") 
@@ -110,12 +116,12 @@ class ChineseScraper:
                         id= article["url"],
                         source= "FreeBuf",
                         title= article["title"],
-                        translated_title="",
-                        link= article["url"],
+                        title_translated="",
+                        url= article["url"],
                         content= content,
-                        translated_content="",
+                        content_translated="",
                         language= "zh",
-                        scraped_at= datetime.now()
+                        scraped_at= datetime.now().isoformat()
                     )
             articles.append(article)
         return articles
@@ -134,7 +140,7 @@ if __name__ == "__main__":
         print(f"ID: {art.id}")
         print(f"Source: {art.source}")
         print(f"Title: {art.title}")
-        print(f"Link: {art.link}")
+        print(f"Link: {art.url}")
         print(f"Language: {art.language}")
         print(f"Scraped at: {art.scraped_at}")
         print(f"Content preview:\n{art.content[:300]}")  # first 300 chars

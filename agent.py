@@ -11,15 +11,16 @@ Given this text:
 ---
 {article}
 ---
-1. Is this describing a unique and identifiable CVE (yes/no)?
+1. Does this contain a unique and identifiable CVE (yes/no)?
 2. If yes, extract:
-   - CVE number (or say 'Unknown'). Store multiple CVEs found as a list of strings
+   - CVE number (or say 'Unknown'). Store multiple CVEs found as a list of strings. You should most likely set "type" to "CVE" if you find a CVE number.
    - Severity (Low/Medium/High/Critical). Give your best estimate from these 4 choices
    - CVSS score, If CVSS score is present in text, extract it as a float. Otherwise, provide your own reasoned estimate based on described impact and exploitability, choosing a value between 0.0 and 10.0 and avoiding overestimation.
+   - Create simple list of affected products as a list of strings
 3. Provide a 2-3 sentence consise and compact summary of the details the vulnerability, exploitation process, and affected machines
 
-Here is your format, return ONLY IN THIS FORMAT and provide no other information
-{{"type":"CVE"|"News","cve_id":"[]", "severity":"Low"|"Medium"|"High"|"Critical", "cvss_score":"", "summary":""}}
+Here is your format, return ONLY IN THIS FORMAT and provide no other information.
+{{"type":"CVE"|"News","cve_id":"[]", "severity":"Low"|"Medium"|"High"|"Critical", "cvss_score":"", "summary":"", "affected_products":"[]"}}
 """)
 
 def classify_article(article: str) -> dict:

@@ -4,7 +4,7 @@ from typing import List
 
 @dataclass
 class NewsItem:
-    title_original: str
+    title: str
     title_translated: str
     summary: str
     published_date: datetime
@@ -15,7 +15,7 @@ class NewsItem:
 @dataclass
 class Vulnerability:
     cve_id: str
-    title_original: str
+    title: str
     title_translated: str
     summary: str
     severity: str
@@ -37,9 +37,9 @@ class Article:
     id: int | None
     source: str
     title: str
-    translated_title: str
-    link: str
+    title_translated: str
+    url: str
     content: str
-    translated_content: str
+    content_translated: str
     language: str
     scraped_at: datetime
