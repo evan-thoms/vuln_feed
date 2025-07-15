@@ -21,17 +21,14 @@ def truncate_text(text, max_length=3000):
     return text[:max_length]
 
 def setup_argos():
-    # Download language packages (run once)
     argostranslate.package.update_package_index()
     available_packages = argostranslate.package.get_available_packages()
     
-    # Install Chinese to English
     zh_en_package = next(
         filter(lambda x: x.from_code == "zh" and x.to_code == "en", available_packages)
     )
     argostranslate.package.install_from_path(zh_en_package.download())
     
-    # Install Russian to English
     ru_en_package = next(
         filter(lambda x: x.from_code == "ru" and x.to_code == "en", available_packages)
     )

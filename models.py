@@ -43,3 +43,4 @@ class Article:
     content_translated: str
     language: str
     scraped_at: datetime
+    published_date: datetime

@@ -24,15 +24,41 @@ class EnglishScraper:
                 id=cve_url,
                 source="CISA KEV",
                 title= v.get("vulnerabilityName"),
-                title_translated="",
+                title_translated=v.get("vulnerabilityName"),
                 url=cve_url,
                 content=v.get("shortDescription")+v.get("requiredAction"),
-                content_translated="",
+                content_translated=v.get("shortDescription")+v.get("requiredAction"),
                 language="en",
                 scraped_at=datetime.now().isoformat()
             )
             articles.append(article)
         return articles
+    
+    def scrape_rapid_7(self):
+        API_URL = "https://www.rapid7.com/api/vulnerability-list/?page=1&sort=id%2CDESC"
+        r = requests.get(API_URL)
+        data = r.json()
+
+        articles = []
+        for item in data["data"]:
+            urls = [alt["name"] for alt in item["data"]["alternate_ids"] if alt["namespace"] == "URL"]
+            url = urls[0] if urls else f"https://www.rapid7.com/db/vulnerabilities/{item['identifier']}/"
+
+            article = Article(
+                id=url,
+                source="Rapid7",
+                title=item["title"],
+                title_translated=item["title"],
+                url=url,
+                content=item["description"] + " Severity: "+item["severity"],
+                content_translated=item["description"] + " Severity: "+item["severity"],
+                language="en",
+                scraped_at=datetime.now().isoformat()
+            )
+            articles.append(article)
+
+        return articles
+
 
 
 
@@ -100,16 +126,17 @@ class EnglishScraper:
         return full_text
 if __name__ == "__main__":
     scraper = EnglishScraper()
-    exploits = scraper.scrape_cisa()
-    for art in exploits:
-        print(f"ID: {art.id}")
-        print(f"Source: {art.source}")
-        print(f"Title: {art.title}")
-        print(f"Link: {art.url}")
-        print(f"Language: {art.language}")
-        print(f"Scraped at: {art.scraped_at}")
-        print(f"Content preview:\n{art.content[:300]}")  # first 300 chars
-        print("-" * 40)
+    # exploits = scraper.scrape_cisa()
+    # for art in exploits:
+    #     print(f"ID: {art.id}")
+    #     print(f"Source: {art.source}")
+    #     print(f"Title: {art.title}")
+    #     print(f"Link: {art.url}")
+    #     print(f"Language: {art.language}")
+    #     print(f"Scraped at: {art.scraped_at}")
+    #     print(f"Content preview:\n{art.content[:300]}")  # first 300 chars
+    #     print("-" * 40)
+    exploits = scraper.scrape_rapid_7()
     
 
 
