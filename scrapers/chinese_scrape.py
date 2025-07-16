@@ -5,6 +5,8 @@ import requests
 from bs4 import BeautifulSoup
 import time
 from db import is_article_scraped
+from dateutil import parser
+
 
 class ChineseScraper:
     def scrape_freebuf(self, days_back: int = 7):
@@ -17,7 +19,8 @@ class ChineseScraper:
 
         for entry in feed.entries[:1]:
             article_url = entry.link
-            if is_article_scraped(article_url):
+            FORCE = True
+            if is_article_scraped(article_url) and not FORCE:
                 print("Article ", article_url, " already scraped, moving on")
                 continue
             print(f"\nFetching: {article_url}")
@@ -41,6 +44,7 @@ class ChineseScraper:
                 paragraphs = [p.get_text(strip=True) for p in body_div.find_all("p")]
                 code_blocks = [pre.get_text(strip=True) for pre in body_div.find_all("pre")]
                 full_text = "\n\n".join(paragraphs + code_blocks)
+                # date = soup.find("span", class_="date")
 
                 print("Title:", entry.title)
                 print("PubDate:", entry.published)
@@ -56,7 +60,8 @@ class ChineseScraper:
                     content= full_text,
                     content_translated="",
                     language= "zh",
-                    scraped_at= datetime.now().isoformat()
+                    scraped_at= datetime.now().isoformat(),
+                    published_date=self.normalize_date(entry.published)
                 )
                 articles.append(article)
 
@@ -65,6 +70,10 @@ class ChineseScraper:
             
             time.sleep(1)   
         return articles
+    def normalize_date(self, date_str):
+        date = parser.parse(date_str)
+        return date.isoformat()
+
                
     def fetch_article_content_an(self, url):
             if not url.startswith("http"):
@@ -106,7 +115,8 @@ class ChineseScraper:
         print(f"Grabbed {len(articles_meta)} articles")
         articles = []
         for article in articles_meta:
-            if is_article_scraped(article["url"]):
+            FORCE = True
+            if is_article_scraped(article["url"]) and not FORCE:
                 print("Article ", article["url"], " already scraped, moving on")
                 continue
             print(f"Fetching: {article['title']} ({article['url']})")
@@ -121,7 +131,8 @@ class ChineseScraper:
                         content= content,
                         content_translated="",
                         language= "zh",
-                        scraped_at= datetime.now().isoformat()
+                        scraped_at= datetime.now().isoformat(),
+                        published_date=self.normalize_date(article["date"])
                     )
             articles.append(article)
         return articles
@@ -135,7 +146,7 @@ class ChineseScraper:
 
 if __name__ == "__main__":
     scraper = ChineseScraper()
-    articles = scraper.scrape_all()
+    articles = scraper.scrape_anquanke()
     for art in articles:
         print(f"ID: {art.id}")
         print(f"Source: {art.source}")
@@ -143,5 +154,6 @@ if __name__ == "__main__":
         print(f"Link: {art.url}")
         print(f"Language: {art.language}")
         print(f"Scraped at: {art.scraped_at}")
-        print(f"Content preview:\n{art.content[:300]}")  # first 300 chars
+        print(f"Content preview:\n{art.content[:300]}") 
+        print(f"date: {art.published_date}"  ) # first 300 chars
         print("-" * 40)
