@@ -9,6 +9,10 @@ from dateutil import parser
 
 
 class ChineseScraper:
+    def __init__(self, num_articles):
+        self.max_arts = num_articles
+        self.FORCE = True
+
     def scrape_freebuf(self, days_back: int = 7):
         print("[FreeBuf] Starting RSS scrape...")
         feed_url = "https://www.freebuf.com/feed"
@@ -17,10 +21,10 @@ class ChineseScraper:
 
         articles = []
 
-        for entry in feed.entries[:1]:
+        for entry in feed.entries[:self.max_arts]:
             article_url = entry.link
-            FORCE = True
-            if is_article_scraped(article_url) and not FORCE:
+           
+            if is_article_scraped(article_url) and not self.FORCE:
                 print("Article ", article_url, " already scraped, moving on")
                 continue
             print(f"\nFetching: {article_url}")
@@ -49,7 +53,7 @@ class ChineseScraper:
                 print("Title:", entry.title)
                 print("PubDate:", entry.published)
                 print("Link:", article_url)
-                print("First 300 chars:", full_text[:300], "...")
+                print("Preview:", full_text[:100], "...")
                 
                 article = Article(
                     id= article_url,
@@ -99,12 +103,11 @@ class ChineseScraper:
         for page in range(1, pages + 1):
             params = {
                 "page": page,
-                "size": 1,
                 "tag": TAG
             }
             r = requests.get(API_URL, params=params)
             data = r.json()
-            for post in data['data']:
+            for post in data['data'][:self.max_arts]:
                 original_url = f"https://www.anquanke.com/post/id/{post['id']}"
                 articles_meta.append({
                     "title": post['title'],
@@ -115,13 +118,12 @@ class ChineseScraper:
         print(f"Grabbed {len(articles_meta)} articles")
         articles = []
         for article in articles_meta:
-            FORCE = True
-            if is_article_scraped(article["url"]) and not FORCE:
+            if is_article_scraped(article["url"]) and not self.FORCE:
                 print("Article ", article["url"], " already scraped, moving on")
                 continue
             print(f"Fetching: {article['title']} ({article['url']})")
             content = self.fetch_article_content_an(article['url'])
-            print(f"Content preview:\n{content[:300]}...\n") 
+            print(f"Content preview:\n{content[:100]}...\n") 
             article = Article(
                         id= article["url"],
                         source= "FreeBuf",

@@ -9,6 +9,10 @@ from dateutil import parser
 
 
 class EnglishScraper:
+    def __init__(self, num_articles) -> None:
+        self.FORCE = True
+        self.max_arts = num_articles
+
     def normalize_date(self, date_str):
         date = parser.parse(date_str)
         return date.isoformat()
@@ -24,8 +28,11 @@ class EnglishScraper:
         vulns = data.get("vulnerabilities", [])
         print(f"Found {len(vulns)} known exploited vulnerabilities")
         articles = []
-        for v in vulns[:3]:
+        for v in vulns[:self.max_arts]:
             cve_url = f"https://nvd.nist.gov/vuln/detail/{v.get("cveID")}"
+            if is_article_scraped(cve_url) and not self.FORCE:
+                print(f"Skipping already-scraped: {cve_url}")
+                continue
             article = Article(
                 id=cve_url,
                 source="CISA KEV",
@@ -45,8 +52,7 @@ class EnglishScraper:
         API_URL = "https://www.rapid7.com/api/vulnerability-list/"
         r = requests.get(API_URL)
         data = r.json()
-        page = 4
-        max_pages = 20
+        max_pages = 1
 
         articles = []
 
@@ -67,14 +73,13 @@ class EnglishScraper:
             if not batch:
                 print("batch empty")
                 break 
-            for item in batch[:2]:
+            for item in batch[:self.max_arts]:
                 print("\ngathering ", item["title"])
                 print("content: ",item["description"][:100] )
                 print("data: ", self.normalize_date(item["data"]["date_published"]))
                 urls = [alt["name"] for alt in item["data"]["alternate_ids"] if alt["namespace"] == "URL"]
                 url = urls[0] if urls else f"https://www.rapid7.com/db/vulnerabilities/{item['identifier']}/"
-                FORCE = True
-                if is_article_scraped(url) and not FORCE:
+                if is_article_scraped(url) and not self.FORCE:
                     print(f"Skipping already-scraped: {url}")
                     continue
 
@@ -160,9 +165,16 @@ class EnglishScraper:
             return ""
 
         return full_text
+    def scrape_all(self):
+        cisa = self.scrape_cisa()
+        rapid = self.scrape_rapid_7()
+        print("cisa len, ", len(cisa), " rapid len ", len(rapid))
+        cisa.extend(rapid)
+        return cisa
+    
 if __name__ == "__main__":
     scraper = EnglishScraper()
-    exploits = scraper.scrape_rapid_7()
+    exploits = scraper.scrape_all()
     for art in exploits:
         print(f"ID: {art.id}")
         print(f"Source: {art.source}")

@@ -1,4 +1,5 @@
 from scrapers.chinese_scrape import ChineseScraper
+from scrapers.english_scrape import EnglishScraper
 from deep_translator import GoogleTranslator
 from models import NewsItem, Vulnerability
 from agent import classify_article
@@ -80,7 +81,7 @@ def classify_articles(articles):
 
     for art in articles:
         result = classify_article(art.content_translated)
-        print(f"Agent result: {result}")
+        # print(f"Agent result: {result}")
 
         if result["type"] == "CVE":
             vul = Vulnerability(
@@ -120,14 +121,15 @@ def main():
     setup_argos()
 
     articles = []
-    c_scraper = ChineseScraper()
+    num_articles = 2
+    c_scraper = ChineseScraper(num_articles)
     articles += c_scraper.scrape_all()
 
     # r_scraper = RussianScraper()
     # articles+= r_scraper.scrape_all()
 
-    # e_scraper = EnglishScraper()
-    # articles+= c_scraper.scrape_all()
+    e_scraper = EnglishScraper(num_articles)
+    articles+= e_scraper.scrape_all()
 
 
     unprocessed_rows = get_unprocessed_articles()
@@ -145,7 +147,7 @@ def main():
     print(f"Translated {len(translated_articles)} articles")
 
     for art in translated_articles:
-        print("Inserted ", art.title_translated)
+        print("Inserted Article ", art.title_translated)
         insert_raw_article(art)
 
     cves, newsitems = classify_articles(translated_articles)
@@ -153,10 +155,12 @@ def main():
     for cve in cves:
         print("Inserted CVE ", cve.title_translated)
         insert_cve(cve)
+        mark_as_processed(cve["id"])
 
     for newsitem in newsitems:
         print("Inserted News ", newsitem.title_translated)
         insert_newsitem(newsitem)
+        mark_as_processed(newsitem["id"])
     
     save_to_json(cves, "cves.json")
     save_to_json(newsitems, "newsitems.json")
@@ -174,86 +178,8 @@ def row_to_article(row):
         scraped_at=row[8]
     )
 
-def test_classify_example():
-    example_text = """Researchers use OpenAI o3 model to discover remote zero-day vulnerability in Linux kernel
-Yixin Security
-2025-05-27 15:42:39
-11000
-
-Source of this article
-Official account
-Yixin Security
-If you have any questions, please contact FreeBuf customer service (WeChat ID: freebee1024)
-Researchers use OpenAI o3 model to discover remote zero-day vulnerability in Linux kernel
-Image
-Article background
-The protagonist of the article is Sean Heelan, a senior security researcher. When he audited the SMB implementation ksmbd of the Linux kernel, he used OpenAI's latest o3 model to successfully discover a remote zero-day vulnerability CVE-2025-37899. ksmbd is a module in the Linux kernel used to implement the SMB (Server Message Block) protocol, mainly used for file sharing services. Since the SMB protocol is widely used in enterprise environments, the discovery of this vulnerability is of great significance.
-
-Vulnerability Overview: CVE-2025-37899
-Vulnerability Type
-CVE-2025-37899 is a use-after-free (UAF) vulnerability located in the logoff command handler of ksmbd. UAF vulnerability definition: When a memory object is released and the program still attempts to access or operate the memory address, a UAF vulnerability is triggered. This situation may lead to undefined behavior, including program crashes or even remote code execution.
-
-Vulnerability Location
-The vulnerability occurs when ksmbd processes the logoff command of the SMB protocol. The logoff command is usually sent by the client to notify the server to disconnect the current session.
-
-Vulnerability Details Analysis
-Cause Analysis
-The core problem of the vulnerability is improper reference count management, combined with the concurrent connection characteristics of the SMB server, which leads to the occurrence of UAF. The following are the specific causes:
-
-1. Object release
-When processing the logoff command, ksmbd will release a key object (such as a session or connection-related structure). After this object is released, its memory address should be marked as unavailable.
-
-2. Concurrent access
-The SMB server supports multi-threaded processing of concurrent connections. When one thread releases the object, another thread may still be processing operations related to the object and try to access the released memory.
-
-3. Missing reference count
-The object does not correctly implement the reference counting mechanism. Normally, the reference count is used to track the number of active references to the object, and the object will be safely released only when the count is zero. However, in ksmbd, a design flaw causes the object to be released early when there are still threads referencing it.
-
-Speculated code problem
-The article does not directly provide the code snippet of the vulnerability, but based on the description, I speculate that the problem may appear in the following logic (pseudo-code representation):
-
-struct session {
-int ref_count; // reference count
-void *data; // data pointer
-};
-void process_logoff(struct session *s) {
-free(s->data); // release data
-free(s); // release session object
-}
-void handle_connection(struct session *s) {
-// assume that another thread is still using s->data
-process_data(s->data);
-}
-In the above pseudo-code: The process_logoff function releases s->data and s, but does not check whether ref_count is zero. If handle_connection is still accessing s->data in a concurrent thread, the UAF will be triggered.
-
-Vulnerability Exploitation Method
-The article does not disclose the specific exploitation method in detail, but based on the characteristics of the UAF vulnerability, I can speculate a possible exploitation path:
-
-1. Triggering object release
-The attacker triggers the release of the target object by sending a carefully constructed logoff command.
-
-2. Concurrent access
-After the object is released, the attacker immediately accesses the same object through another SMB connection. At this time, the memory may still not be overwritten and points to the released address.
-
-3. Memory reuse and control
-The released memory may be reallocated to other uses by the operating system.
-The attacker controls the reallocated memory content (such as heap spray technology) by sending specific SMB requests, thereby overwriting critical data (such as function pointers).
-If the memory layout is successfully controlled, arbitrary code execution may be achieved.
-Difficulty of Exploitation
-Challenge: Exploiting UAF requires precise control of memory allocation and thread timing, which is a high-difficulty exploit. Possibility: Since ksmbd runs in kernel mode, successful exploitation may lead to remote privilege escalation or system crash.
-
-Vulnerability Discovery Method
-Using OpenAI o3 Model
-Sean Heelan used OpenAI's o3 model, a powerful large language model (LLM) that has the ability to understand and analyze code. The discovery process is as follows:
-
-1. Code input
-The author inputs the relevant code of ksmbd (about 12,000 lines) into the o3 model. This includes the logoff command handler and related concurrent logic.
-
-2. Model Analysis
-The o3 model identifies potential vulnerability points through static analysis and semantic understanding. In particular, it can:"""
-    result = classify_article(example_text)
-    print(f"Agent result: {result}")
-
+def test_classify():
+    pass
 if __name__ == "__main__":
     # result = classify_article(cool)
     # print(f"Agent result: {result}")

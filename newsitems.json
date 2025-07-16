@@ -1,11 +1,11 @@
 [
   {
-    "title": "信息收集思路小结",
-    "title_translated": "Synopsis of information collection",
-    "summary": "This article provides information on various tools and techniques for conducting security threat intelligence, including subdomain enumeration, port scanning, HTTPX, and Wappalyzer. It also discusses the importance of cataloging and using dictionaries for fuzz testing.",
-    "published_date": "2025-07-12T15:43:56.789002",
+    "title": "人工智能可能修复帮助传播了 15 年的漏洞",
+    "title_translated": "The repair of artificial intelligence may have helped spread a 15-year gap.",
+    "summary": "A vulnerability in a 10-year-old GitHub Gist allows attackers to navigate outside the specified directory, and AI models may reproduce this code. The vulnerability has been embedded in AI training data.",
+    "published_date": "2025-07-15T20:11:46.933841",
     "original_language": "zh",
     "source": "FreeBuf",
-    "url": "https://www.freebuf.com/articles/web/438797.html"
+    "url": "https://www.anquanke.com/post/id/308401"
   }
 ]
