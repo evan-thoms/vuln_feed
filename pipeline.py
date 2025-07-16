@@ -81,6 +81,7 @@ def classify_articles(articles):
 
     for art in articles:
         result = classify_article(art.content_translated)
+        print("URL: ",art.url)
         # print(f"Agent result: {result}")
 
         if result["type"] == "CVE":
@@ -131,7 +132,7 @@ def main():
     e_scraper = EnglishScraper(num_articles)
     articles+= e_scraper.scrape_all()
 
-
+    print(f"Scraped {len(articles)} articles")
     unprocessed_rows = get_unprocessed_articles()
     if unprocessed_rows:
         print("processing " ,len(unprocessed_rows), " unprocessed rows")
@@ -140,7 +141,7 @@ def main():
     articles+= leftover_articles
     for art in articles:
         art.content = truncate_text(art.content, max_length=3000)
-    print(f"Scraped {len(articles)} articles")
+    print(f"Collected  {len(articles)} articles")
 
     translated_articles = translate_articles(articles)
     
@@ -155,12 +156,12 @@ def main():
     for cve in cves:
         print("Inserted CVE ", cve.title_translated)
         insert_cve(cve)
-        mark_as_processed(cve["id"])
+        mark_as_processed(cve.url)
 
     for newsitem in newsitems:
         print("Inserted News ", newsitem.title_translated)
         insert_newsitem(newsitem)
-        mark_as_processed(newsitem["id"])
+        mark_as_processed(newsitem.url)
     
     save_to_json(cves, "cves.json")
     save_to_json(newsitems, "newsitems.json")
@@ -175,7 +176,8 @@ def row_to_article(row):
         content=row[5],
         content_translated=row[6],
         language=row[7],
-        scraped_at=row[8]
+        scraped_at=row[8],
+        published_date=row[9]
     )
 
 def test_classify():

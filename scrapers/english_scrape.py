@@ -23,8 +23,6 @@ class EnglishScraper:
         response = requests.get(url)
         response.raise_for_status()
         data = response.json()
-        print(f"Catalog Version: {data.get('catalogVersion')}")
-        print(f"Released: {data.get('dateReleased')}")
         vulns = data.get("vulnerabilities", [])
         print(f"Found {len(vulns)} known exploited vulnerabilities")
         articles = []

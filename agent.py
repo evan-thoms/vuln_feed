@@ -13,8 +13,12 @@ Given this text:
 ---
 1. Does this contain a unique and identifiable CVE (yes/no)?
 2. If yes, extract:
-   - Type: Set Type to "CVE" if the article largely describes an identifiable CVE vulnerability, and set it to "News" if it does not describe a specific identifiable vulnerability.
-   - CVE id:  Set CVE to the CVE number you find in the text, which looks like "CVE-" and followed by numbers and dashes. You should most likely set "type" to "CVE" if you find a CVE number, but there are exceptions. Store multiple CVEs found as a list of strings. Most importantly, you must either set this to the CVE numbers you find, or set this to "Unknown" if you cannot find one. You must do only either of these. 
+    - 
+   - If you find no CVE number, ALWAYS set `cve_id` to `["Unknown"]` AND `type` to `"News"`.
+    - If you find one or more valid CVE IDs, ALWAYS set `type` to `"CVE"` and `cve_id` to the found CVE list.
+    - NEVER output `"CVE"` type if the ID is missing or unknown.
+    - If no unique CVE ID is present, do NOT make up a fake CVE format like `CVE-XXXX-XXXX` — just set it to `["Unknown"]`.
+
    - Severity (Low/Medium/High/Critical). Give your best estimate from these 4 choices
    - CVSS score, If CVSS score is present in text, extract it as a float. Otherwise, provide your own reasoned estimate based on described impact and exploitability, choosing a value between 0.0 and 10.0 and avoiding overestimation.
    - Create simple list of affected products as a list of strings
@@ -28,6 +32,7 @@ def classify_article(article: str) -> dict:
     chain = prompt | llm | (lambda x: x.content)
     result = chain.invoke({"article": article})
     print("result ", result)
+    
     match = re.search(r"\{[\s\S]*\}", result)
     if not match:
         raise ValueError("No JSON found in response:\n" + result)
