@@ -42,7 +42,7 @@ def mark_as_processed(raw_article_id):
     print("Marked as processed: ", raw_article_id)
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("UPDATE raw_articles SET processed = 1 WHERE id = ?", (raw_article_id,))
+    cursor.execute("UPDATE raw_articles SET processed = 1 WHERE url = ?", (raw_article_id,))
     conn.commit()
     conn.close()
 

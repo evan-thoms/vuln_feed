@@ -171,8 +171,8 @@ class EnglishScraper:
         return cisa
     
 if __name__ == "__main__":
-    scraper = EnglishScraper()
-    exploits = scraper.scrape_all()
+    scraper = EnglishScraper(2)
+    exploits = scraper.scrape_rapid_7()
     for art in exploits:
         print(f"ID: {art.id}")
         print(f"Source: {art.source}")

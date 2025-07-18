@@ -1,29 +1,56 @@
 [
   {
-    "title": "【电子数据取证】安卓镜像提取与解析",
-    "title_translated": "[electronic data forensics]",
-    "summary": "The report describes a method for recovering data from smartphones, specifically mentioning Qualcomm HS-USB QDLoader 9008 and Mi5X. The method involves using the QPST Tool to download a brush pack and then use it to enter mode 9008 on the phone.",
-    "published_date": "2025-07-15T21:25:33.673775",
+    "title": "DXScanGo正式上线：为“实战挖洞”打造的自动化扫描工具",
+    "title_translated": "DXScanGo on-line: automated scanning tool for “field digging”",
+    "summary": "DXScanGo v1.6.8 released, a security tool for scanning and analyzing websites for vulnerabilities, including XSS detection, parameter extraction, and more.",
+    "published_date": "2025-07-17T20:21:34.418591",
     "original_language": "zh",
     "source": "FreeBuf",
-    "url": "https://www.freebuf.com/articles/sectool/439552.html"
+    "url": "https://www.freebuf.com/articles/sectool/440071.html"
+  },
+  {
+    "title": "H2Miner僵尸网络攻击Linux、Windows及容器设备进行门罗币挖矿",
+    "title_translated": "H2Miner Zombie Network attacks Linux, Windows and container equipment for Monroe mining",
+    "summary": "H2miner zombie network attacks Linux, Windows, and containers to mine Monero. The attack uses misconfiguration services or loopholes, including Apache ActiveMQ (CVE-2023-46604) and Log4Shell, to deploy customized loading scripts.",
+    "published_date": "2025-07-17T20:21:36.494867",
+    "original_language": "zh",
+    "source": "FreeBuf",
+    "url": "https://www.freebuf.com/articles/system/440100.html"
   },
   {
     "title": "人工智能可能修复帮助传播了 15 年的漏洞",
     "title_translated": "The repair of artificial intelligence may have helped spread a 15-year gap.",
-    "summary": "A 10-year-old vulnerability in Node.js allows attackers to navigate outside of specified directories, and AI models may have reproduced this vulnerability due to training on public code repositories.",
-    "published_date": "2025-07-15T21:25:40.816366",
+    "summary": "An unintended static file server vulnerability has been present for 10 years, and AI models have replicated it. The vulnerability allows attackers to navigate outside the specified directory.",
+    "published_date": "2025-07-17T20:21:41.287033",
     "original_language": "zh",
     "source": "FreeBuf",
     "url": "https://www.anquanke.com/post/id/308401"
   },
   {
+    "title": "Wing FTP Server Improper Neutralization of Null Byte or NUL Character Vulnerability",
+    "title_translated": "Wing FTP Server Improper Neutralization of Null Byte or NUL Character Vulnerability",
+    "summary": "Wing FTP Server contains an improper neutralization of null byte or NUL character vulnerability that can allow injection of arbitrary Lua code into user session files. This can be used to execute arbitrary system commands with the privileges of the FTP service (root or SYSTEM by default).",
+    "published_date": "2025-07-17T20:21:41.487244",
+    "original_language": "en",
+    "source": "CISA KEV",
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-47812"
+  },
+  {
     "title": "Citrix NetScaler ADC and Gateway Out-of-Bounds Read Vulnerability",
     "title_translated": "Citrix NetScaler ADC and Gateway Out-of-Bounds Read Vulnerability",
     "summary": "Citrix NetScaler ADC and Gateway contain an out-of-bounds read vulnerability due to insufficient input validation. This vulnerability can lead to memory overread when the NetScaler is configured as a Gateway (VPN virtual server, ICA Proxy, CVPN, RDP Proxy) OR AAA virtual server.",
-    "published_date": "2025-07-15T21:25:41.032680",
+    "published_date": "2025-07-17T20:21:41.487420",
     "original_language": "en",
     "source": "CISA KEV",
     "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-5777"
+  },
+  {
+    "title": "SUSE: CVE-2025-4565: SUSE Linux Security Advisory",
+    "title_translated": "SUSE: CVE-2025-4565: SUSE Linux Security Advisory",
+    "summary": "Any project that uses Protobuf Pure-Python backend to parse untrusted Protocol Buffers data can be corrupted by exceeding the Python recursion limit, resulting in a Denial of Service. This can be caused by recursive groups, messages or SGROUP tags.",
+    "published_date": "2025-07-17T20:21:43.680097",
+    "original_language": "en",
+    "source": "Rapid7",
+    "url": "https://www.rapid7.com/db/vulnerabilities/suse-cve-2025-4565/"
   }
 ]

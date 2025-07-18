@@ -79,15 +79,20 @@ class ChineseScraper:
         return date.isoformat()
 
                
-    def fetch_article_content_an(self, url):
+    def fetch_article_content(self, url, site):
+         
             if not url.startswith("http"):
                 url = "https://" + url
             r = requests.get(url)
+            
             if r.status_code == 404:
                 print(f"Skipping 404 URL: {url}")
                 return "404"
             soup = BeautifulSoup(r.text, "html.parser")
-            content_div = soup.find("div", id="js-article")
+            if site == "FreeBuf":
+                content_div = soup.find("div", class_="artical-body")
+            else:
+                content_div = soup.find("div", id="js-article")
             if content_div:
                 paragraphs = content_div.stripped_strings
                 return "\n".join(paragraphs)
@@ -122,7 +127,7 @@ class ChineseScraper:
                 print("Article ", article["url"], " already scraped, moving on")
                 continue
             print(f"Fetching: {article['title']} ({article['url']})")
-            content = self.fetch_article_content_an(article['url'])
+            content = self.fetch_article_content(article['url'], "Anquanke")
             print(f"Content preview:\n{content[:100]}...\n") 
             article = Article(
                         id= article["url"],
@@ -138,6 +143,66 @@ class ChineseScraper:
                     )
             articles.append(article)
         return articles
+    def scrape_freebuf_vuls(self):
+        API_URL = "https://www.freebuf.com/fapi/frontend/category/list"
+        max_pages = 10 
+        articles = []
+
+        for page in range(1, max_pages + 1):
+            print(f"Scraping FreeBuf page {page}")
+
+            params = {
+                "name": "vuls",
+                "tag": "category",
+                "limit": 20,
+                "page": page,
+                "select": 0,
+                "order": 0
+            }
+
+            try:
+                r = requests.get(API_URL, params=params)
+                r.raise_for_status()
+                data = r.json()
+            except Exception as e:
+                print(f"Error on page {page}: {e}")
+                break
+
+            article_items = data["data"]["data_list"]
+           
+            print(f"[FreeBuf] Page {page}: Found {len(article_items)} items")
+
+            for item in article_items[:self.max_arts]:
+                post_title = item.get("post_title", "No Title")
+                url = "https://www.freebuf.com"+item.get("url", "")
+                content = self.fetch_article_content(url, "FreeBuf")
+                published = item.get("post_date", "")
+
+                print("\nGathering:", post_title)
+                print("URL:", url)
+                print("Published:", published)
+
+                if is_article_scraped(url) and not self.FORCE:
+                    print(f"Skipping already-scraped: {url}")
+                    continue
+
+                article = Article(
+                    id=url,
+                    source="FreeBuf",
+                    title=post_title,
+                    title_translated="",
+                    url=url,
+                    content=content,
+                    content_translated="",
+                    language="zh",
+                    scraped_at=datetime.now().isoformat(),
+                    published_date=self.normalize_date(published)
+                )
+                articles.append(article)
+
+        print(f"[FreeBuf] Total collected: {len(articles)}")
+        return articles
+
     def scrape_all(self):
         freeBuf = self.scrape_freebuf()
         anquanke = self.scrape_anquanke()
@@ -147,8 +212,8 @@ class ChineseScraper:
 
 
 if __name__ == "__main__":
-    scraper = ChineseScraper()
-    articles = scraper.scrape_anquanke()
+    scraper = ChineseScraper(2)
+    articles = scraper.scrape_freebuf_vuls()
     for art in articles:
         print(f"ID: {art.id}")
         print(f"Source: {art.source}")
