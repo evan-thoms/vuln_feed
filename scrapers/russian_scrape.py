@@ -13,29 +13,35 @@ class RussianScraper():
 }
         response = requests.get(url, headers=headers)
         response.raise_for_status()
-        print(response)
+
+        max_pages = 3
         
-        soup = BeautifulSoup(response.text, 'html.parser')
-        articles = []
-        print(response.text)
-        all_articles = []
 
-        articles = soup.select("div.news-list-item")
+        BASE_URL = "https://www.anti-malware.ru"
 
-        for article in articles:
-            link_tag = article.find("a")
-            if not link_tag:
-                continue
+        for page in range(1,max_pages+1):
+            print("PAGE ",page)
+            LISTING_URL = f"{BASE_URL}/news?page={page}"
 
-            title = link_tag.text.strip()
-            relative_url = link_tag["href"]
-            full_url = self.base_url + relative_url
+            soup = BeautifulSoup(response.text, 'html.parser')
+            articles = []
+            all_articles = []
 
-            all_articles.append({
-                "title": title,
-                "url": full_url
-            })
+            articles = soup.select("div.node-news")
 
+            for article in articles:
+                a_tag = article.find("h2").find("a")
+                title = a_tag.text.strip()
+                url = BASE_URL + a_tag["href"]
+  
+                # Summary (first paragraph)
+                summary_tag = article.select_one("div.content p")
+                summary = summary_tag.text.strip() if summary_tag else ""
+
+                print(f"Title: {title}")
+                print(f"URL: {url}")
+                print(f"Summary: {summary}")
+                print("-" * 80)
         print("Success: ", all_articles)
         return all_articles
 
