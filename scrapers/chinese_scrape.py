@@ -175,6 +175,9 @@ class ChineseScraper:
             for item in article_items[:self.max_arts]:
                 post_title = item.get("post_title", "No Title")
                 url = "https://www.freebuf.com"+item.get("url", "")
+                if is_article_scraped(url) and not self.FORCE:
+                    print(f"Skipping already-scraped: {url}")
+                    continue
                 content = self.fetch_article_content(url, "FreeBuf")
                 published = item.get("post_date", "")
 
@@ -182,9 +185,7 @@ class ChineseScraper:
                 print("URL:", url)
                 print("Published:", published)
 
-                if is_article_scraped(url) and not self.FORCE:
-                    print(f"Skipping already-scraped: {url}")
-                    continue
+                
 
                 article = Article(
                     id=url,
