@@ -145,7 +145,7 @@ class ChineseScraper:
         return articles
     def scrape_freebuf_vuls(self):
         API_URL = "https://www.freebuf.com/fapi/frontend/category/list"
-        max_pages = 10 
+        max_pages = 1
         articles = []
 
         for page in range(1, max_pages + 1):
