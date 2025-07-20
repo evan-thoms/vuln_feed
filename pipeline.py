@@ -1,7 +1,9 @@
 from scrapers.chinese_scrape import ChineseScraper
 from scrapers.english_scrape import EnglishScraper
+from scrapers.russian_scrape import RussianScraper
 from deep_translator import GoogleTranslator
 from models import NewsItem, Vulnerability
+
 from agent import classify_article
 import json
 import argostranslate.package
@@ -122,15 +124,15 @@ def main():
     setup_argos()
 
     articles = []
-    num_articles = 2
-    c_scraper = ChineseScraper(num_articles)
-    articles += c_scraper.scrape_all()
+    # num_articles = 2
+    # c_scraper = ChineseScraper(num_articles)
+    # articles += c_scraper.scrape_all()
 
-    # r_scraper = RussianScraper()
-    # articles+= r_scraper.scrape_all()
+    r_scraper = RussianScraper()
+    articles+= r_scraper.scrape_all()
 
-    e_scraper = EnglishScraper(num_articles)
-    articles+= e_scraper.scrape_all()
+    # e_scraper = EnglishScraper(num_articles)
+    # articles+= e_scraper.scrape_all()
 
     print(f"Scraped {len(articles)} articles")
     unprocessed_rows = get_unprocessed_articles()

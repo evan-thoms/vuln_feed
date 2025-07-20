@@ -1,56 +1,74 @@
 [
   {
-    "title": "DXScanGo正式上线：为“实战挖洞”打造的自动化扫描工具",
-    "title_translated": "DXScanGo on-line: automated scanning tool for “field digging”",
-    "summary": "DXScanGo v1.6.8 released, a security tool for scanning and analyzing websites for vulnerabilities, including XSS detection, parameter extraction, and more.",
-    "published_date": "2025-07-17T20:21:34.418591",
-    "original_language": "zh",
-    "source": "FreeBuf",
-    "url": "https://www.freebuf.com/articles/sectool/440071.html"
+    "title": "Мошенники крадут товары, выдавая себя за ПСК и Ozon",
+    "title_translated": "Fraudsters steal goods posing as PSK and Ozon",
+    "summary": "Fraudulent attacks targeting well-known companies, using forged documents and phone number substitution to make purchases. Scammers posed as representatives of legitimate organizations, showing powers of attorney and seeking shipment of goods.",
+    "published_date": "2025-07-20T14:01:45.163344",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-07-18-121598/46706"
   },
   {
-    "title": "H2Miner僵尸网络攻击Linux、Windows及容器设备进行门罗币挖矿",
-    "title_translated": "H2Miner Zombie Network attacks Linux, Windows and container equipment for Monroe mining",
-    "summary": "H2miner zombie network attacks Linux, Windows, and containers to mine Monero. The attack uses misconfiguration services or loopholes, including Apache ActiveMQ (CVE-2023-46604) and Log4Shell, to deploy customized loading scripts.",
-    "published_date": "2025-07-17T20:21:36.494867",
-    "original_language": "zh",
-    "source": "FreeBuf",
-    "url": "https://www.freebuf.com/articles/system/440100.html"
+    "title": "В веб-ресурсах 26% компаний нашли веб-шеллы ещё до запуска сервисов",
+    "title_translated": "In web resources, 26% of companies found web shells before the launch of services",
+    "summary": "Web shells were detected on 26% of Russian companies' websites, services, and applications in the first half of 2025. The most alarming increase is seen on external sites and public web resources, with a rise from 12% to 53%. Developers often open access to test or unfinished services, making systems vulnerable.",
+    "published_date": "2025-07-20T14:01:46.800071",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-07-18-111332/46705"
   },
   {
-    "title": "人工智能可能修复帮助传播了 15 年的漏洞",
-    "title_translated": "The repair of artificial intelligence may have helped spread a 15-year gap.",
-    "summary": "An unintended static file server vulnerability has been present for 10 years, and AI models have replicated it. The vulnerability allows attackers to navigate outside the specified directory.",
-    "published_date": "2025-07-17T20:21:41.287033",
-    "original_language": "zh",
-    "source": "FreeBuf",
-    "url": "https://www.anquanke.com/post/id/308401"
+    "title": "Новый macOS-вредонос с подписью Apple Developer заменяет Ledger Live",
+    "title_translated": "New macOS malware signed by Apple Developer replaces Ledger Live",
+    "summary": "A new version of malware for macOS was found, which managed to bypass Apple's protective mechanisms and pretend to be an update to GoogleMeet. The malware has been reported to steal data, linger in the system, and execute malicious scripts. It also includes basic protection against analysis.",
+    "published_date": "2025-07-20T14:01:48.437010",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-07-18-111332/46704"
   },
   {
-    "title": "Wing FTP Server Improper Neutralization of Null Byte or NUL Character Vulnerability",
-    "title_translated": "Wing FTP Server Improper Neutralization of Null Byte or NUL Character Vulnerability",
-    "summary": "Wing FTP Server contains an improper neutralization of null byte or NUL character vulnerability that can allow injection of arbitrary Lua code into user session files. This can be used to execute arbitrary system commands with the privileges of the FTP service (root or SYSTEM by default).",
-    "published_date": "2025-07-17T20:21:41.487244",
-    "original_language": "en",
-    "source": "CISA KEV",
-    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-47812"
+    "title": "В России готовят запрет на зарубежные коммуникационные сервисы",
+    "title_translated": "Russia is preparing a ban on foreign communication services",
+    "summary": "The Russian government plans to introduce additional restrictions on the use of communication services and software from unfriendly countries before September 1, 2025. This is a measure in response to restrictions imposed by other states.",
+    "published_date": "2025-07-20T14:01:49.934598",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-07-18-121598/46703"
   },
   {
-    "title": "Citrix NetScaler ADC and Gateway Out-of-Bounds Read Vulnerability",
-    "title_translated": "Citrix NetScaler ADC and Gateway Out-of-Bounds Read Vulnerability",
-    "summary": "Citrix NetScaler ADC and Gateway contain an out-of-bounds read vulnerability due to insufficient input validation. This vulnerability can lead to memory overread when the NetScaler is configured as a Gateway (VPN virtual server, ICA Proxy, CVPN, RDP Proxy) OR AAA virtual server.",
-    "published_date": "2025-07-17T20:21:41.487420",
-    "original_language": "en",
-    "source": "CISA KEV",
-    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-5777"
+    "title": "Минцифры предлагает предоставлять отсрочки ИТ-специалистам без дипломов",
+    "title_translated": "The Ministry proposes to provide delays to IT specialists without diplomas",
+    "summary": "The Ministry proposes to expand the list of IT specialists who can defer from conscription in the army, allowing young professionals to build a career in IT without interruption.",
+    "published_date": "2025-07-20T14:01:51.381238",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-07-17-121598/46702"
   },
   {
-    "title": "SUSE: CVE-2025-4565: SUSE Linux Security Advisory",
-    "title_translated": "SUSE: CVE-2025-4565: SUSE Linux Security Advisory",
-    "summary": "Any project that uses Protobuf Pure-Python backend to parse untrusted Protocol Buffers data can be corrupted by exceeding the Python recursion limit, resulting in a Denial of Service. This can be caused by recursive groups, messages or SGROUP tags.",
-    "published_date": "2025-07-17T20:21:43.680097",
-    "original_language": "en",
-    "source": "Rapid7",
-    "url": "https://www.rapid7.com/db/vulnerabilities/suse-cve-2025-4565/"
+    "title": "Вышла САКУРА 2.36: поддержка ARM и улучшения для VPN и AD",
+    "title_translated": "Sakura 2.36: ARM support and improvements for VPN and AD",
+    "summary": "Optimization and acceleration: The release includes corrections for errors found in previous versions.",
+    "published_date": "2025-07-20T14:01:52.926416",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-07-17-111332/46701"
+  },
+  {
+    "title": "Golden dMSA: доступ к защищенным ресурсам AD через взлом контроллера домена",
+    "title_translated": "Golden dMSA: Accessing Protected AD Resources by Hacking a Domain Controller",
+    "summary": "Semperis experts discovered a serious flaw in Managed Service Accounts (dMSA) project, allowing permanent access to all resources in Active Directory domains. The vulnerability simplifies password cracking and enables horizontal movement between domains.",
+    "published_date": "2025-07-20T14:01:54.281688",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-07-17-114534/46700"
+  },
+  {
+    "title": "Роскомнадзор обсуждает с маркетплейсами проверку сим-карт",
+    "title_translated": "Roskomnadzor discusses with marketplaces the verification of SIM cards",
+    "summary": "Roskomnadzor and marketplaces are discussing introducing mechanisms to check SIM cards used by migrants, aiming to prevent fraud using other people's numbers.",
+    "published_date": "2025-07-20T14:01:55.921145",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-07-17-121598/46699"
   }
 ]

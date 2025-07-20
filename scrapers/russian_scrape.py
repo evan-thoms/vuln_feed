@@ -8,7 +8,7 @@ from dateutil import parser
 
 class RussianScraper():
     def __init__(self):
-        self.max_arts = 2
+        self.max_arts = 8
         self.FORCE = True
     
     def normalize_date(self, date_str):
@@ -37,19 +37,14 @@ class RussianScraper():
         except Exception as e:
             print(f"Date parse failed: {date_str}, Error: {e}")
             return None
+     
     def scrape_anti_malware_news(self):
-        
-        
 
         max_pages = 1
         
-
         BASE_URL = "https://www.anti-malware.ru"
         headers = {
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-}
-        
-
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
         all_articles = []
 
         for page in range(1,max_pages+1):
@@ -110,13 +105,17 @@ class RussianScraper():
 
         print("Success:", len(all_articles), "articles collected")
         return all_articles
+    
+    def scrape_all(self):
+        anti = self.scrape_anti_malware_news()
+        return anti
 
 
 
 
 if __name__ == "__main__":
     scraper = RussianScraper()
-    articles = scraper.scrape_anti_malware_news()
+    articles = scraper.scrape_all()
     for art in articles:
         print(f"ID: {art.id}")
         print(f"Source: {art.source}")
