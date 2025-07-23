@@ -8,15 +8,24 @@ from models import Article
 import datetime
 
 @tool
-def scrape_articles(language: str = "ru", limit: int = 2) -> list:
-    """Scrape CVE articles in Chinese, English, or Russian."""
-    if language == "zh":
-        scraper = ChineseScraper(limit)
-    elif language == "en":
-        scraper = EnglishScraper(limit)
-    else:
-        scraper = RussianScraper(limit)
-    return scraper.scrape_all()
+def scrape_articles(language: str = "ru", num_articles: int = 2) -> list:
+    # """Scrape CVE articles in Chinese, English, or Russian."""
+    # if language == "zh":
+    #     scraper = ChineseScraper(limit)
+    # elif language == "en":
+    #     scraper = EnglishScraper(limit)
+    # else:
+    #     scraper = RussianScraper(limit)
+    # return scraper.scrape_all()
+    articles = []
+    c_scraper = ChineseScraper(num_articles)
+    articles += c_scraper.scrape_all()
+
+    r_scraper = RussianScraper()
+    articles+= r_scraper.scrape_all()
+
+    e_scraper = EnglishScraper(num_articles)
+    articles+= e_scraper.scrape_all()
 
 @tool
 def translate(articles: list) -> list:
