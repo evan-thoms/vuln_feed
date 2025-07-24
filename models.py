@@ -1,6 +1,16 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List
+from typing import List, Optional, Literal
+
+@dataclass
+class QueryParams:
+    content_type: Literal["cve", "news", "both"] = "both"
+    severity: Optional[str] = None  # low, medium, high, critical
+    days_back: int = 7
+    max_results: int = 10
+    output_format: Literal["display", "email"] = "display"
+    email_address: Optional[str] = None
+
 
 @dataclass
 class NewsItem:

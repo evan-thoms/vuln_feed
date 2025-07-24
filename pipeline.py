@@ -4,7 +4,7 @@ from scrapers.russian_scrape import RussianScraper
 from deep_translator import GoogleTranslator
 from models import NewsItem, Vulnerability
 
-from agent import classify_article
+from classify import classify_article
 import json
 import argostranslate.package
 import argostranslate.translate
@@ -124,15 +124,15 @@ def main():
     setup_argos()
 
     articles = []
-    # num_articles = 2
-    # c_scraper = ChineseScraper(num_articles)
-    # articles += c_scraper.scrape_all()
+    num_articles = 2
+    c_scraper = ChineseScraper(num_articles)
+    articles += c_scraper.scrape_all()
 
     r_scraper = RussianScraper()
     articles+= r_scraper.scrape_all()
 
-    # e_scraper = EnglishScraper(num_articles)
-    # articles+= e_scraper.scrape_all()
+    e_scraper = EnglishScraper(num_articles)
+    articles+= e_scraper.scrape_all()
 
     print(f"Scraped {len(articles)} articles")
     unprocessed_rows = get_unprocessed_articles()
@@ -182,8 +182,7 @@ def row_to_article(row):
         published_date=row[9]
     )
 
-def test_classify():
-    pass
+
 if __name__ == "__main__":
     # result = classify_article(cool)
     # print(f"Agent result: {result}")
