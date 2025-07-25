@@ -4,3 +4,4 @@ Vuln Feed scrapes Chinese, Russian, and English speaking Cybersecurity websites 
 # Stack
 Python
 SQLite
+LangChain
