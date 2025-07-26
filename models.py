@@ -10,6 +10,7 @@ class QueryParams:
     max_results: int = 10
     output_format: Literal["display", "email"] = "display"
     email_address: Optional[str] = None
+    language: Literal["en", "zh", "ru", "all"] = "all"
 
 
 @dataclass
