@@ -1,36 +1,41 @@
-# Import tools directly
-from tools.scrape_tools import scrape_site
-from tools.cve_tools import fetch_cves
-from tools.translate_tools import translate_text
-from tools.db_tools import initialize_db, list_recent_articles
+from tools.tools import (
+    scrape_and_process_articles,
+    classify_articles,
+    filter_and_rank_items,
+    format_and_present_results,
+)
+from models import QueryParams
 
-# ---- Test Scrape Tool ----
-print("🔍 Testing scrape_site()")
-scraped = scrape_site(language="chinese")
-print(f"Scraped {len(scraped)} items.")
-print(scraped[:1])  # show one result
+# Step 0: Prepare QueryParams
+params = QueryParams(
+    content_type="both",  # or "cve", "news"
+    severity="high",      # optional
+    days_back=7,
+    max_results=5,
+    output_format="display",
+    email_address=None,
+)
 
-# ---- Test CVE Tool ----
-print("\n🛡️ Testing fetch_cves()")
-cves = fetch_cves()
-print(f"Fetched {len(cves)} CVEs.")
-print(cves[:1])  # show one result
+# Step 1: Scrape & Translate
+print("===== TESTING: scrape_and_process_articles =====")
+articles = scrape_and_process_articles.invoke(params)
+print(f"✅ Got {len(articles)} articles")
+print("Sample article title:", articles[0].title_translated)
 
-# ---- Test Translate Tool ----
-print("\n🌍 Testing translate_text()")
-sample = "你好，世界！这是一个测试。"
-translated = translate_text(text=sample, target_lang="en")
-print(f"Original: {sample}")
-print(f"Translated: {translated}")
+# Step 2: Classify
+print("\n===== TESTING: classify_articles =====")
+cves, news = classify_articles.invoke({"articles": articles, "params": params})
+print(f"✅ Classified {len(cves)} CVEs and {len(news)} news articles")
+if cves:
+    print("Sample CVE title:", cves[0].title_translated)
 
-# ---- Test DB Init ----
-print("\n🗂️ Testing initialize_db()")
-init_status = initialize_db()
-print(init_status)
+# Step 3: Filter & Rank
+print("\n===== TESTING: filter_and_rank_items =====")
+final_items = filter_and_rank_items.invoke({"cves": cves, "news_items": news, "params": params})
+print(f"✅ Filtered down to {len(final_items)} items")
 
-# ---- Test list_recent_articles() ----
-print("\n📰 Testing list_recent_articles()")
-recent = list_recent_articles(limit=3)
-print(f"Fetched {len(recent)} articles from DB.")
-for i, article in enumerate(recent, 1):
-    print(f"{i}. {article.get('title', 'No title')} — {article.get('url')}")
+# Step 4: Format Output
+print("\n===== TESTING: format_and_present_results =====")
+formatted = format_and_present_results.invoke({"items": final_items, "params": params})
+print("✅ Final Output:\n")
+print(formatted)

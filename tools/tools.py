@@ -1,4 +1,4 @@
-from langchain_core.tools import tool
+from langchain.tools import tool
 from typing import List
 from models import QueryParams
 from datetime import datetime, timedelta
