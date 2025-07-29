@@ -74,8 +74,8 @@ class EnglishScraper:
             for item in batch[:self.max_arts]:
                 print("\ngathering ", item["title"])
                 print("content: ",item["description"][:100] )
-                print("data: ", self.normalize_date(item["data"]["date_published"]))
-                urls = [alt["name"] for alt in item["data"]["alternate_ids"] if alt["namespace"] == "URL"]
+                print("data: ", self.normalize_date(item.get("created_at")))
+                urls = [alt["name"] for alt in item["data"].get("alternate_ids", []) if alt["namespace"] == "URL"]
                 url = urls[0] if urls else f"https://www.rapid7.com/db/vulnerabilities/{item['identifier']}/"
                 if is_article_scraped(url) and not self.FORCE:
                     print(f"Skipping already-scraped: {url}")
@@ -87,11 +87,11 @@ class EnglishScraper:
                     title=item["title"],
                     title_translated=item["title"],
                     url=url,
-                    content=item["description"] + " Severity: "+str(item["data"]["severity"]),
-                    content_translated=item["description"] + " Severity: "+str(item["data"]["severity"]),
+                    content=item["description"] + " Severity: "+str(item["data"].get("severity", [])),
+                    content_translated=item["description"] + " Severity: "+str(item["data"].get("severity", [])),
                     language="en",
                     scraped_at=datetime.now().isoformat(),
-                    published_date=self.normalize_date(item["data"]["date_published"])
+                    published_date=self.normalize_date(item.get("created_at"))
                 )
                 articles.append(article)
             

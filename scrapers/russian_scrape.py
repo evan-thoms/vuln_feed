@@ -87,6 +87,7 @@ class RussianScraper():
                 
                 paragraphs = content_div.find_all(["p", "blockquote"])
                 full_text = "\n\n".join(p.get_text(strip=True) for p in paragraphs)
+                print("title: ", title)
 
 
                 article = Article(

@@ -1,74 +1,146 @@
 [
   {
-    "title": "Мошенники крадут товары, выдавая себя за ПСК и Ozon",
-    "title_translated": "Fraudsters steal goods posing as PSK and Ozon",
-    "summary": "Fraudulent attacks targeting well-known companies, using forged documents and phone number substitution to make purchases. Scammers posed as representatives of legitimate organizations, showing powers of attorney and seeking shipment of goods.",
-    "published_date": "2025-07-20T14:01:45.163344",
-    "original_language": "ru",
-    "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-18-121598/46706"
+    "title": "Splunk的安装和基本使用",
+    "title_translated": "Installation and basic use of Splunk",
+    "summary": "The Splunk data platform provides powerful insights and analytics capabilities, but does not contain a unique and identifiable CVE.",
+    "published_date": "2025-07-28T19:10:23.879586",
+    "original_language": "zh",
+    "source": "FreeBuf",
+    "url": "https://www.freebuf.com/articles/sectool/441769.html"
   },
   {
-    "title": "В веб-ресурсах 26% компаний нашли веб-шеллы ещё до запуска сервисов",
-    "title_translated": "In web resources, 26% of companies found web shells before the launch of services",
-    "summary": "Web shells were detected on 26% of Russian companies' websites, services, and applications in the first half of 2025. The most alarming increase is seen on external sites and public web resources, with a rise from 12% to 53%. Developers often open access to test or unfinished services, making systems vulnerable.",
-    "published_date": "2025-07-20T14:01:46.800071",
-    "original_language": "ru",
-    "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-18-111332/46705"
+    "title": "新型信息窃取木马SHUYAL攻击19款主流浏览器窃取登录凭证",
+    "title_translated": "A new type of information theft horse SHUYAL attacked 19 mainstream browsers and stole login documents.",
+    "summary": "SHUYAL malware steals documents, captures system intercepts, clipboard contents and conducts systematic reconnaissance. It uses multistage attack vectors, automatic prohibition of Windows task manager, and complex counter-detection mechanisms to evade detection.",
+    "published_date": "2025-07-28T19:10:28.096936",
+    "original_language": "zh",
+    "source": "FreeBuf",
+    "url": "https://www.freebuf.com/articles/database/441872.html"
   },
   {
-    "title": "Новый macOS-вредонос с подписью Apple Developer заменяет Ledger Live",
-    "title_translated": "New macOS malware signed by Apple Developer replaces Ledger Live",
-    "summary": "A new version of malware for macOS was found, which managed to bypass Apple's protective mechanisms and pretend to be an update to GoogleMeet. The malware has been reported to steal data, linger in the system, and execute malicious scripts. It also includes basic protection against analysis.",
-    "published_date": "2025-07-20T14:01:48.437010",
-    "original_language": "ru",
-    "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-18-111332/46704"
+    "title": "人工智能可能修复帮助传播了 15 年的漏洞",
+    "title_translated": "The repair of artificial intelligence may have helped spread a 15-year gap.",
+    "summary": "An artificial intelligence tool can help eliminate a 10-year-old vulnerability that allows an attacker to navigate outside the specified directory.",
+    "published_date": "2025-07-28T19:10:33.342481",
+    "original_language": "zh",
+    "source": "FreeBuf",
+    "url": "https://www.anquanke.com/post/id/308401"
   },
   {
-    "title": "В России готовят запрет на зарубежные коммуникационные сервисы",
-    "title_translated": "Russia is preparing a ban on foreign communication services",
-    "summary": "The Russian government plans to introduce additional restrictions on the use of communication services and software from unfriendly countries before September 1, 2025. This is a measure in response to restrictions imposed by other states.",
-    "published_date": "2025-07-20T14:01:49.934598",
+    "title": "В России может появиться новая статья УК для киберпреступников",
+    "title_translated": "In Russia may appear a new article of the criminal code for cybercriminals",
+    "summary": "Russian government proposes new measures to combat remote fraud, including tougher penalties for extortion using digital technologies. The proposal aims to add a new part to Article 163 of the Criminal Code providing for separate liability for extortion using digital technologies.",
+    "published_date": "2025-07-28T19:10:36.255942",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-18-121598/46703"
+    "url": "https://www.anti-malware.ru/news/2025-07-28-121598/46799"
   },
   {
-    "title": "Минцифры предлагает предоставлять отсрочки ИТ-специалистам без дипломов",
-    "title_translated": "The Ministry proposes to provide delays to IT specialists without diplomas",
-    "summary": "The Ministry proposes to expand the list of IT specialists who can defer from conscription in the army, allowing young professionals to build a career in IT without interruption.",
-    "published_date": "2025-07-20T14:01:51.381238",
+    "title": "Московские школы начали требовать от учеников и родителей установки MAX",
+    "title_translated": "Moscow schools began to require students and parents to install MAX",
+    "summary": "In Moscow, some schools are requiring students and parents to install the MAX messenger, replacing the Sferum platform. Parents are expressing discontent with this requirement, and there is uncertainty about whether these regulations have legal force.",
+    "published_date": "2025-07-28T19:10:37.253729",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-17-121598/46702"
+    "url": "https://www.anti-malware.ru/news/2025-07-28-121598/46798"
   },
   {
-    "title": "Вышла САКУРА 2.36: поддержка ARM и улучшения для VPN и AD",
-    "title_translated": "Sakura 2.36: ARM support and improvements for VPN and AD",
-    "summary": "Optimization and acceleration: The release includes corrections for errors found in previous versions.",
-    "published_date": "2025-07-20T14:01:52.926416",
+    "title": "Аэрофлот сообщил о сбое в работе информационных систем",
+    "title_translated": "Aeroflot reported a failure in the work of information systems",
+    "summary": "Aeroflot Airlines reported a failure in their information systems, leading to disruptions in digital services and potential flight delays/cancellations.",
+    "published_date": "2025-07-28T19:10:38.113119",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-17-111332/46701"
+    "url": "https://www.anti-malware.ru/news/2025-07-28-121598/46797"
   },
   {
-    "title": "Golden dMSA: доступ к защищенным ресурсам AD через взлом контроллера домена",
-    "title_translated": "Golden dMSA: Accessing Protected AD Resources by Hacking a Domain Controller",
-    "summary": "Semperis experts discovered a serious flaw in Managed Service Accounts (dMSA) project, allowing permanent access to all resources in Active Directory domains. The vulnerability simplifies password cracking and enables horizontal movement between domains.",
-    "published_date": "2025-07-20T14:01:54.281688",
+    "title": "ИИ-инструменты могут получить статус соавтора в разработке ядра Linux",
+    "title_translated": "AI tools can get co-author status in Linux kernel development",
+    "summary": "Nvidia developer Sasha Levin proposes patch series to integrate AI assistants into Linux kernel development process with rules and guidelines.",
+    "published_date": "2025-07-28T19:10:38.970158",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-17-114534/46700"
+    "url": "https://www.anti-malware.ru/news/2025-07-28-111332/46796"
   },
   {
-    "title": "Роскомнадзор обсуждает с маркетплейсами проверку сим-карт",
-    "title_translated": "Roskomnadzor discusses with marketplaces the verification of SIM cards",
-    "summary": "Roskomnadzor and marketplaces are discussing introducing mechanisms to check SIM cards used by migrants, aiming to prevent fraud using other people's numbers.",
-    "published_date": "2025-07-20T14:01:55.921145",
+    "title": "Endgame Gear распространяла вредонос в конфигураторе мыши OP1w 4k v2",
+    "title_translated": "Endgame Gear Distributed Malware in OP1w 4k v2 Mouse Configurator",
+    "summary": "Endgame Gear's official website was compromised, allowing malware to spread through a wireless mouse configurator. Users who downloaded the OP1w 4k v2 setup tool between June 26 and July 9 should check their systems for potential infection.",
+    "published_date": "2025-07-28T19:10:39.861033",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-17-121598/46699"
+    "url": "https://www.anti-malware.ru/news/2025-07-28-111332/46795"
+  },
+  {
+    "title": "Обновление Windows 11 снова доступно для игроков с Easy Anti-Cheat",
+    "title_translated": "Windows 11 Update Now Available for Players with Easy Anti-Cheat",
+    "summary": "Microsoft resolves issue with Easy Anti-Cheat causing blue screens during Windows 11 updates. The restriction on updating Windows has been lifted, allowing users to safely update without issues.",
+    "published_date": "2025-07-28T19:10:40.721130",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-07-25-111332/46794"
+  },
+  {
+    "title": "Microsoft: Мы не можем защитить данные пользователей от запросов США",
+    "title_translated": "Microsoft: We cannot protect user data from U.S. requests.",
+    "summary": "Microsoft, AWS, and Google may be forced to transfer user data from the EU to the US due to the CLOUD Act. This raises concerns about digital sovereignty and the potential for US authorities to access EU user data.",
+    "published_date": "2025-07-28T19:10:41.575780",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-07-25-111332/46793"
+  },
+  {
+    "title": "Разработчик фишинг-наборов получил 7 лет за ущерб в $134 млн",
+    "title_translated": "Phishing kit developer gets 7 years for $134 million damage",
+    "summary": "A British student, Ollie Holman, was sentenced to 7 years in prison for creating and distributing phishing tools that caused over $134 million in damages. The kits mimicked government services, financial organizations, and charities, allowing attackers to access personal data and payment details.",
+    "published_date": "2025-07-28T19:10:42.428695",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-07-25-121598/46792"
+  },
+  {
+    "title": "PaperCut NG/MF Cross-Site Request Forgery (CSRF) Vulnerability",
+    "title_translated": "PaperCut NG/MF Cross-Site Request Forgery (CSRF) Vulnerability",
+    "summary": "PaperCut NG/MF contains a cross-site request forgery (CSRF) vulnerability, which, under specific conditions, could potentially enable an attacker to alter security settings or execute arbitrary code.",
+    "published_date": "2025-07-28T19:10:42.608998",
+    "original_language": "en",
+    "source": "CISA KEV",
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2023-2533"
+  },
+  {
+    "title": "Cisco Identity Services Engine Injection Vulnerability",
+    "title_translated": "Cisco Identity Services Engine Injection Vulnerability",
+    "summary": "Cisco Identity Services Engine contains an injection vulnerability allowing remote code execution and obtaining root privileges on affected devices. Successful exploitation can occur by submitting a crafted API request.",
+    "published_date": "2025-07-28T19:10:42.609814",
+    "original_language": "en",
+    "source": "CISA KEV",
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-20281"
+  },
+  {
+    "title": "Malicious Windows Script Host VBScript (.vbs) File",
+    "title_translated": "Malicious Windows Script Host VBScript (.vbs) File",
+    "summary": "This module creates a Windows Script Host (WSH) VBScript (.vbs) file.",
+    "published_date": "2025-07-28T19:10:44.981146",
+    "original_language": "en",
+    "source": "Rapid7",
+    "url": "https://www.rapid7.com/db/vulnerabilities/exploit/windows/fileformat/windows_script_host_vbscript/"
+  },
+  {
+    "title": "Malicious Windows Script Host JScript (.js) File",
+    "title_translated": "Malicious Windows Script Host JScript (.js) File",
+    "summary": "",
+    "published_date": "2025-07-28T19:10:44.981747",
+    "original_language": "en",
+    "source": "Rapid7",
+    "url": "https://www.rapid7.com/db/vulnerabilities/exploit/windows/fileformat/windows_script_host_jscript/"
+  },
+  {
+    "title": "FreeBSD: VID-0F5BCBA2-67FB-11F0-9EE5-B42E991FC52E (CVE-2025-6965): sqlite -- Integer Truncation on SQLite",
+    "title_translated": "FreeBSD: VID-0F5BCBA2-67FB-11F0-9EE5-B42E991FC52E (CVE-2025-6965): sqlite -- Integer Truncation on SQLite",
+    "summary": "A vulnerability exists in SQLite versions before 3.50.2 where excessive aggregate terms can lead to memory corruption. Upgrade to version 3.50.2 or above.",
+    "published_date": "2025-07-28T19:10:44.982382",
+    "original_language": "en",
+    "source": "Rapid7",
+    "url": "https://www.rapid7.com/db/vulnerabilities/freebsd-cve-2025-6965/"
   }
 ]

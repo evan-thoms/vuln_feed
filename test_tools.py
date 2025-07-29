@@ -18,7 +18,7 @@ params = QueryParams(
 
 # Step 1: Scrape & Translate
 print("===== TESTING: scrape_and_process_articles =====")
-articles = scrape_and_process_articles.invoke(params)
+articles = scrape_and_process_articles.invoke({"params": params})
 print(f"✅ Got {len(articles)} articles")
 print("Sample article title:", articles[0].title_translated)
 

@@ -1,1 +1,54 @@
-[]
+[
+  {
+    "cve_id": "CVE-2025-31199",
+    "title": "macOS \"Sploitlight\"漏洞曝光：攻击者可窃取Apple Intelligence缓存数据",
+    "title_translated": "MacOS Sploitlight leak: The assailant can steal Apple Intelligence cache data",
+    "summary": "A MacOS loophole, named Sploitlight, allows attackers to bypass Apple privacy control mechanisms and access sensitive user data, including Apple Intelligence cache files.",
+    "severity": "High",
+    "cvss_score": 7.5,
+    "published_date": "2025-07-28T19:10:25.859033",
+    "original_language": "zh",
+    "source": "FreeBuf",
+    "url": "https://www.freebuf.com/articles/system/441870.html",
+    "affected_products": []
+  },
+  {
+    "cve_id": "CVE-2025-47162",
+    "title": "微软 Office 漏洞允许攻击者执行远程代码",
+    "title_translated": "Microsoft Office bug allows the assailant to execute remote code",
+    "summary": "Multiple vulnerabilities in Microsoft Office allow attackers to enforce random codes on affected systems, affecting memory management and object processing.",
+    "severity": "High",
+    "cvss_score": 8.4,
+    "published_date": "2025-07-28T19:10:31.951224",
+    "original_language": "zh",
+    "source": "FreeBuf",
+    "url": "https://www.anquanke.com/post/id/308412",
+    "affected_products": []
+  },
+  {
+    "cve_id": "CVE-2025-5484",
+    "title": "美国CISA警告 SinoTrack GPS 跟踪器存在远程控制漏洞",
+    "title_translated": "US CISA warning SinoTrack GPS tracker has remote control gaps",
+    "summary": "Weak identification defect and observable response difference in SinoTrack GPS equipment allow attackers to control vehicles remotely, track locations, or cut fuel. Default passwords and easily guessable device identifiers enable exploitation.",
+    "severity": "Critical",
+    "cvss_score": 8.8,
+    "published_date": "2025-07-28T19:10:34.425387",
+    "original_language": "zh",
+    "source": "FreeBuf",
+    "url": "https://www.anquanke.com/post/id/308398",
+    "affected_products": []
+  },
+  {
+    "cve_id": "Unknown",
+    "title": "Cisco Identity Services Engine Injection Vulnerability",
+    "title_translated": "Cisco Identity Services Engine Injection Vulnerability",
+    "summary": "Cisco Identity Services Engine contains an injection vulnerability allowing remote code execution and obtaining root privileges. Exploitation occurs by submitting a crafted API request. Affected devices can be mitigated per vendor instructions, followed applicable BOD 22-01 guidance for cloud services, or discontinued if mitigations are unavailable.",
+    "severity": "High",
+    "cvss_score": 0.0,
+    "published_date": "2025-07-28T19:10:42.609487",
+    "original_language": "en",
+    "source": "CISA KEV",
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-20337",
+    "affected_products": []
+  }
+]
