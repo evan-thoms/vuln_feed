@@ -197,10 +197,16 @@ def filter_and_rank_items(cves: List[Vulnerability], news_items: List[NewsItem],
     
     # Apply date filter
     cutoff_date = datetime.now() - timedelta(days=params.days_back)
-    date_filtered = [
-        item for item in all_items 
-        if item.published_date >= cutoff_date
-    ]
+    date_filtered = []
+    for item in all_items:
+        published = item.published_date
+        if isinstance(published, str):
+            try:
+                published = datetime.fromisoformat(published)
+            except ValueError:
+                continue  
+        if published >= cutoff_date:
+            date_filtered.append(item)
     
     # Simple ranking by CVSS score for CVEs, recency for news
     def rank_item(item):

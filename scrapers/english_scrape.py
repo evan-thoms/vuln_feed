@@ -14,8 +14,8 @@ class EnglishScraper:
         self.max_arts = num_articles
 
     def normalize_date(self, date_str):
-        date = parser.parse(date_str)
-        return date.isoformat()
+        return parser.parse(date_str)
+      
     
     def scrape_cisa(self):
         url = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
@@ -32,7 +32,7 @@ class EnglishScraper:
                 print(f"Skipping already-scraped: {cve_url}")
                 continue
             article = Article(
-                id=cve_url,
+                id=None,
                 source="CISA KEV",
                 title= v.get("vulnerabilityName"),
                 title_translated=v.get("vulnerabilityName"),
@@ -82,7 +82,7 @@ class EnglishScraper:
                     continue
 
                 article = Article(
-                    id=url,
+                    id=None,
                     source="Rapid7",
                     title=item["title"],
                     title_translated=item["title"],

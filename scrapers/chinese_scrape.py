@@ -56,7 +56,7 @@ class ChineseScraper:
                 print("Preview:", full_text[:100], "...")
                 
                 article = Article(
-                    id= article_url,
+                    id= None,
                     source= "FreeBuf",
                     title= title,
                     title_translated="",
@@ -75,8 +75,8 @@ class ChineseScraper:
             time.sleep(1)   
         return articles
     def normalize_date(self, date_str):
-        date = parser.parse(date_str)
-        return date.isoformat()
+        return parser.parse(date_str)
+
 
                
     def fetch_article_content(self, url, site):
@@ -130,7 +130,7 @@ class ChineseScraper:
             content = self.fetch_article_content(article['url'], "Anquanke")
             print(f"Content preview:\n{content[:100]}...\n") 
             article = Article(
-                        id= article["url"],
+                        id= None,
                         source= "FreeBuf",
                         title= article["title"],
                         title_translated="",
@@ -188,7 +188,7 @@ class ChineseScraper:
                 
 
                 article = Article(
-                    id=url,
+                    id=None,
                     source="FreeBuf",
                     title=post_title,
                     title_translated="",

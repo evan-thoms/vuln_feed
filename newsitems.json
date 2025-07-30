@@ -1,146 +1,110 @@
 [
   {
-    "title": "Splunk的安装和基本使用",
-    "title_translated": "Installation and basic use of Splunk",
-    "summary": "The Splunk data platform provides powerful insights and analytics capabilities, but does not contain a unique and identifiable CVE.",
-    "published_date": "2025-07-28T19:10:23.879586",
+    "title": "MCP安全：为自主AI系统筑牢根基",
+    "title_translated": "MCP security: building the foundations for an autonomous AI system",
+    "summary": "The article discusses the importance of Model Context Protocol (MCP) security, highlighting its probabilistic logic and potential for autonomous decision-making. It also touches on recent attacks targeting MCP ecosystems.",
+    "published_date": "2025-07-29T22:10:47.239105",
     "original_language": "zh",
     "source": "FreeBuf",
-    "url": "https://www.freebuf.com/articles/sectool/441769.html"
+    "url": "https://www.freebuf.com/articles/ai-security/442161.html"
   },
   {
-    "title": "新型信息窃取木马SHUYAL攻击19款主流浏览器窃取登录凭证",
-    "title_translated": "A new type of information theft horse SHUYAL attacked 19 mainstream browsers and stole login documents.",
-    "summary": "SHUYAL malware steals documents, captures system intercepts, clipboard contents and conducts systematic reconnaissance. It uses multistage attack vectors, automatic prohibition of Windows task manager, and complex counter-detection mechanisms to evade detection.",
-    "published_date": "2025-07-28T19:10:28.096936",
+    "title": "AI成功绕过\"人机验证\"系统，ChatGPT智能代理突破CAPTCHA验证",
+    "title_translated": "AI successfully bypassed the human authentication system. ChatGPT smart agent broke CAPTCHA.",
+    "summary": "ChatGPT smart agents can bypass Cloudflare Turnstile CAPTCHA, highlighting the need for more sophisticated anti-robot strategies as AI technology continues to evolve.",
+    "published_date": "2025-07-29T22:10:51.559321",
     "original_language": "zh",
     "source": "FreeBuf",
-    "url": "https://www.freebuf.com/articles/database/441872.html"
+    "url": "https://www.freebuf.com/articles/ai-security/442109.html"
   },
   {
     "title": "人工智能可能修复帮助传播了 15 年的漏洞",
     "title_translated": "The repair of artificial intelligence may have helped spread a 15-year gap.",
-    "summary": "An artificial intelligence tool can help eliminate a 10-year-old vulnerability that allows an attacker to navigate outside the specified directory.",
-    "published_date": "2025-07-28T19:10:33.342481",
+    "summary": "An artificial intelligence tool that inadvertently lasts 10 years can now also help to eliminate it. A loophole in Node.js code from 2010 has been exploited, and large language models are reproducing the vulnerable logic.",
+    "published_date": "2025-07-29T22:10:59.194438",
     "original_language": "zh",
     "source": "FreeBuf",
     "url": "https://www.anquanke.com/post/id/308401"
   },
   {
-    "title": "В России может появиться новая статья УК для киберпреступников",
-    "title_translated": "In Russia may appear a new article of the criminal code for cybercriminals",
-    "summary": "Russian government proposes new measures to combat remote fraud, including tougher penalties for extortion using digital technologies. The proposal aims to add a new part to Article 163 of the Criminal Code providing for separate liability for extortion using digital technologies.",
-    "published_date": "2025-07-28T19:10:36.255942",
+    "title": "Во 2 квартале DDoS-атак в России стало на 42% больше, бьют по финсектору",
+    "title_translated": "In the 2nd quarter, DDoS attacks in Russia became 42% more, hit the financial sector",
+    "summary": "In Q2 2025, DDoS attacks increased by 42% in Russia, with financial institutions (28%), government agencies (21%), and telecom companies (16%) being targeted. Attacks on the financial sector grew the most (84%).",
+    "published_date": "2025-07-29T22:11:04.330105",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-28-121598/46799"
+    "url": "https://www.anti-malware.ru/news/2025-07-29-111332/46816"
   },
   {
-    "title": "Московские школы начали требовать от учеников и родителей установки MAX",
-    "title_translated": "Moscow schools began to require students and parents to install MAX",
-    "summary": "In Moscow, some schools are requiring students and parents to install the MAX messenger, replacing the Sferum platform. Parents are expressing discontent with this requirement, and there is uncertainty about whether these regulations have legal force.",
-    "published_date": "2025-07-28T19:10:37.253729",
+    "title": "СёрчИнформ добавила поддержку S3-хранилищ в FileAuditor",
+    "title_translated": "SurchInform adds S3 storage support to FileAuditor",
+    "summary": "The SearchInform FileAuditor can now work with cloud storage based on Amazon S3, allowing for control and monitoring of cloud environments. This is important because research shows that cloud environments are increasingly becoming the source of major leaks.",
+    "published_date": "2025-07-29T22:11:05.569142",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-28-121598/46798"
+    "url": "https://www.anti-malware.ru/news/2025-07-29-111332/46815"
   },
   {
-    "title": "Аэрофлот сообщил о сбое в работе информационных систем",
-    "title_translated": "Aeroflot reported a failure in the work of information systems",
-    "summary": "Aeroflot Airlines reported a failure in their information systems, leading to disruptions in digital services and potential flight delays/cancellations.",
-    "published_date": "2025-07-28T19:10:38.113119",
+    "title": "С 1 августа можно будет отказаться от массовых рассылок",
+    "title_translated": "From August 1, mass mailings can be abandoned",
+    "summary": "New law in Russia allows citizens to refuse mass mailings from telecom operators, aiming to protect against intrusive advertising and fraudulent messages.",
+    "published_date": "2025-07-29T22:11:07.014128",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-28-121598/46797"
+    "url": "https://www.anti-malware.ru/news/2025-07-29-121598/46814"
   },
   {
-    "title": "ИИ-инструменты могут получить статус соавтора в разработке ядра Linux",
-    "title_translated": "AI tools can get co-author status in Linux kernel development",
-    "summary": "Nvidia developer Sasha Levin proposes patch series to integrate AI assistants into Linux kernel development process with rules and guidelines.",
-    "published_date": "2025-07-28T19:10:38.970158",
+    "title": "Только от отмены рейсов Аэрофлот потерял 250 млн рублей за сутки",
+    "title_translated": "Only from the cancellation of flights Aeroflot lost 250 million rubles per day",
+    "summary": "Aeroflot suffered a cyber attack that resulted in the cancellation of 54 pair flights, causing estimated direct losses of at least 260 million rubles. The attackers may have gained access to Aeroflot's supplier database, posing a threat to its logistics chain.",
+    "published_date": "2025-07-29T22:11:07.982124",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-28-111332/46796"
+    "url": "https://www.anti-malware.ru/news/2025-07-29-121598/46813"
   },
   {
-    "title": "Endgame Gear распространяла вредонос в конфигураторе мыши OP1w 4k v2",
-    "title_translated": "Endgame Gear Distributed Malware in OP1w 4k v2 Mouse Configurator",
-    "summary": "Endgame Gear's official website was compromised, allowing malware to spread through a wireless mouse configurator. Users who downloaded the OP1w 4k v2 setup tool between June 26 and July 9 should check their systems for potential infection.",
-    "published_date": "2025-07-28T19:10:39.861033",
+    "title": "Meta* обвинили в раздаче порно через BitTorrent для обучения ИИ",
+    "title_translated": "Meta accused of handing out porn through BitTorrent for AI training",
+    "summary": "Meta allegedly used pornographic films to train its AI models, which could erode its key argument with writers and potentially create 'AI porn' that could be distributed free of charge, including to minors.",
+    "published_date": "2025-07-29T22:11:09.576596",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-28-111332/46795"
+    "url": "https://www.anti-malware.ru/news/2025-07-29-111332/46812"
   },
   {
-    "title": "Обновление Windows 11 снова доступно для игроков с Easy Anti-Cheat",
-    "title_translated": "Windows 11 Update Now Available for Players with Easy Anti-Cheat",
-    "summary": "Microsoft resolves issue with Easy Anti-Cheat causing blue screens during Windows 11 updates. The restriction on updating Windows has been lifted, allowing users to safely update without issues.",
-    "published_date": "2025-07-28T19:10:40.721130",
+    "title": "Александр Тараканов возглавил направление ИБ в группе Rubytech",
+    "title_translated": "Alexander Tarakanov headed the direction of information security in the Rubytech group",
+    "summary": "Rubytech appoints new head of information security department, Alexander Tarakanov, who has over 20 years of experience in the field. He will be responsible for developing expertise and implementing projects.",
+    "published_date": "2025-07-29T22:11:11.460684",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-25-111332/46794"
+    "url": "https://www.anti-malware.ru/news/2025-07-28-111332/46810"
   },
   {
-    "title": "Microsoft: Мы не можем защитить данные пользователей от запросов США",
-    "title_translated": "Microsoft: We cannot protect user data from U.S. requests.",
-    "summary": "Microsoft, AWS, and Google may be forced to transfer user data from the EU to the US due to the CLOUD Act. This raises concerns about digital sovereignty and the potential for US authorities to access EU user data.",
-    "published_date": "2025-07-28T19:10:41.575780",
+    "title": "По стопам Аэрофлота: не работают сайт и приложение «Госуслуг»",
+    "title_translated": "In the footsteps of Aeroflot: the website and the application “State Services” do not work",
+    "summary": "A large-scale cyber attack was reported on July 28, affecting multiple digital services in Russia, including the government portal and Aeroflot's IT infrastructure. The hacktivist group Silent Crow claimed responsibility for the attack, stating they accessed 122 internal systems.",
+    "published_date": "2025-07-29T22:11:12.403123",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-25-111332/46793"
+    "url": "https://www.anti-malware.ru/news/2025-07-28-111332/46809"
   },
   {
-    "title": "Разработчик фишинг-наборов получил 7 лет за ущерб в $134 млн",
-    "title_translated": "Phishing kit developer gets 7 years for $134 million damage",
-    "summary": "A British student, Ollie Holman, was sentenced to 7 years in prison for creating and distributing phishing tools that caused over $134 million in damages. The kits mimicked government services, financial organizations, and charities, allowing attackers to access personal data and payment details.",
-    "published_date": "2025-07-28T19:10:42.428695",
-    "original_language": "ru",
-    "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-25-121598/46792"
-  },
-  {
-    "title": "PaperCut NG/MF Cross-Site Request Forgery (CSRF) Vulnerability",
-    "title_translated": "PaperCut NG/MF Cross-Site Request Forgery (CSRF) Vulnerability",
-    "summary": "PaperCut NG/MF contains a cross-site request forgery (CSRF) vulnerability, which, under specific conditions, could potentially enable an attacker to alter security settings or execute arbitrary code.",
-    "published_date": "2025-07-28T19:10:42.608998",
-    "original_language": "en",
-    "source": "CISA KEV",
-    "url": "https://nvd.nist.gov/vuln/detail/CVE-2023-2533"
-  },
-  {
-    "title": "Cisco Identity Services Engine Injection Vulnerability",
-    "title_translated": "Cisco Identity Services Engine Injection Vulnerability",
-    "summary": "Cisco Identity Services Engine contains an injection vulnerability allowing remote code execution and obtaining root privileges on affected devices. Successful exploitation can occur by submitting a crafted API request.",
-    "published_date": "2025-07-28T19:10:42.609814",
-    "original_language": "en",
-    "source": "CISA KEV",
-    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-20281"
-  },
-  {
-    "title": "Malicious Windows Script Host VBScript (.vbs) File",
-    "title_translated": "Malicious Windows Script Host VBScript (.vbs) File",
-    "summary": "This module creates a Windows Script Host (WSH) VBScript (.vbs) file.",
-    "published_date": "2025-07-28T19:10:44.981146",
+    "title": "VMware Photon OS: CVE-2021-47432",
+    "title_translated": "VMware Photon OS: CVE-2021-47432",
+    "summary": "In the Linux kernel, a vulnerability was resolved by fixing integer overflows related to the radix tree code. The severity of this issue is critical.",
+    "published_date": "2025-07-29T22:11:16.218680",
     "original_language": "en",
     "source": "Rapid7",
-    "url": "https://www.rapid7.com/db/vulnerabilities/exploit/windows/fileformat/windows_script_host_vbscript/"
+    "url": "https://www.rapid7.com/db/vulnerabilities/vmware-photon_os-cve-2021-47432/"
   },
   {
-    "title": "Malicious Windows Script Host JScript (.js) File",
-    "title_translated": "Malicious Windows Script Host JScript (.js) File",
-    "summary": "",
-    "published_date": "2025-07-28T19:10:44.981747",
+    "title": "VMware Photon OS: CVE-2021-47412",
+    "title_translated": "VMware Photon OS: CVE-2021-47412",
+    "summary": "The Linux kernel vulnerability was fixed by not calling rq_qos_ops->done_bio if the bio isn't tracked, to prevent potential kernel panic.",
+    "published_date": "2025-07-29T22:11:16.219167",
     "original_language": "en",
     "source": "Rapid7",
-    "url": "https://www.rapid7.com/db/vulnerabilities/exploit/windows/fileformat/windows_script_host_jscript/"
-  },
-  {
-    "title": "FreeBSD: VID-0F5BCBA2-67FB-11F0-9EE5-B42E991FC52E (CVE-2025-6965): sqlite -- Integer Truncation on SQLite",
-    "title_translated": "FreeBSD: VID-0F5BCBA2-67FB-11F0-9EE5-B42E991FC52E (CVE-2025-6965): sqlite -- Integer Truncation on SQLite",
-    "summary": "A vulnerability exists in SQLite versions before 3.50.2 where excessive aggregate terms can lead to memory corruption. Upgrade to version 3.50.2 or above.",
-    "published_date": "2025-07-28T19:10:44.982382",
-    "original_language": "en",
-    "source": "Rapid7",
-    "url": "https://www.rapid7.com/db/vulnerabilities/freebsd-cve-2025-6965/"
+    "url": "https://www.rapid7.com/db/vulnerabilities/vmware-photon_os-cve-2021-47412/"
   }
 ]

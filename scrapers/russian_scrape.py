@@ -33,7 +33,7 @@ class RussianScraper():
                 break
 
         try:
-            return parser.parse(date_str).date()
+            return parser.parse(date_str)
         except Exception as e:
             print(f"Date parse failed: {date_str}, Error: {e}")
             return None
