@@ -50,8 +50,12 @@ class RussianScraper():
         for page in range(1,max_pages+1):
             print("PAGE ",page)
             LISTING_URL = f"{BASE_URL}/news?page={page}"
-            response = requests.get(LISTING_URL, headers=headers)
-            response.raise_for_status()
+            try:
+                response = requests.get(LISTING_URL, headers=headers)
+                response.raise_for_status()
+            except requests.exceptions.RequestException as e:
+                print(f"Skipping {LISTING_URL} due to request error: {e}")
+                continue
 
             soup = BeautifulSoup(response.text, 'html.parser')
             articles = []
@@ -67,9 +71,12 @@ class RussianScraper():
                 if is_article_scraped(article_url) and not self.FORCE:
                     print(f"Skipping already-scraped: {article_url}")
                     continue
-
-                article_res = requests.get(article_url, headers=headers)
-                article_res.raise_for_status()
+                try:
+                    article_res = requests.get(article_url, headers=headers)
+                    article_res.raise_for_status()
+                except requests.exceptions.RequestException as e:
+                    print(f"Failed to fetch article {article_url}: {e}")
+                    continue
                 article_soup = BeautifulSoup(article_res.text, 'html.parser')
 
                 date_div = article_soup.find("div", class_="submitted")

@@ -1,110 +1,137 @@
 [
   {
-    "title": "MCP安全：为自主AI系统筑牢根基",
-    "title_translated": "MCP security: building the foundations for an autonomous AI system",
-    "summary": "The article discusses the importance of Model Context Protocol (MCP) security, highlighting its probabilistic logic and potential for autonomous decision-making. It also touches on recent attacks targeting MCP ecosystems.",
-    "published_date": "2025-07-29T22:10:47.239105",
+    "title": "针对亚洲大型企业的隐秘网络间谍活动：DLL劫持及社交媒体C2攻击",
+    "title_translated": "Secret cyber espionage against large Asian enterprises: DLL hijacking and social media C2 attacks",
+    "summary": "The Kabaski laboratory has revealed a highly confusing web-based espionage campaign targeting Russian IT companies and global business agencies. The attack consisted of a multistage delivery chain, culminating in the deployment of Cobalt Strike Beacon.",
+    "published_date": "2025-07-30T19:27:04.960551",
     "original_language": "zh",
     "source": "FreeBuf",
-    "url": "https://www.freebuf.com/articles/ai-security/442161.html"
+    "url": "https://www.freebuf.com/articles/442337.html"
   },
   {
-    "title": "AI成功绕过\"人机验证\"系统，ChatGPT智能代理突破CAPTCHA验证",
-    "title_translated": "AI successfully bypassed the human authentication system. ChatGPT smart agent broke CAPTCHA.",
-    "summary": "ChatGPT smart agents can bypass Cloudflare Turnstile CAPTCHA, highlighting the need for more sophisticated anti-robot strategies as AI technology continues to evolve.",
-    "published_date": "2025-07-29T22:10:51.559321",
+    "title": "诺基亚遭遇公司史上最严重数据泄露事件，内部网络遭入侵",
+    "title_translated": "Nokia suffered the worst data leak in the company's history and the internal network was hacked.",
+    "summary": "The threat to attacker Tsar0Byte claimed to have invaded Nokia's network through a porous third-party link, resulting in the disclosure of sensitive data for over 94,500 employees. The incident was brought to light at dark web forums such as DarkForums and was one of the most serious corporate data leaks affecting Nokia in recent years.",
+    "published_date": "2025-07-30T19:27:09.696138",
     "original_language": "zh",
     "source": "FreeBuf",
-    "url": "https://www.freebuf.com/articles/ai-security/442109.html"
+    "url": "https://www.freebuf.com/articles/database/442313.html"
   },
   {
     "title": "人工智能可能修复帮助传播了 15 年的漏洞",
     "title_translated": "The repair of artificial intelligence may have helped spread a 15-year gap.",
-    "summary": "An artificial intelligence tool that inadvertently lasts 10 years can now also help to eliminate it. A loophole in Node.js code from 2010 has been exploited, and large language models are reproducing the vulnerable logic.",
-    "published_date": "2025-07-29T22:10:59.194438",
+    "summary": "No CVE identified or described vulnerability.",
+    "published_date": "2025-07-30T19:27:27.078434",
     "original_language": "zh",
     "source": "FreeBuf",
     "url": "https://www.anquanke.com/post/id/308401"
   },
   {
-    "title": "Во 2 квартале DDoS-атак в России стало на 42% больше, бьют по финсектору",
-    "title_translated": "In the 2nd quarter, DDoS attacks in Russia became 42% more, hit the financial sector",
-    "summary": "In Q2 2025, DDoS attacks increased by 42% in Russia, with financial institutions (28%), government agencies (21%), and telecom companies (16%) being targeted. Attacks on the financial sector grew the most (84%).",
-    "published_date": "2025-07-29T22:11:04.330105",
+    "title": "Прямой ущерб Столичек и Неофарма от кибератаки оценили до полумиллиарда",
+    "title_translated": "Direct damage to Stolits and Neopharm from cyberattacks estimated to half a billion",
+    "summary": "Cyber attack on pharmacy chains 'Stolichka' and 'Neopharm' caused 500 million rubles in damage. The attack affected corporate systems, including accounting, cash register, and product tracking module.",
+    "published_date": "2025-07-30T19:27:32.969084",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-29-111332/46816"
+    "url": "https://www.anti-malware.ru/news/2025-07-30-121598/46831"
   },
   {
-    "title": "СёрчИнформ добавила поддержку S3-хранилищ в FileAuditor",
-    "title_translated": "SurchInform adds S3 storage support to FileAuditor",
-    "summary": "The SearchInform FileAuditor can now work with cloud storage based on Amazon S3, allowing for control and monitoring of cloud environments. This is important because research shows that cloud environments are increasingly becoming the source of major leaks.",
-    "published_date": "2025-07-29T22:11:05.569142",
+    "title": "Вышел Linux 6.16: улучшения для ARM64, графики и звуковых систем",
+    "title_translated": "Linux 6.16 Released: Improvements to ARM64, Graphics and Sound Systems",
+    "summary": "Linux 6.16 kernel release announcement with key changes and no identified CVE.",
+    "published_date": "2025-07-30T19:27:34.869773",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-29-111332/46815"
+    "url": "https://www.anti-malware.ru/news/2025-07-30-111332/46830"
   },
   {
-    "title": "С 1 августа можно будет отказаться от массовых рассылок",
-    "title_translated": "From August 1, mass mailings can be abandoned",
-    "summary": "New law in Russia allows citizens to refuse mass mailings from telecom operators, aiming to protect against intrusive advertising and fraudulent messages.",
-    "published_date": "2025-07-29T22:11:07.014128",
+    "title": "В iOS 26 Safari включит защиту от фингерпринта по умолчанию",
+    "title_translated": "In iOS 26 Safari will include protection from fingerprint print by default",
+    "summary": "Apple's Safari browser will default to advanced digital fingerprint protection, preventing websites from tracking users' browsing habits. This protection was previously only available in private mode.",
+    "published_date": "2025-07-30T19:27:37.317292",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-29-121598/46814"
+    "url": "https://www.anti-malware.ru/news/2025-07-30-111332/46829"
   },
   {
-    "title": "Только от отмены рейсов Аэрофлот потерял 250 млн рублей за сутки",
-    "title_translated": "Only from the cancellation of flights Aeroflot lost 250 million rubles per day",
-    "summary": "Aeroflot suffered a cyber attack that resulted in the cancellation of 54 pair flights, causing estimated direct losses of at least 260 million rubles. The attackers may have gained access to Aeroflot's supplier database, posing a threat to its logistics chain.",
-    "published_date": "2025-07-29T22:11:07.982124",
+    "title": "iOS 18.6: Apple закрыла уязвимости в Safari, Mail и обработке медиа",
+    "title_translated": "iOS 18.6: Apple has closed vulnerabilities in Safari, Mail and media processing",
+    "summary": "Apple has released iOS 18.6 with a list of important patches, addressing dozens of vulnerabilities and covering some that could allow exploitation.",
+    "published_date": "2025-07-30T19:27:39.179790",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-29-121598/46813"
+    "url": "https://www.anti-malware.ru/news/2025-07-30-111332/46828"
   },
   {
-    "title": "Meta* обвинили в раздаче порно через BitTorrent для обучения ИИ",
-    "title_translated": "Meta accused of handing out porn through BitTorrent for AI training",
-    "summary": "Meta allegedly used pornographic films to train its AI models, which could erode its key argument with writers and potentially create 'AI porn' that could be distributed free of charge, including to minors.",
-    "published_date": "2025-07-29T22:11:09.576596",
+    "title": "Фейковая рассылка от Belarusian Cyber-Partisans: угрозы атак на ЦБ и ФСИН",
+    "title_translated": "Fake newsletter from Belarusian Cyber-Partisans: threats of attacks on the Central Bank and the Federal Penitentiary Service",
+    "summary": "Mass mailing of emails on behalf of Belarusian Cyber-Partisans group, demanding release of Pavel Vrublevsky. No specific vulnerability or exploitation process reported.",
+    "published_date": "2025-07-30T19:27:41.114990",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-29-111332/46812"
+    "url": "https://www.anti-malware.ru/news/2025-07-29-121598/46827"
   },
   {
-    "title": "Александр Тараканов возглавил направление ИБ в группе Rubytech",
-    "title_translated": "Alexander Tarakanov headed the direction of information security in the Rubytech group",
-    "summary": "Rubytech appoints new head of information security department, Alexander Tarakanov, who has over 20 years of experience in the field. He will be responsible for developing expertise and implementing projects.",
-    "published_date": "2025-07-29T22:11:11.460684",
+    "title": "У Почты России наблюдаются сбои в работе сайта и онлайн-сервисов",
+    "title_translated": "Russian Post is experiencing failures in the work of the site and online services",
+    "summary": "Russian Post website and Mail of Russia app experienced failures, but no CVE identified. Stolichki pharmacy network and Aeroflot had separate incidents with unknown CVEs.",
+    "published_date": "2025-07-30T19:27:41.974964",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-28-111332/46810"
+    "url": "https://www.anti-malware.ru/news/2025-07-29-121598/46826"
   },
   {
-    "title": "По стопам Аэрофлота: не работают сайт и приложение «Госуслуг»",
-    "title_translated": "In the footsteps of Aeroflot: the website and the application “State Services” do not work",
-    "summary": "A large-scale cyber attack was reported on July 28, affecting multiple digital services in Russia, including the government portal and Aeroflot's IT infrastructure. The hacktivist group Silent Crow claimed responsibility for the attack, stating they accessed 122 internal systems.",
-    "published_date": "2025-07-29T22:11:12.403123",
+    "title": "Неизвестные злоумышленники атаковали сеть Семейный доктор",
+    "title_translated": "Unknown attackers attacked the network Family Doctor",
+    "summary": "Family Doctor clinics network was subjected to a cyber attack, resulting in patient database destruction. Clinic's website and appointment system were also affected.",
+    "published_date": "2025-07-30T19:27:43.894728",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-28-111332/46809"
+    "url": "https://www.anti-malware.ru/news/2025-07-29-121598/46825"
   },
   {
-    "title": "VMware Photon OS: CVE-2021-47432",
-    "title_translated": "VMware Photon OS: CVE-2021-47432",
-    "summary": "In the Linux kernel, a vulnerability was resolved by fixing integer overflows related to the radix tree code. The severity of this issue is critical.",
-    "published_date": "2025-07-29T22:11:16.218680",
+    "title": "Аферисты обещают карту на 100 тыс. рублей и просят 3050 рублей «комиссии»",
+    "title_translated": "Scammers promise a card for 100 thousand rubles and ask for 3050 rubles “commission”",
+    "summary": "Scammers are targeting vulnerable citizens, promising credit cards with high interest rates and stealing personal data. The attack involves filling out a questionnaire and providing sensitive information.",
+    "published_date": "2025-07-30T19:27:44.768223",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-07-29-121598/46823"
+  },
+  {
+    "title": "PaperCut NG/MF Cross-Site Request Forgery (CSRF) Vulnerability",
+    "title_translated": "PaperCut NG/MF Cross-Site Request Forgery (CSRF) Vulnerability",
+    "summary": "PaperCut NG/MF contains a cross-site request forgery (CSRF) vulnerability, which could potentially enable an attacker to alter security settings or execute arbitrary code.",
+    "published_date": "2025-07-30T19:27:45.083240",
+    "original_language": "en",
+    "source": "CISA KEV",
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2023-2533"
+  },
+  {
+    "title": "Cisco Identity Services Engine Injection Vulnerability",
+    "title_translated": "Cisco Identity Services Engine Injection Vulnerability",
+    "summary": "Cisco Identity Services Engine contains an injection vulnerability allowing remote code execution and root privileges. Successful exploitation could be done by submitting a crafted API request.",
+    "published_date": "2025-07-30T19:27:45.086040",
+    "original_language": "en",
+    "source": "CISA KEV",
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-20337"
+  },
+  {
+    "title": "Alma Linux: CVE-2025-6965: Important: nodejs:22 security update (ALSA-2025-11803)",
+    "title_translated": "Alma Linux: CVE-2025-6965: Important: nodejs:22 security update (ALSA-2025-11803)",
+    "summary": "A vulnerability exists in SQLite versions before 3.50.2, leading to memory corruption and potentially exploitable issue.",
+    "published_date": "2025-07-30T19:27:47.662607",
     "original_language": "en",
     "source": "Rapid7",
-    "url": "https://www.rapid7.com/db/vulnerabilities/vmware-photon_os-cve-2021-47432/"
+    "url": "https://errata.almalinux.org/8/ALSA-2025-11803.html"
   },
   {
-    "title": "VMware Photon OS: CVE-2021-47412",
-    "title_translated": "VMware Photon OS: CVE-2021-47412",
-    "summary": "The Linux kernel vulnerability was fixed by not calling rq_qos_ops->done_bio if the bio isn't tracked, to prevent potential kernel panic.",
-    "published_date": "2025-07-29T22:11:16.219167",
+    "title": "Alma Linux: CVE-2025-5994: Important: unbound security update (Multiple Advisories)",
+    "title_translated": "Alma Linux: CVE-2025-5994: Important: unbound security update (Multiple Advisories)",
+    "summary": "A multi-vendor cache poisoning vulnerability named 'Rebirthday Attack' has been discovered in caching resolvers that support EDNS Client Subnet (ECS).",
+    "published_date": "2025-07-30T19:27:47.662924",
     "original_language": "en",
     "source": "Rapid7",
-    "url": "https://www.rapid7.com/db/vulnerabilities/vmware-photon_os-cve-2021-47412/"
+    "url": "https://errata.almalinux.org/8/ALSA-2025-11884.html"
   }
 ]

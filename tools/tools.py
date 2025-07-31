@@ -205,7 +205,7 @@ def filter_and_rank_items(cves: List[Vulnerability], news_items: List[NewsItem],
                 published = datetime.fromisoformat(published)
             except ValueError:
                 continue  
-        if published >= cutoff_date:
+        if published and published >= cutoff_date:
             date_filtered.append(item)
     
     # Simple ranking by CVSS score for CVEs, recency for news
@@ -248,6 +248,8 @@ def format_and_present_results(items: List, params: QueryParams) -> str:
             if item.cvss_score:
                 output += f" | **CVSS**: {item.cvss_score}"
             output += "\n"
+        if isinstance(item.published_date, str):
+            item.published_date = datetime.fromisoformat(item.published_date)
         
         output += f"📝 **Summary**: {item.summary}\n"
         output += f"🌐 **Source**: {item.source} ({item.original_language})\n"

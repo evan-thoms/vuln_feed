@@ -11,6 +11,7 @@ def init_db():
     conn.close()
 
 def is_article_scraped(link):
+    print("Checking if ", link, " is scraped ")
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT 1 from raw_articles WHERE url = ?", (link,))
