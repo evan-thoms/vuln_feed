@@ -24,15 +24,21 @@ class ChineseScraper:
         for entry in feed.entries[:self.max_arts]:
             article_url = entry.link
            
-            if is_article_scraped(article_url) and not self.FORCE:
+            if not self.FORCE and is_article_scraped(article_url):
                 print("Article ", article_url, " already scraped, moving on")
                 continue
             print(f"\nFetching: {article_url}")
             
             try:
                 headers = {"User-Agent": "Mozilla/5.0"}
-                res = requests.get(article_url, headers=headers)
-                res.raise_for_status()
+                print(f"[INFO] Sending request to {article_url}")
+                try:
+                    res = requests.get(article_url, headers=headers, timeout=10)
+                    res.raise_for_status()
+                    print("[INFO] Response received")
+                except Exception as e:
+                    print(f"❌ Error fetching {article_url}: {e}")
+                    continue
                 
                 soup = BeautifulSoup(res.text, "html.parser")
                 
@@ -64,7 +70,7 @@ class ChineseScraper:
                     content= full_text,
                     content_translated="",
                     language= "zh",
-                    scraped_at= datetime.now().isoformat(),
+                    scraped_at= datetime.now(),
                     published_date=self.normalize_date(entry.published)
                 )
                 articles.append(article)
@@ -123,7 +129,7 @@ class ChineseScraper:
         print(f"Grabbed {len(articles_meta)} articles")
         articles = []
         for article in articles_meta:
-            if is_article_scraped(article["url"]) and not self.FORCE:
+            if not self.FORCE and is_article_scraped(article["url"]):
                 print("Article ", article["url"], " already scraped, moving on")
                 continue
             print(f"Fetching: {article['title']} ({article['url']})")
@@ -138,7 +144,7 @@ class ChineseScraper:
                         content= content,
                         content_translated="",
                         language= "zh",
-                        scraped_at= datetime.now().isoformat(),
+                        scraped_at= datetime.now(),
                         published_date=self.normalize_date(article["date"])
                     )
             articles.append(article)
@@ -175,7 +181,7 @@ class ChineseScraper:
             for item in article_items[:self.max_arts]:
                 post_title = item.get("post_title", "No Title")
                 url = "https://www.freebuf.com"+item.get("url", "")
-                if is_article_scraped(url) and not self.FORCE:
+                if not self.FORCE and is_article_scraped(url):
                     print(f"Skipping already-scraped: {url}")
                     continue
                 content = self.fetch_article_content(url, "FreeBuf")
@@ -196,7 +202,7 @@ class ChineseScraper:
                     content=content,
                     content_translated="",
                     language="zh",
-                    scraped_at=datetime.now().isoformat(),
+                    scraped_at=datetime.now(),
                     published_date=self.normalize_date(published)
                 )
                 articles.append(article)

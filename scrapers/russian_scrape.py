@@ -51,7 +51,7 @@ class RussianScraper():
             print("PAGE ",page)
             LISTING_URL = f"{BASE_URL}/news?page={page}"
             try:
-                response = requests.get(LISTING_URL, headers=headers)
+                response = requests.get(LISTING_URL, headers=headers, timeout=10)
                 response.raise_for_status()
             except requests.exceptions.RequestException as e:
                 print(f"Skipping {LISTING_URL} due to request error: {e}")
@@ -68,7 +68,7 @@ class RussianScraper():
                 article_url = BASE_URL + a_tag["href"]
                 
 
-                if is_article_scraped(article_url) and not self.FORCE:
+                if not self.FORCE and is_article_scraped(article_url):
                     print(f"Skipping already-scraped: {article_url}")
                     continue
                 try:
@@ -106,7 +106,7 @@ class RussianScraper():
                     content= full_text,
                     content_translated="",
                     language= "ru",
-                    scraped_at= datetime.now().isoformat(),
+                    scraped_at= datetime.now(),
                     published_date=self.normalize_date(date)
                 )
                 all_articles.append(article)

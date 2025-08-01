@@ -28,7 +28,7 @@ class EnglishScraper:
         articles = []
         for v in vulns[:self.max_arts]:
             cve_url = f"https://nvd.nist.gov/vuln/detail/{v.get("cveID")}"
-            if is_article_scraped(cve_url) and not self.FORCE:
+            if not self.FORCE and is_article_scraped(cve_url):
                 print(f"Skipping already-scraped: {cve_url}")
                 continue
             article = Article(
@@ -40,7 +40,7 @@ class EnglishScraper:
                 content=v.get("shortDescription")+v.get("requiredAction"),
                 content_translated=v.get("shortDescription")+v.get("requiredAction"),
                 language="en",
-                scraped_at=datetime.now().isoformat(),
+                scraped_at=datetime.now(),
                 published_date=self.normalize_date(v.get("dateAdded"))
             )
             articles.append(article)
@@ -77,7 +77,7 @@ class EnglishScraper:
                 print("data: ", self.normalize_date(item.get("created_at")))
                 urls = [alt["name"] for alt in item["data"].get("alternate_ids", []) if alt["namespace"] == "URL"]
                 url = urls[0] if urls else f"https://www.rapid7.com/db/vulnerabilities/{item['identifier']}/"
-                if is_article_scraped(url) and not self.FORCE:
+                if not self.FORCE and is_article_scraped(url):
                     print(f"Skipping already-scraped: {url}")
                     continue
 
@@ -90,7 +90,7 @@ class EnglishScraper:
                     content=item["description"] + " Severity: "+str(item["data"].get("severity", [])),
                     content_translated=item["description"] + " Severity: "+str(item["data"].get("severity", [])),
                     language="en",
-                    scraped_at=datetime.now().isoformat(),
+                    scraped_at=datetime.now(),
                     published_date=self.normalize_date(item.get("created_at"))
                 )
                 articles.append(article)
@@ -133,7 +133,7 @@ class EnglishScraper:
                 content=content,
                 content_translated="",
                 language="en",
-                scraped_at=datetime.now().isoformat()
+                scraped_at=datetime.now()
             )
             articles.append(article_obj)
             time.sleep(1)

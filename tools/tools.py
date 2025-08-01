@@ -177,26 +177,79 @@ def classify_articles(articles: List[Article], params: QueryParams) -> tuple[Lis
     print(f"✅ Classified into {len(cves)} CVEs and {len(news)} news items")
     return cves, news
 
+# @tool
+# def filter_and_rank_items(cves: List[Vulnerability], news_items: List[NewsItem], params: QueryParams) -> List:
+#     """Filter items by user criteria and rank them"""
+#     print(f"🔧 Filtering and ranking items...")
+    
+#     all_items = []
+    
+#     # Filter by content type
+#     if params.content_type in ["cve", "both"]:
+#         filtered_cves = cves
+#         # Apply severity filter if specified
+#         if params.severity:
+#             filtered_cves = [cve for cve in cves if cve.severity == params.severity]
+#         all_items.extend(filtered_cves)
+    
+#     if params.content_type in ["news", "both"]:
+#         all_items.extend(news_items)
+    
+#     # Apply date filter
+#     cutoff_date = datetime.now() - timedelta(days=params.days_back)
+#     date_filtered = []
+#     for item in all_items:
+#         published = item.published_date
+#         if isinstance(published, str):
+#             try:
+#                 published = datetime.fromisoformat(published)
+#             except ValueError:
+#                 continue  
+#         if published and published >= cutoff_date:
+#             date_filtered.append(item)
+    
+#     # Simple ranking by CVSS score for CVEs, recency for news
+#     def rank_item(item):
+#         if hasattr(item, 'cvss_score') and item.cvss_score:
+#             return item.cvss_score
+#         return 1.0  # Default score for news items
+    
+#     ranked_items = sorted(date_filtered, key=rank_item, reverse=True)
+    
+#     # Limit results
+#     final_items = ranked_items[:params.max_results]
+    
+#     print(f"✅ Filtered to {len(final_items)} final items")
+#     return final_items
 @tool
 def filter_and_rank_items(cves: List[Vulnerability], news_items: List[NewsItem], params: QueryParams) -> List:
     """Filter items by user criteria and rank them"""
-    print(f"🔧 Filtering and ranking items...")
-    
+    print(f"\n🔧 Starting filter_and_rank_items()")
+    print(f"📥 Received {len(cves)} CVEs and {len(news_items)} news items")
+    print(f"🧾 Parameters: content_type={params.content_type}, severity={params.severity}, days_back={params.days_back}, max_results={params.max_results}")
+
     all_items = []
-    
+
     # Filter by content type
     if params.content_type in ["cve", "both"]:
         filtered_cves = cves
-        # Apply severity filter if specified
+        print(f"🔍 Initial CVEs count: {len(filtered_cves)}")
+        
         if params.severity:
-            filtered_cves = [cve for cve in cves if cve.severity == params.severity]
+            filtered_cves = [cve for cve in filtered_cves if cve.severity == params.severity]
+            print(f"⚙️ Filtered CVEs by severity '{params.severity}': {len(filtered_cves)} remaining")
         all_items.extend(filtered_cves)
-    
+
     if params.content_type in ["news", "both"]:
+        print(f"📰 Adding {len(news_items)} news items")
         all_items.extend(news_items)
+
+    print(f"📊 Total items before date filtering: {len(all_items)}")
     
     # Apply date filter
     cutoff_date = datetime.now() - timedelta(days=params.days_back)
+    print(f"⏳ Applying date filter: only items newer than {cutoff_date}")
+
     date_filtered = []
     for item in all_items:
         published = item.published_date
@@ -204,41 +257,47 @@ def filter_and_rank_items(cves: List[Vulnerability], news_items: List[NewsItem],
             try:
                 published = datetime.fromisoformat(published)
             except ValueError:
+                print(f"❌ Skipping item with unparseable date: {item}")
                 continue  
         if published and published >= cutoff_date:
             date_filtered.append(item)
-    
-    # Simple ranking by CVSS score for CVEs, recency for news
+
+    print(f"✅ Date filter retained {len(date_filtered)} items")
+
+    # Ranking logic
     def rank_item(item):
         if hasattr(item, 'cvss_score') and item.cvss_score:
+            print(f"📈 Ranking CVE with score: {item.cvss_score}")
             return item.cvss_score
-        return 1.0  # Default score for news items
-    
+        return 1.0  # Default for news
+
+    print("🏁 Ranking items by CVSS (CVE) or recency (news)")
     ranked_items = sorted(date_filtered, key=rank_item, reverse=True)
-    
-    # Limit results
+
     final_items = ranked_items[:params.max_results]
-    
-    print(f"✅ Filtered to {len(final_items)} final items")
+    print(f"🎯 Selected top {len(final_items)} items after ranking\n")
+
     return final_items
 
 @tool  
 def format_and_present_results(items: List, params: QueryParams) -> str:
     """Format results for display or email"""
-    print(f"📋 Formatting {len(items)} items for {params.output_format}")
-    
+    print(f"\n📋 Starting format_and_present_results()")
+    print(f"🧾 Formatting {len(items)} items using format: {params.output_format}")
+
     if not items:
+        print("⚠️ No items found to format.")
         return "No items found matching your criteria."
-    
-    # Generate formatted output
+
     output = f"🔒 **Cybersecurity Report** - {len(items)} item(s)\n"
     output += f"📅 From the last {params.days_back} day(s)\n"
     output += f"🎯 Type: {params.content_type.upper()}\n"
     if params.severity:
         output += f"⚡ Severity: {params.severity.upper()}\n"
     output += "\n" + "="*60 + "\n\n"
-    
+
     for i, item in enumerate(items, 1):
+        print(f"🧩 Formatting item {i}/{len(items)}: {getattr(item, 'title_translated', 'No title')}")
         output += f"**{i}. {item.title_translated}**\n"
         
         # Check if it's a CVE (has cve_id attribute)
@@ -248,18 +307,67 @@ def format_and_present_results(items: List, params: QueryParams) -> str:
             if item.cvss_score:
                 output += f" | **CVSS**: {item.cvss_score}"
             output += "\n"
-        if isinstance(item.published_date, str):
-            item.published_date = datetime.fromisoformat(item.published_date)
         
+        # Convert date if needed
+        if isinstance(item.published_date, str):
+            try:
+                item.published_date = datetime.fromisoformat(item.published_date)
+            except ValueError:
+                print(f"⚠️ Could not parse date: {item.published_date}")
+                item.published_date = datetime.now()
+
         output += f"📝 **Summary**: {item.summary}\n"
         output += f"🌐 **Source**: {item.source} ({item.original_language})\n"
         output += f"🔗 **URL**: {item.url}\n"
         output += f"📅 **Date**: {item.published_date.strftime('%Y-%m-%d %H:%M')}\n"
         output += "\n" + "-"*40 + "\n\n"
-    
-    # Handle email delivery
+
     if params.output_format == "email" and params.email_address:
-        # TODO: Implement email sending using your SMTP config
         output += f"\n📧 (Email would be sent to {params.email_address})"
-    
+        print(f"📨 Email placeholder included for {params.email_address}")
+
+    print(f"✅ Finished formatting results\n")
     return output
+
+
+# @tool  
+# def format_and_present_results(items: List, params: QueryParams) -> str:
+#     """Format results for display or email"""
+#     print(f"📋 Formatting {len(items)} items for {params.output_format}")
+    
+#     if not items:
+#         return "No items found matching your criteria."
+    
+#     # Generate formatted output
+#     output = f"🔒 **Cybersecurity Report** - {len(items)} item(s)\n"
+#     output += f"📅 From the last {params.days_back} day(s)\n"
+#     output += f"🎯 Type: {params.content_type.upper()}\n"
+#     if params.severity:
+#         output += f"⚡ Severity: {params.severity.upper()}\n"
+#     output += "\n" + "="*60 + "\n\n"
+    
+#     for i, item in enumerate(items, 1):
+#         output += f"**{i}. {item.title_translated}**\n"
+        
+#         # Check if it's a CVE (has cve_id attribute)
+#         if hasattr(item, 'cve_id'):
+#             output += f"🚨 **CVE**: {item.cve_id or 'TBD'} | "
+#             output += f"**Severity**: {item.severity or 'Unknown'}"
+#             if item.cvss_score:
+#                 output += f" | **CVSS**: {item.cvss_score}"
+#             output += "\n"
+#         if isinstance(item.published_date, str):
+#             item.published_date = datetime.fromisoformat(item.published_date)
+        
+#         output += f"📝 **Summary**: {item.summary}\n"
+#         output += f"🌐 **Source**: {item.source} ({item.original_language})\n"
+#         output += f"🔗 **URL**: {item.url}\n"
+#         output += f"📅 **Date**: {item.published_date.strftime('%Y-%m-%d %H:%M')}\n"
+#         output += "\n" + "-"*40 + "\n\n"
+    
+#     # Handle email delivery
+#     if params.output_format == "email" and params.email_address:
+#         # TODO: Implement email sending using your SMTP config
+#         output += f"\n📧 (Email would be sent to {params.email_address})"
+    
+#     return output
