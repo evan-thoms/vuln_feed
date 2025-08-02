@@ -24,7 +24,7 @@ Given this text:
    - Create simple list of affected products as a list of strings
 3. Provide a 2-3 sentence consise and compact summary of the details the vulnerability, exploitation process, and affected machines
 
-Here is your format, return ONLY IN THIS FORMAT and provide no other information.
+Here is your format, return ONLY IN THIS FORMAT and provide no other information. Return this information as only one object, not a list of objects.
 {{"type":"CVE"|"News","cve_id":"[]", "severity":"Low"|"Medium"|"High"|"Critical", "cvss_score":"", "summary":"", "affected_products":"[]"}}
 """)
 

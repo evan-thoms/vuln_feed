@@ -119,9 +119,14 @@ def scrape_and_process_articles(params: QueryParams) -> List[Article]:
 
     
     return translated_articles
-def save_to_json(items, path):
-    with open(path, "w") as f:
-        json.dump([vars(item) for item in items], f, ensure_ascii=False, indent=2)
+def save_to_json(items: list, filename: str) -> None:
+    def convert(obj):
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        return obj
+
+    with open(filename, "w", encoding="utf-8") as f:
+        json.dump([vars(item) for item in items], f, ensure_ascii=False, indent=2, default=convert)
 
 @tool
 def classify_articles(articles: List[Article], params: QueryParams) -> tuple[List[Vulnerability], List[NewsItem]]:
@@ -133,8 +138,9 @@ def classify_articles(articles: List[Article], params: QueryParams) -> tuple[Lis
 
     for art in articles:
         # Reuse your existing classify_article function
-        result = classify_article(art.content_translated)
         print("Processing URL:", art.url)
+
+        result = classify_article(art.content_translated)
 
         if result["type"] == "CVE":
             vul = Vulnerability(
@@ -228,56 +234,42 @@ def filter_and_rank_items(cves: List[Vulnerability], news_items: List[NewsItem],
     print(f"📥 Received {len(cves)} CVEs and {len(news_items)} news items")
     print(f"🧾 Parameters: content_type={params.content_type}, severity={params.severity}, days_back={params.days_back}, max_results={params.max_results}")
 
-    all_items = []
+    cutoff_date = datetime.now() - timedelta(days=params.days_back)
 
-    # Filter by content type
-    if params.content_type in ["cve", "both"]:
-        filtered_cves = cves
-        print(f"🔍 Initial CVEs count: {len(filtered_cves)}")
+    # 🧪 Filter CVEs
+    filtered_cves = []
+    
+    for cve in cves:
         
         if params.severity:
-            filtered_cves = [cve for cve in filtered_cves if cve.severity == params.severity]
-            print(f"⚙️ Filtered CVEs by severity '{params.severity}': {len(filtered_cves)} remaining")
-        all_items.extend(filtered_cves)
-
-    if params.content_type in ["news", "both"]:
-        print(f"📰 Adding {len(news_items)} news items")
-        all_items.extend(news_items)
-
-    print(f"📊 Total items before date filtering: {len(all_items)}")
+            allowed = [s.upper() for s in params.severity]
+            print("Allowed Severities: ",allowed)
+            if cve.severity.upper() not in allowed:
+                continue
+        if isinstance(cve.published_date, str):
+            cve.published_date = datetime.fromisoformat(cve.published_date)
+        if cve.published_date >= cutoff_date:
+            filtered_cves.append(cve)
+    print(f"🔍 Filtered CVEs count: {len(filtered_cves)}")
+    ranked_cves = sorted(filtered_cves, key=lambda x: x.cvss_score or 0, reverse=True)
     
-    # Apply date filter
-    cutoff_date = datetime.now() - timedelta(days=params.days_back)
-    print(f"⏳ Applying date filter: only items newer than {cutoff_date}")
 
-    date_filtered = []
-    for item in all_items:
-        published = item.published_date
-        if isinstance(published, str):
-            try:
-                published = datetime.fromisoformat(published)
-            except ValueError:
-                print(f"❌ Skipping item with unparseable date: {item}")
-                continue  
-        if published and published >= cutoff_date:
-            date_filtered.append(item)
+    # 🧪 Filter News
+    filtered_news = []
+    for news in news_items:
+        if isinstance(news.published_date, str):
+            news.published_date = datetime.fromisoformat(news.published_date)
+        if news.published_date >= cutoff_date:
+            filtered_news.append(news)
+    print(f"🔍 Filtered News  count: {len(filtered_news)}")
+    ranked_news = sorted(filtered_news, key=lambda x: x.published_date, reverse=True)
 
-    print(f"✅ Date filter retained {len(date_filtered)} items")
-
-    # Ranking logic
-    def rank_item(item):
-        if hasattr(item, 'cvss_score') and item.cvss_score:
-            print(f"📈 Ranking CVE with score: {item.cvss_score}")
-            return item.cvss_score
-        return 1.0  # Default for news
-
-    print("🏁 Ranking items by CVSS (CVE) or recency (news)")
-    ranked_items = sorted(date_filtered, key=rank_item, reverse=True)
-
-    final_items = ranked_items[:params.max_results]
-    print(f"🎯 Selected top {len(final_items)} items after ranking\n")
-
-    return final_items
+    print(f"✅ Filtered {len(ranked_cves)} CVEs and {len(ranked_news)} News items")
+    
+    return {
+        "cves": ranked_cves[:params.max_results],
+        "news": ranked_news[:params.max_results],
+    }
 
 @tool  
 def format_and_present_results(items: List, params: QueryParams) -> str:

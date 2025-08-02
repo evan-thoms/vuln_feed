@@ -1,137 +1,110 @@
 [
   {
-    "title": "针对亚洲大型企业的隐秘网络间谍活动：DLL劫持及社交媒体C2攻击",
-    "title_translated": "Secret cyber espionage against large Asian enterprises: DLL hijacking and social media C2 attacks",
-    "summary": "The Kabaski laboratory has revealed a highly confusing web-based espionage campaign targeting Russian IT companies and global business agencies. The attack consisted of a multistage delivery chain, culminating in the deployment of Cobalt Strike Beacon.",
-    "published_date": "2025-07-30T19:27:04.960551",
+    "title": "银狐钓鱼再升级：白文件脚本化实现GO语言后门持久驻留",
+    "title_translated": "Silver Fox Fish Upgrade: Scripting white documents to sustain the Go language back door",
+    "summary": "The SilverFox threat actor has evolved its tactics to evade detection by using a multilingual hybrid version of the backdoor procedure, which includes information theft, command execution, and permanent maintenance of computer backdoor control. The attackers have also abandoned early reliance on memory to load the PE document and moved to a new utilization chain of 'white document + script'.",
+    "published_date": "2025-08-01T20:54:26.918631",
     "original_language": "zh",
     "source": "FreeBuf",
-    "url": "https://www.freebuf.com/articles/442337.html"
+    "url": "https://www.freebuf.com/news/442649.html"
   },
   {
-    "title": "诺基亚遭遇公司史上最严重数据泄露事件，内部网络遭入侵",
-    "title_translated": "Nokia suffered the worst data leak in the company's history and the internal network was hacked.",
-    "summary": "The threat to attacker Tsar0Byte claimed to have invaded Nokia's network through a porous third-party link, resulting in the disclosure of sensitive data for over 94,500 employees. The incident was brought to light at dark web forums such as DarkForums and was one of the most serious corporate data leaks affecting Nokia in recent years.",
-    "published_date": "2025-07-30T19:27:09.696138",
+    "title": "CentOS 9 安装部署最新版本Zabbix 7.4 完整步骤",
+    "title_translated": "CentOS 9 installation deployment, latest version Zabbix 7.4, complete step",
+    "summary": "This security proposal discusses setting up Zabbix server and database, including configuring SELinux, installing zabbix-release package, and importing SQL scripts. It does not contain a unique CVE ID.",
+    "published_date": "2025-08-01T20:54:29.002215",
     "original_language": "zh",
     "source": "FreeBuf",
-    "url": "https://www.freebuf.com/articles/database/442313.html"
+    "url": "https://www.freebuf.com/articles/development/442624.html"
   },
   {
     "title": "人工智能可能修复帮助传播了 15 年的漏洞",
     "title_translated": "The repair of artificial intelligence may have helped spread a 15-year gap.",
-    "summary": "No CVE identified or described vulnerability.",
-    "published_date": "2025-07-30T19:27:27.078434",
+    "summary": "A 10-year-old loophole in a Node.js code clip has been found to be embedded in AI models, allowing attackers to navigate outside the specified directory. The issue is attributed to the dissemination of unsafe code through platforms like Stack Overflow and university curricula.",
+    "published_date": "2025-08-01T20:54:37.342181",
     "original_language": "zh",
     "source": "FreeBuf",
     "url": "https://www.anquanke.com/post/id/308401"
   },
   {
-    "title": "Прямой ущерб Столичек и Неофарма от кибератаки оценили до полумиллиарда",
-    "title_translated": "Direct damage to Stolits and Neopharm from cyberattacks estimated to half a billion",
-    "summary": "Cyber attack on pharmacy chains 'Stolichka' and 'Neopharm' caused 500 million rubles in damage. The attack affected corporate systems, including accounting, cash register, and product tracking module.",
-    "published_date": "2025-07-30T19:27:32.969084",
+    "title": "OpenAI отключила функцию, из-за которой чаты ChatGPT попадали в поиск",
+    "title_translated": "OpenAI disables the function that caused ChatGPT chats to be searched",
+    "summary": "OpenAI's experiment to make ChatGPT conversations searchable on search engines was closed after users began accidentally sharing personal conversations online.",
+    "published_date": "2025-08-01T20:54:41.291123",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-30-121598/46831"
+    "url": "https://www.anti-malware.ru/news/2025-08-01-111332/46859"
   },
   {
-    "title": "Вышел Linux 6.16: улучшения для ARM64, графики и звуковых систем",
-    "title_translated": "Linux 6.16 Released: Improvements to ARM64, Graphics and Sound Systems",
-    "summary": "Linux 6.16 kernel release announcement with key changes and no identified CVE.",
-    "published_date": "2025-07-30T19:27:34.869773",
+    "title": "Сеть дискаунтеров Доброцен парализована атакой",
+    "title_translated": "The network of discounters Dobrozen paralyzed by the attack",
+    "summary": "Dobrozen, a discount store network, faced a large-scale failure due to a cyber attack. The attack paralyzed internal systems, disrupting work and services.",
+    "published_date": "2025-08-01T20:54:42.338629",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-30-111332/46830"
+    "url": "https://www.anti-malware.ru/news/2025-07-31-121598/46857"
   },
   {
-    "title": "В iOS 26 Safari включит защиту от фингерпринта по умолчанию",
-    "title_translated": "In iOS 26 Safari will include protection from fingerprint print by default",
-    "summary": "Apple's Safari browser will default to advanced digital fingerprint protection, preventing websites from tracking users' browsing habits. This protection was previously only available in private mode.",
-    "published_date": "2025-07-30T19:27:37.317292",
+    "title": "PT Surveying: вышел сервис для оценки киберустойчивости компаний",
+    "title_translated": "PT Surveying: a service for assessing the cyber resilience of companies",
+    "summary": "Positive Technologies has launched a new service called PT Surveying, which helps organizations assess their cyber-resilience. The service evaluates an organization's subsidiaries, suppliers or contractors to identify potential weaknesses and provide recommendations for improvement.",
+    "published_date": "2025-08-01T20:54:43.484761",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-30-111332/46829"
+    "url": "https://www.anti-malware.ru/news/2025-07-31-111332/46856"
   },
   {
-    "title": "iOS 18.6: Apple закрыла уязвимости в Safari, Mail и обработке медиа",
-    "title_translated": "iOS 18.6: Apple has closed vulnerabilities in Safari, Mail and media processing",
-    "summary": "Apple has released iOS 18.6 with a list of important patches, addressing dozens of vulnerabilities and covering some that could allow exploitation.",
-    "published_date": "2025-07-30T19:27:39.179790",
+    "title": "Каждый второй турист в России рискует попасть на фишинговый сайт",
+    "title_translated": "Every second tourist in Russia is at risk of getting on a phishing site",
+    "summary": "The article discusses the importance of being cautious when booking travel online, as phishing sites and fraudsters may try to take advantage of unsuspecting travelers. It highlights the risks of not verifying the safety of online services and provides tips for avoiding common scams.",
+    "published_date": "2025-08-01T20:54:44.540565",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-30-111332/46828"
+    "url": "https://www.anti-malware.ru/news/2025-07-31-111332/46855"
   },
   {
-    "title": "Фейковая рассылка от Belarusian Cyber-Partisans: угрозы атак на ЦБ и ФСИН",
-    "title_translated": "Fake newsletter from Belarusian Cyber-Partisans: threats of attacks on the Central Bank and the Federal Penitentiary Service",
-    "summary": "Mass mailing of emails on behalf of Belarusian Cyber-Partisans group, demanding release of Pavel Vrublevsky. No specific vulnerability or exploitation process reported.",
-    "published_date": "2025-07-30T19:27:41.114990",
+    "title": "«Агропромцифра» запустила аудит кибербезопасности для агропредприятий",
+    "title_translated": "Agropromtsifra launches cyber security audit for agribusinesses",
+    "summary": "Agropromtsifra has launched a program for free cybersecurity testing to help identify vulnerabilities and increase resilience in the agricultural sector. The goal is to prevent attacks using ransomware, data theft, and financial losses.",
+    "published_date": "2025-08-01T20:54:45.493756",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-29-121598/46827"
+    "url": "https://www.anti-malware.ru/news/2025-07-31-111332/46854"
   },
   {
-    "title": "У Почты России наблюдаются сбои в работе сайта и онлайн-сервисов",
-    "title_translated": "Russian Post is experiencing failures in the work of the site and online services",
-    "summary": "Russian Post website and Mail of Russia app experienced failures, but no CVE identified. Stolichki pharmacy network and Aeroflot had separate incidents with unknown CVEs.",
-    "published_date": "2025-07-30T19:27:41.974964",
+    "title": "Межсетевой экран InfoWatch ARMA Стена получил сертификат ФСТЭК России",
+    "title_translated": "Firewall InfoWatch ARMA Wall received the certificate of FSTEC of Russia",
+    "summary": "The InfoWatch ARMASten (NGFW) has been certified by FSTEC of Russia, making it suitable for use at critical information infrastructure facilities.",
+    "published_date": "2025-08-01T20:54:46.329323",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-29-121598/46826"
+    "url": "https://www.anti-malware.ru/news/2025-07-31-111332/46853"
   },
   {
-    "title": "Неизвестные злоумышленники атаковали сеть Семейный доктор",
-    "title_translated": "Unknown attackers attacked the network Family Doctor",
-    "summary": "Family Doctor clinics network was subjected to a cyber attack, resulting in patient database destruction. Clinic's website and appointment system were also affected.",
-    "published_date": "2025-07-30T19:27:43.894728",
+    "title": "Crosstech представила решение для защиты контейнерных сред",
+    "title_translated": "Crosstech unveils solution to protect container environments",
+    "summary": "Crosstech Solutions Group has launched a new cybersecurity product called Crosstech Container Security (CTCS) to protect container infrastructure. The solution covers the entire life cycle of working with containers and allows integration with Keycloak, LDAP/LDAPS, Syslog and Docker Registry (API v2).",
+    "published_date": "2025-08-01T20:54:47.252155",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-29-121598/46825"
+    "url": "https://www.anti-malware.ru/news/2025-07-31-111332/46852"
   },
   {
-    "title": "Аферисты обещают карту на 100 тыс. рублей и просят 3050 рублей «комиссии»",
-    "title_translated": "Scammers promise a card for 100 thousand rubles and ask for 3050 rubles “commission”",
-    "summary": "Scammers are targeting vulnerable citizens, promising credit cards with high interest rates and stealing personal data. The attack involves filling out a questionnaire and providing sensitive information.",
-    "published_date": "2025-07-30T19:27:44.768223",
+    "title": "Количество взломов на заказ выросло на четверть",
+    "title_translated": "The number of hacks to order increased by a quarter",
+    "summary": "Custom hacker attacks on businesses are increasing, targeting technical documentation, customer databases, product development plans, and disrupting operations. Hackers use phishing, exploiting vulnerabilities, and DDoS attacks to gain access to valuable information.",
+    "published_date": "2025-08-01T20:54:48.112864",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-29-121598/46823"
+    "url": "https://www.anti-malware.ru/news/2025-07-31-121598/46851"
   },
   {
     "title": "PaperCut NG/MF Cross-Site Request Forgery (CSRF) Vulnerability",
     "title_translated": "PaperCut NG/MF Cross-Site Request Forgery (CSRF) Vulnerability",
-    "summary": "PaperCut NG/MF contains a cross-site request forgery (CSRF) vulnerability, which could potentially enable an attacker to alter security settings or execute arbitrary code.",
-    "published_date": "2025-07-30T19:27:45.083240",
+    "summary": "PaperCut NG/MF contains a cross-site request forgery (CSRF) vulnerability, which could potentially enable an attacker to alter security settings or execute arbitrary code. Apply mitigations per vendor instructions.",
+    "published_date": "2025-08-01T20:54:48.422587",
     "original_language": "en",
     "source": "CISA KEV",
     "url": "https://nvd.nist.gov/vuln/detail/CVE-2023-2533"
-  },
-  {
-    "title": "Cisco Identity Services Engine Injection Vulnerability",
-    "title_translated": "Cisco Identity Services Engine Injection Vulnerability",
-    "summary": "Cisco Identity Services Engine contains an injection vulnerability allowing remote code execution and root privileges. Successful exploitation could be done by submitting a crafted API request.",
-    "published_date": "2025-07-30T19:27:45.086040",
-    "original_language": "en",
-    "source": "CISA KEV",
-    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-20337"
-  },
-  {
-    "title": "Alma Linux: CVE-2025-6965: Important: nodejs:22 security update (ALSA-2025-11803)",
-    "title_translated": "Alma Linux: CVE-2025-6965: Important: nodejs:22 security update (ALSA-2025-11803)",
-    "summary": "A vulnerability exists in SQLite versions before 3.50.2, leading to memory corruption and potentially exploitable issue.",
-    "published_date": "2025-07-30T19:27:47.662607",
-    "original_language": "en",
-    "source": "Rapid7",
-    "url": "https://errata.almalinux.org/8/ALSA-2025-11803.html"
-  },
-  {
-    "title": "Alma Linux: CVE-2025-5994: Important: unbound security update (Multiple Advisories)",
-    "title_translated": "Alma Linux: CVE-2025-5994: Important: unbound security update (Multiple Advisories)",
-    "summary": "A multi-vendor cache poisoning vulnerability named 'Rebirthday Attack' has been discovered in caching resolvers that support EDNS Client Subnet (ECS).",
-    "published_date": "2025-07-30T19:27:47.662924",
-    "original_language": "en",
-    "source": "Rapid7",
-    "url": "https://errata.almalinux.org/8/ALSA-2025-11884.html"
   }
 ]
