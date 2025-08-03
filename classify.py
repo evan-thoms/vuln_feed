@@ -5,28 +5,42 @@ import re
 
 llm = ChatOllama(model="llama3")
 
+# REQUIRED FORMAT:
+# {
+#   "type": "CVE" | "News",
+#   "cve_id": ["..."],
+#   "severity": "Low" | "Medium" | "High" | "Critical",
+#   "cvss_score": "0.0 - 10.0",
+#   "summary": "Concise, human-readable explanation",
+#   "intrigue": "0-10",
+#   "affected_products": ["product1", "product2"]
+# }
 prompt = ChatPromptTemplate.from_template("""
 You are a security threat intelligence assistant, returning a json report in my specified format
 Given this text:
 ---
 {article}
 ---
-1. Does this contain a unique and identifiable CVE (yes/no)?
-2. If yes, extract:
-    - 
-   - If you find no CVE number, ALWAYS set `cve_id` to `["Unknown"]` AND `type` to `"News"`.
-    - If you find one or more valid CVE IDs, ALWAYS set `type` to `"CVE"` and `cve_id` to the found CVE list.
-    - NEVER output `"CVE"` type if the ID is missing or unknown.
-    - If no unique CVE ID is present, do NOT make up a fake CVE format like `CVE-XXXX-XXXX` — just set it to `["Unknown"]`.
+Return a SINGLE JSON object with ALL of the following fields.
 
-   - Severity (Low/Medium/High/Critical). Give your best estimate from these 4 choices
-   - CVSS score, If CVSS score is present in text, extract it as a float. Otherwise, provide your own reasoned estimate based on described impact and exploitability, choosing a value between 0.0 and 10.0 and avoiding overestimation.
-   - Rate how intriguing and exciting this information is by providing a number from 1 to 10, with ten being the most intriguing, must-read information for someone getting updates about cybersecurity.
-   - Create simple list of affected products as a list of strings
-3. For the summary field, provide a 2-3 sentence consise and compact summary of the details the vulnerability, exploitation process, and affected machines
+Type: If this contains a unique and identifieable CVE, then set this to CVE. Otherwise, always set it to News
+cve_id: If identifiable CVE numbers are found, return a list of all of them here. If no unique CVE ID is present, set cve_id to Unknown if no identifiable CVE nubmer is present and type to News
+severity: Give your best estimate from these 4 choices as to how severe this incident is: (Low/Medium/High/Critical)
+CVSS_score: If CVSS score is present in text, extract it as a float. Otherwise, provide your own reasoned estimate based on described impact and exploitability, choosing a value between 0.0 and 10.0 and avoiding overestimation.
+summary: Provide a 2-3 sentence consise and compact summary of the details the vulnerability, exploitation process, and affected machines
+intrigue: Rate how intriguing and exciting this information is by providing a number from 1 to 10, with ten being the most intriguing, must-read information for someone getting updates about cybersecurity.
+affected_products: Create simple list of affected products as a list of strings
 
-Here is your format, return ONLY IN THIS FORMAT and provide no other information. Return this information as only one object, not a list of objects.
-{{"type":"CVE"|"News","cve_id":"[]", "severity":"Low"|"Medium"|"High"|"Critical", "cvss_score":"", "summary":"", "intrigue":"", "affected_products":"[]"}}
+Return nothing else besides this exact JSON format as this example below. 
+{{
+  "type": "CVE",
+  "cve_id": ["CVE-2023-12345"],
+  "severity": "High",
+  "cvss_score": 7.2,
+  "summary": "Concise explanation of the vulnerability and exploitation details.",
+  "intrigue": 7,
+  "affected_products": ["Product A", "Product B"]
+}}
 """)
 
 def classify_article(article: str) -> dict:
