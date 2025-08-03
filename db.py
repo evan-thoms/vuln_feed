@@ -52,7 +52,7 @@ def insert_cve(cve):
     cursor = conn.cursor()
     cursor.execute("""
         INSERT INTO cves (cve_id, title, title_translated, summary, severity, cvss_score, published_date, original_language, source, url, affected_products)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         cve.cve_id,
         cve.title,
@@ -64,6 +64,7 @@ def insert_cve(cve):
         cve.original_language,
         cve.source,
         cve.url,
+        cve.intrigue,
         ",".join(cve.affected_products)
     ))
     conn.commit()
@@ -74,14 +75,15 @@ def insert_newsitem( news):
     cursor = conn.cursor()
     cursor.execute("""
         INSERT INTO newsitems (title, title_translated, summary, published_date, source, url)
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
     """, (
         news.title,
         news.title_translated,
         news.summary,
         news.published_date,
         news.source,
-        news.url
+        news.url,
+        news.intrigue
     ))
     conn.commit()
     conn.close()

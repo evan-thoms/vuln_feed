@@ -21,11 +21,12 @@ Given this text:
 
    - Severity (Low/Medium/High/Critical). Give your best estimate from these 4 choices
    - CVSS score, If CVSS score is present in text, extract it as a float. Otherwise, provide your own reasoned estimate based on described impact and exploitability, choosing a value between 0.0 and 10.0 and avoiding overestimation.
+   - Rate how intriguing and exciting this information is by providing a number from 1 to 10, with ten being the most intriguing, must-read information for someone getting updates about cybersecurity.
    - Create simple list of affected products as a list of strings
-3. Provide a 2-3 sentence consise and compact summary of the details the vulnerability, exploitation process, and affected machines
+3. For the summary field, provide a 2-3 sentence consise and compact summary of the details the vulnerability, exploitation process, and affected machines
 
 Here is your format, return ONLY IN THIS FORMAT and provide no other information. Return this information as only one object, not a list of objects.
-{{"type":"CVE"|"News","cve_id":"[]", "severity":"Low"|"Medium"|"High"|"Critical", "cvss_score":"", "summary":"", "affected_products":"[]"}}
+{{"type":"CVE"|"News","cve_id":"[]", "severity":"Low"|"Medium"|"High"|"Critical", "cvss_score":"", "summary":"", "intrigue":"", "affected_products":"[]"}}
 """)
 
 def classify_article(article: str) -> dict:

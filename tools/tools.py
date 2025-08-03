@@ -154,6 +154,7 @@ def classify_articles(articles: List[Article], params: QueryParams) -> tuple[Lis
                 original_language=art.language,
                 source=art.source,
                 url=art.url,
+                intrigue= float(result["intrigue"]),
                 affected_products=[], 
             )
             cves.append(vul)
@@ -165,6 +166,7 @@ def classify_articles(articles: List[Article], params: QueryParams) -> tuple[Lis
                 published_date=art.scraped_at,
                 original_language=art.language,
                 source=art.source,
+                intrigue= float(result["intrigue"]),
                 url=art.url,
             )
             news.append(news_item)
@@ -251,7 +253,11 @@ def filter_and_rank_items(cves: List[Vulnerability], news_items: List[NewsItem],
         if cve.published_date >= cutoff_date:
             filtered_cves.append(cve)
     print(f"🔍 Filtered CVEs count: {len(filtered_cves)}")
-    ranked_cves = sorted(filtered_cves, key=lambda x: x.cvss_score or 0, reverse=True)
+    ranked_cves = sorted(
+    cves,
+    key=lambda c: (c.cvss_score * 0.6 + c.intrigue * 0.4),
+    reverse=True
+)
     
 
     # 🧪 Filter News
@@ -262,7 +268,8 @@ def filter_and_rank_items(cves: List[Vulnerability], news_items: List[NewsItem],
         if news.published_date >= cutoff_date:
             filtered_news.append(news)
     print(f"🔍 Filtered News  count: {len(filtered_news)}")
-    ranked_news = sorted(filtered_news, key=lambda x: x.published_date, reverse=True)
+    ranked_news = sorted(news_items, key=lambda n: n.intrigue, reverse=True)
+
 
     print(f"✅ Filtered {len(ranked_cves)} CVEs and {len(ranked_news)} News items")
     
@@ -272,53 +279,42 @@ def filter_and_rank_items(cves: List[Vulnerability], news_items: List[NewsItem],
     }
 
 @tool  
-def format_and_present_results(items: List, params: QueryParams) -> str:
-    """Format results for display or email"""
-    print(f"\n📋 Starting format_and_present_results()")
-    print(f"🧾 Formatting {len(items)} items using format: {params.output_format}")
+def format_and_present_results(results: dict, params: QueryParams) -> str:
+    """Format CVEs and News separately"""
+    cves = results.get("cves", [])
+    news = results.get("news", [])
 
-    if not items:
-        print("⚠️ No items found to format.")
-        return "No items found matching your criteria."
-
-    output = f"🔒 **Cybersecurity Report** - {len(items)} item(s)\n"
-    output += f"📅 From the last {params.days_back} day(s)\n"
-    output += f"🎯 Type: {params.content_type.upper()}\n"
+    output = f"🔒 **Cybersecurity Report**\n"
+    output += f"📅 Past {params.days_back} day(s)\n"
     if params.severity:
-        output += f"⚡ Severity: {params.severity.upper()}\n"
-    output += "\n" + "="*60 + "\n\n"
+        output += f"⚠️ Severity filter: {', '.join(params.severity)}\n"
+    output += "\n" + "="*60 + "\n"
 
-    for i, item in enumerate(items, 1):
-        print(f"🧩 Formatting item {i}/{len(items)}: {getattr(item, 'title_translated', 'No title')}")
+    # 🔹 CVEs Section
+    output += f"\n🚨 **Vulnerabilities ({len(cves)})**\n\n"
+    for i, cve in enumerate(cves, 1):
+        output += f"**{i}. {cve.title_translated}**\n"
+        output += f"🔗 URL: {cve.url}\n"
+        output += f"🧾 CVE: {cve.cve_id} | Severity: {cve.severity} | CVSS: {cve.cvss_score}\n"
+        output += f"📝 {cve.summary}\n"
+        output += f"📅 {cve.published_date.strftime('%Y-%m-%d')}\n"
+        output += f"🌐 Source: {cve.source} ({cve.original_language})\n"
+   
+        output += "-"*40 + "\n"
+
+    # 🔸 News Section
+    output += f"\n📰 **News Items ({len(news)})**\n\n"
+    for i, item in enumerate(news, 1):
         output += f"**{i}. {item.title_translated}**\n"
-        
-        # Check if it's a CVE (has cve_id attribute)
-        if hasattr(item, 'cve_id'):
-            output += f"🚨 **CVE**: {item.cve_id or 'TBD'} | "
-            output += f"**Severity**: {item.severity or 'Unknown'}"
-            if item.cvss_score:
-                output += f" | **CVSS**: {item.cvss_score}"
-            output += "\n"
-        
-        # Convert date if needed
-        if isinstance(item.published_date, str):
-            try:
-                item.published_date = datetime.fromisoformat(item.published_date)
-            except ValueError:
-                print(f"⚠️ Could not parse date: {item.published_date}")
-                item.published_date = datetime.now()
-
-        output += f"📝 **Summary**: {item.summary}\n"
-        output += f"🌐 **Source**: {item.source} ({item.original_language})\n"
-        output += f"🔗 **URL**: {item.url}\n"
-        output += f"📅 **Date**: {item.published_date.strftime('%Y-%m-%d %H:%M')}\n"
-        output += "\n" + "-"*40 + "\n\n"
+        output += f"🔗 URL: {item.url}\n"
+        output += f"📝 {item.summary}\n"
+        output += f"📅 {item.published_date.strftime('%Y-%m-%d')}\n"
+        output += f"🌐 Source: {item.source} ({item.original_language})\n"
+        output += "-"*40 + "\n"
 
     if params.output_format == "email" and params.email_address:
-        output += f"\n📧 (Email would be sent to {params.email_address})"
-        print(f"📨 Email placeholder included for {params.email_address}")
+        output += f"\n📧 Would send to: {params.email_address}\n"
 
-    print(f"✅ Finished formatting results\n")
     return output
 
 

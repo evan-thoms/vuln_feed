@@ -22,6 +22,7 @@ class NewsItem:
     original_language: str
     source: str
     url: str        
+    intrigue: float
 
 @dataclass
 class Vulnerability:
@@ -35,6 +36,7 @@ class Vulnerability:
     original_language: str
     source: str
     url: str
+    intrigue: float
     affected_products: List[str]
 
     def get_priority_score(self) -> float:
