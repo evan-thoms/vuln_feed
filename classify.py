@@ -21,7 +21,7 @@ Given this text:
 ---
 {article}
 ---
-Return a SINGLE JSON object with ALL of the following fields.
+Return a SINGLE JSON object with ALL of the following fields, and nothing else, no other notes.
 
 Type: If this contains a unique and identifieable CVE, then set this to CVE. Otherwise, always set it to News
 cve_id: If identifiable CVE numbers are found, return a list of all of them here. If no unique CVE ID is present, set cve_id to Unknown if no identifiable CVE nubmer is present and type to News
@@ -48,11 +48,22 @@ def classify_article(article: str) -> dict:
     result = chain.invoke({"article": article})
     print("result ", result)
     
-    match = re.search(r"\{[\s\S]*\}", result)
-    if not match:
+    matches = re.findall(r"\{[\s\S]*?\}(?=\s*\{|\s*$)", result)
+    if not matches:
         raise ValueError("No JSON found in response:\n" + result)
 
-    return json.loads(match.group(0))
+    json_objects = []
+    for block in matches:
+        try:
+            parsed = json.loads(block)
+            json_objects.append(parsed)
+        except json.JSONDecodeError as e:
+            print(f"⚠️ Skipping malformed JSON block:\n{block}\nError: {e}")
+
+    if not json_objects:
+        raise ValueError("❌ All matched JSON blocks failed to parse.")
+
+    return json_objects[0] if len(json_objects) == 1 else json_objects
 
 
 if __name__ == "__main__":

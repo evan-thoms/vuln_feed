@@ -140,36 +140,36 @@ def classify_articles(articles: List[Article], params: QueryParams) -> tuple[Lis
         # Reuse your existing classify_article function
         print("Processing URL:", art.url)
 
-        result = classify_article(art.content_translated)
-
-        if result["type"] == "CVE":
-            vul = Vulnerability(
-                cve_id=result["cve_id"][0] if result["cve_id"] else "Unknown",
-                title=art.title,
-                title_translated=art.title_translated,
-                summary=result["summary"],
-                severity=result["severity"],
-                cvss_score=float(result["cvss_score"]) if result["cvss_score"] else 0.0,
-                published_date=art.scraped_at,
-                original_language=art.language,
-                source=art.source,
-                url=art.url,
-                intrigue= float(result["intrigue"]),
-                affected_products=[], 
-            )
-            cves.append(vul)
-        else:
-            news_item = NewsItem(
-                title=art.title,
-                title_translated=art.title_translated,
-                summary=result["summary"],
-                published_date=art.scraped_at,
-                original_language=art.language,
-                source=art.source,
-                intrigue= float(result["intrigue"]),
-                url=art.url,
-            )
-            news.append(news_item)
+        results = classify_article(art.content_translated)
+        for result in results:
+            if result["type"] == "CVE":
+                vul = Vulnerability(
+                    cve_id=result["cve_id"][0] if result["cve_id"] else "Unknown",
+                    title=art.title,
+                    title_translated=art.title_translated,
+                    summary=result["summary"],
+                    severity=result["severity"],
+                    cvss_score=float(result["cvss_score"]) if result["cvss_score"] is not None else 0.0,
+                    published_date=art.scraped_at,
+                    original_language=art.language,
+                    source=art.source,
+                    url=art.url,
+                    intrigue = float(result["intrigue"]) if result["intrigue"] is not None else 0.0,
+                    affected_products=result["affected_products"], 
+                )
+                cves.append(vul)
+            else:
+                news_item = NewsItem(
+                    title=art.title,
+                    title_translated=art.title_translated,
+                    summary=result["summary"],
+                    published_date=art.scraped_at,
+                    original_language=art.language,
+                    source=art.source,
+                    intrigue = float(result["intrigue"]) if result["intrigue"] is not None else 0.0,
+                    url=art.url,
+                )
+                news.append(news_item)
     for cve in cves:
         print("Inserted CVE ", cve.title_translated)
         insert_cve(cve)
