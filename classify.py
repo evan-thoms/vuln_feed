@@ -31,7 +31,7 @@ summary: Provide a 2-3 sentence consise and compact summary of the details the v
 intrigue: Rate how intriguing and exciting this information is by providing a number from 1 to 10, with ten being the most intriguing, must-read information for someone getting updates about cybersecurity.
 affected_products: Create simple list of affected products as a list of strings
 
-Return nothing else besides this exact JSON format as this example below. 
+Return nothing else besides this exact JSON format as this example below. Do not provide an explanation for your answers.
 {{
   "type": "CVE",
   "cve_id": ["CVE-2023-12345"],
@@ -42,28 +42,35 @@ Return nothing else besides this exact JSON format as this example below.
   "affected_products": ["Product A", "Product B"]
 }}
 """)
+def extract_multiple_json_objects(llm_output: str):
+    """
+    Extract multiple JSON objects from LLM output.
+    Ignores noise between or around them.
+    Returns a list of valid JSON objects.
+    """
+    json_objects = []
+    
+    # Match all JSON blocks
+    matches = re.finditer(r'\{.*?\}', llm_output, re.DOTALL)
+    
+    for match in matches:
+        try:
+            obj = json.loads(match.group())
+            json_objects.append(obj)
+        except json.JSONDecodeError:
+            continue  
+    
+    return json_objects
 
 def classify_article(article: str) -> dict:
     chain = prompt | llm | (lambda x: x.content)
     result = chain.invoke({"article": article})
     print("result ", result)
     
-    matches = re.findall(r"\{[\s\S]*?\}(?=\s*\{|\s*$)", result)
+    matches =extract_multiple_json_objects(result)
     if not matches:
         raise ValueError("No JSON found in response:\n" + result)
-
-    json_objects = []
-    for block in matches:
-        try:
-            parsed = json.loads(block)
-            json_objects.append(parsed)
-        except json.JSONDecodeError as e:
-            print(f"⚠️ Skipping malformed JSON block:\n{block}\nError: {e}")
-
-    if not json_objects:
-        raise ValueError("❌ All matched JSON blocks failed to parse.")
-
-    return json_objects[0] if len(json_objects) == 1 else json_objects
+    return matches
 
 
 if __name__ == "__main__":

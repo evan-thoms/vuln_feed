@@ -9,7 +9,7 @@ from models import QueryParams
 # Step 0: Prepare QueryParams
 params = QueryParams(
     content_type="both",  # or "cve", "news"
-    severity="high",      # optional
+    severity=["high"],      # optional
     days_back=7,
     max_results=5,
     output_format="display",

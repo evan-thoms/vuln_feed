@@ -1,106 +1,35 @@
 [
   {
-    "cve_id": "CVE-2025-6982",
-    "title": "FreeBuf周报 | GitHub 全球性服务中断；TP-Link路由器曝安全漏洞",
-    "title_translated": "FreeBuf weekly | GitHub global service break; TP-Link router exposed to security breach",
-    "summary": "Multiple vulnerabilities in GitHub, TP-Link Archer C50 router, OAuth2-Proxy, Dawa smart camera, and other products allow attackers to decrypt configuration files, bypass authentication, remotely control devices, and steal vouchers.",
-    "severity": "High",
-    "cvss_score": 9.1,
-    "published_date": "2025-08-01T20:54:31.069678",
-    "original_language": "zh",
-    "source": "FreeBuf",
-    "url": "https://www.freebuf.com/articles/442585.html",
-    "affected_products": []
-  },
-  {
-    "cve_id": "CVE-2025-47162",
-    "title": "微软 Office 漏洞允许攻击者执行远程代码",
-    "title_translated": "Microsoft Office bug allows the assailant to execute remote code",
-    "summary": "Several key loopholes in Microsoft Office may allow attackers to enforce random codes on affected systems. The vulnerabilities were tracked as CVE-2025-47162, CVE-2025-47953, CVE-2025-47164 and CVE-2025-47167.",
-    "severity": "High",
-    "cvss_score": 8.4,
-    "published_date": "2025-08-01T20:54:36.143108",
-    "original_language": "zh",
-    "source": "FreeBuf",
-    "url": "https://www.anquanke.com/post/id/308412",
-    "affected_products": []
-  },
-  {
     "cve_id": "CVE-2025-5484",
     "title": "美国CISA警告 SinoTrack GPS 跟踪器存在远程控制漏洞",
     "title_translated": "US CISA warning SinoTrack GPS tracker has remote control gaps",
-    "summary": "SinoTrack GPS equipment has critical loopholes that allow attackers to control vehicles remotely, track locations, and even cut fuel. Default passwords and easily guessable usernames enable exploitation.",
+    "summary": "Weak identification defect and observable response difference in SinoTrack GPS equipment allow attackers to control vehicles remotely, track locations, and cut fuel. Default passwords and easily guessed device identifiers are exploited.",
     "severity": "Critical",
     "cvss_score": 8.8,
-    "published_date": "2025-08-01T20:54:38.788751",
+    "published_date": "2025-08-04T19:50:22.849300",
     "original_language": "zh",
     "source": "FreeBuf",
     "url": "https://www.anquanke.com/post/id/308398",
-    "affected_products": []
+    "intrigue": 9.0,
+    "affected_products": [
+      "SinoTrack GPS equipment",
+      "SinoTrack IOT PC platform"
+    ]
   },
   {
-    "cve_id": "CVE-2022-0000",
-    "title": "Cisco Identity Services Engine Injection Vulnerability",
-    "title_translated": "Cisco Identity Services Engine Injection Vulnerability",
-    "summary": "Cisco Identity Services Engine contains an injection vulnerability allowing remote code execution and obtaining root privileges on affected devices. Successful exploitation can be done by submitting a crafted API request. Apply mitigations per vendor instructions or discontinue use of the product if mitigations are unavailable.",
-    "severity": "High",
-    "cvss_score": 7.5,
-    "published_date": "2025-08-01T20:54:48.422709",
-    "original_language": "en",
-    "source": "CISA KEV",
-    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-20337",
-    "affected_products": []
-  },
-  {
-    "cve_id": "CVE-2022-XXXXX",
-    "title": "Cisco Identity Services Engine Injection Vulnerability",
-    "title_translated": "Cisco Identity Services Engine Injection Vulnerability",
-    "summary": "Cisco Identity Services Engine contains an injection vulnerability allowing remote code execution and root privileges on affected devices.",
-    "severity": "High",
-    "cvss_score": 7.5,
-    "published_date": "2025-08-01T20:54:48.422747",
-    "original_language": "en",
-    "source": "CISA KEV",
-    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-20281",
-    "affected_products": []
-  },
-  {
-    "cve_id": "CVE-2022-XXXXX",
-    "title": "Alma Linux: CVE-2025-8035: Important: firefox security update (Multiple Advisories)",
-    "title_translated": "Alma Linux: CVE-2025-8035: Important: firefox security update (Multiple Advisories)",
-    "summary": "Memory safety bugs present in Firefox ESR and Thunderbird; some could have been exploited to run arbitrary code.",
-    "severity": "Critical",
-    "cvss_score": 9.0,
-    "published_date": "2025-08-01T20:54:51.226286",
-    "original_language": "en",
-    "source": "Rapid7",
-    "url": "https://errata.almalinux.org/8/ALSA-2025-11747.html",
-    "affected_products": []
-  },
-  {
-    "cve_id": "CVE-2022-1234",
-    "title": "Alma Linux: CVE-2025-8034: Important: firefox security update (Multiple Advisories)",
-    "title_translated": "Alma Linux: CVE-2025-8034: Important: firefox security update (Multiple Advisories)",
-    "summary": "Memory safety bugs present in Firefox and Thunderbird versions, potentially exploitable to run arbitrary code.",
+    "cve_id": "CVE-unknown",
+    "title": "Microsoft Edge Chromium: CVE-2025-8292 Use after free in Media Stream",
+    "title_translated": "Microsoft Edge Chromium: CVE-2025-8292 Use after free in Media Stream",
+    "summary": "Use after free in Media Stream in Google Chrome prior to 138.0.7204.183 allowed a remote attacker to potentially exploit heap corruption via a crafted HTML page.",
     "severity": "High",
     "cvss_score": 9.0,
-    "published_date": "2025-08-01T20:54:51.226583",
+    "published_date": "2025-08-04T19:50:39.163251",
     "original_language": "en",
     "source": "Rapid7",
-    "url": "https://errata.almalinux.org/8/ALSA-2025-11747.html",
-    "affected_products": []
-  },
-  {
-    "cve_id": "CVE-2020-9564",
-    "title": "Alma Linux: CVE-2025-8033: Important: firefox security update (Multiple Advisories)",
-    "title_translated": "Alma Linux: CVE-2025-8033: Important: firefox security update (Multiple Advisories)",
-    "summary": "The JavaScript engine did not handle closed generators correctly and it was possible to resume them leading to a nullptr deref. This vulnerability allows an attacker to crash the browser.",
-    "severity": "High",
-    "cvss_score": 7.5,
-    "published_date": "2025-08-01T20:54:51.226681",
-    "original_language": "en",
-    "source": "Rapid7",
-    "url": "https://errata.almalinux.org/8/ALSA-2025-11747.html",
-    "affected_products": []
+    "url": "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-8292",
+    "intrigue": 6.0,
+    "affected_products": [
+      "Google Chrome"
+    ]
   }
 ]

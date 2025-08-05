@@ -74,7 +74,7 @@ def insert_newsitem( news):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO newsitems (title, title_translated, summary, published_date, source, url)
+        INSERT INTO newsitems (title, title_translated, summary, published_date, source, url, intrigue)
         VALUES (?, ?, ?, ?, ?, ?, ?)
     """, (
         news.title,

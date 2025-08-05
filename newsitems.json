@@ -1,110 +1,182 @@
 [
   {
-    "title": "银狐钓鱼再升级：白文件脚本化实现GO语言后门持久驻留",
-    "title_translated": "Silver Fox Fish Upgrade: Scripting white documents to sustain the Go language back door",
-    "summary": "The SilverFox threat actor has evolved its tactics to evade detection by using a multilingual hybrid version of the backdoor procedure, which includes information theft, command execution, and permanent maintenance of computer backdoor control. The attackers have also abandoned early reliance on memory to load the PE document and moved to a new utilization chain of 'white document + script'.",
-    "published_date": "2025-08-01T20:54:26.918631",
+    "title": "NVIDIA Triton 服务器漏洞允许未授权攻击者执行代码并劫持AI服务器",
+    "title_translated": "NVIDIA Triton server leaks allow unauthorized assailants to enforce codes and hijack AI servers",
+    "summary": "NVIDIA Triton Access Server has multiple security loopholes that can be used to take over vulnerable servers, leading to remote code execution, information disclosure, and denial of service.",
+    "published_date": "2025-08-04T19:50:11.939907",
     "original_language": "zh",
     "source": "FreeBuf",
-    "url": "https://www.freebuf.com/news/442649.html"
+    "url": "https://www.freebuf.com/articles/ai-security/442932.html",
+    "intrigue": 9.0
   },
   {
-    "title": "CentOS 9 安装部署最新版本Zabbix 7.4 完整步骤",
-    "title_translated": "CentOS 9 installation deployment, latest version Zabbix 7.4, complete step",
-    "summary": "This security proposal discusses setting up Zabbix server and database, including configuring SELinux, installing zabbix-release package, and importing SQL scripts. It does not contain a unique CVE ID.",
-    "published_date": "2025-08-01T20:54:29.002215",
+    "title": "FreeBuf早报 | \"瘟疫\"恶意软件攻击Linux；PlayPraetor安卓木马感染超1.1万台设备",
+    "title_translated": "FreeBuf Mornings, | 瘟 瘟 瘟 瘟 瘟 疫 软件",
+    "summary": "A new Linux backdoor program Plague uses PAM module to bypass authentication, steal documents for up to one year, and has four main features, such as anti-debugging and removal of traces.",
+    "published_date": "2025-08-04T19:50:14.118238",
     "original_language": "zh",
     "source": "FreeBuf",
-    "url": "https://www.freebuf.com/articles/development/442624.html"
+    "url": "https://www.freebuf.com/news/442900.html",
+    "intrigue": 8.0
+  },
+  {
+    "title": "威胁组织利用AI扩大攻击规模、加速攻击并针对自主AI代理发起攻击",
+    "title_translated": "Threat groups use AI to scale up attacks, accelerate attacks and launch attacks against autonomous AI agents",
+    "summary": "Threat organizations weaponize AI to launch complex attacks, enable less technically capable opponents to carry out advanced attacks.",
+    "published_date": "2025-08-04T19:50:16.225512",
+    "original_language": "zh",
+    "source": "FreeBuf",
+    "url": "https://www.freebuf.com/articles/ai-security/442937.html",
+    "intrigue": 9.0
+  },
+  {
+    "title": "微软 Office 漏洞允许攻击者执行远程代码",
+    "title_translated": "Microsoft Office bug allows the assailant to execute remote code",
+    "summary": "Several key loopholes in Microsoft Office may allow attackers to enforce random codes on affected systems, exploiting memory management weaknesses and type confusion. The vulnerabilities can be triggered by malicious files or macros.",
+    "published_date": "2025-08-04T19:50:19.762909",
+    "original_language": "zh",
+    "source": "FreeBuf",
+    "url": "https://www.anquanke.com/post/id/308412",
+    "intrigue": 9.0
   },
   {
     "title": "人工智能可能修复帮助传播了 15 年的漏洞",
     "title_translated": "The repair of artificial intelligence may have helped spread a 15-year gap.",
-    "summary": "A 10-year-old loophole in a Node.js code clip has been found to be embedded in AI models, allowing attackers to navigate outside the specified directory. The issue is attributed to the dissemination of unsafe code through platforms like Stack Overflow and university curricula.",
-    "published_date": "2025-08-01T20:54:37.342181",
+    "summary": "An AI tool that lasts 10 years can help eliminate a loophole in Node.js code that allows attackers to navigate outside the specified directory. The loophole has been embedded in the culture of developers and is now reproduced by AI models.",
+    "published_date": "2025-08-04T19:50:21.339552",
     "original_language": "zh",
     "source": "FreeBuf",
-    "url": "https://www.anquanke.com/post/id/308401"
+    "url": "https://www.anquanke.com/post/id/308401",
+    "intrigue": 8.0
   },
   {
-    "title": "OpenAI отключила функцию, из-за которой чаты ChatGPT попадали в поиск",
-    "title_translated": "OpenAI disables the function that caused ChatGPT chats to be searched",
-    "summary": "OpenAI's experiment to make ChatGPT conversations searchable on search engines was closed after users began accidentally sharing personal conversations online.",
-    "published_date": "2025-08-01T20:54:41.291123",
+    "title": "Злоумышленники взломали Telegram-аккаунт мурманского вице-губернатора",
+    "title_translated": "Attackers hacked the Telegram account of Murmansk Vice-Governor",
+    "summary": "Phishing attack compromised the account of Oksana Demchenko, first Deputy Governor of the Murmansk region, allowing fraudsters to intercept accounts in messengers.",
+    "published_date": "2025-08-04T19:50:26.357354",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-08-01-111332/46859"
+    "url": "https://www.anti-malware.ru/news/2025-08-04-121598/46874",
+    "intrigue": 6.0
   },
   {
-    "title": "Сеть дискаунтеров Доброцен парализована атакой",
-    "title_translated": "The network of discounters Dobrozen paralyzed by the attack",
-    "summary": "Dobrozen, a discount store network, faced a large-scale failure due to a cyber attack. The attack paralyzed internal systems, disrupting work and services.",
-    "published_date": "2025-08-01T20:54:42.338629",
+    "title": "Shade BIOS: новый вектор атаки из BIOS, невидимый для антивирусов и ОС",
+    "title_translated": "Shade BIOS: a new attack vector from BIOS, invisible to antiviruses and OS",
+    "summary": "Attack vector called Shade BIOS allows malicious code to run directly from BIOS, without interacting with OS. Can be written in ordinary C and runs on any device supporting UEFI.",
+    "published_date": "2025-08-04T19:50:28.037149",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-31-121598/46857"
+    "url": "https://www.anti-malware.ru/news/2025-08-04-111332/46873",
+    "intrigue": 9.0
   },
   {
-    "title": "PT Surveying: вышел сервис для оценки киберустойчивости компаний",
-    "title_translated": "PT Surveying: a service for assessing the cyber resilience of companies",
-    "summary": "Positive Technologies has launched a new service called PT Surveying, which helps organizations assess their cyber-resilience. The service evaluates an organization's subsidiaries, suppliers or contractors to identify potential weaknesses and provide recommendations for improvement.",
-    "published_date": "2025-08-01T20:54:43.484761",
+    "title": "Лаборатория Касперского увеличила долю в капитале Ximi Pro до 90%",
+    "title_translated": "Kaspersky Lab Increases Share in Ximi Pro to 90%",
+    "summary": "Kaspersky Lab increased its share in Ximi Pro, a company specializing in container IT infrastructures.",
+    "published_date": "2025-08-04T19:50:29.457068",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-31-111332/46856"
+    "url": "https://www.anti-malware.ru/news/2025-08-01-121598/46870",
+    "intrigue": 3.0
   },
   {
-    "title": "Каждый второй турист в России рискует попасть на фишинговый сайт",
-    "title_translated": "Every second tourist in Russia is at risk of getting on a phishing site",
-    "summary": "The article discusses the importance of being cautious when booking travel online, as phishing sites and fraudsters may try to take advantage of unsuspecting travelers. It highlights the risks of not verifying the safety of online services and provides tips for avoiding common scams.",
-    "published_date": "2025-08-01T20:54:44.540565",
+    "title": "За эксплойт 0-Click в WhatsApp* дадут миллион долларов на Pwn2Own",
+    "title_translated": "For the exploit 0-Click in WhatsApp* will give a million dollars on Pwn2Own",
+    "summary": "WhatsApp offers a $1 million reward for a zero-click RCE exploit, which can take control of devices through the messenger.",
+    "published_date": "2025-08-04T19:50:30.897636",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-31-111332/46855"
+    "url": "https://www.anti-malware.ru/news/2025-08-01-111332/46869",
+    "intrigue": 9.0
   },
   {
-    "title": "«Агропромцифра» запустила аудит кибербезопасности для агропредприятий",
-    "title_translated": "Agropromtsifra launches cyber security audit for agribusinesses",
-    "summary": "Agropromtsifra has launched a program for free cybersecurity testing to help identify vulnerabilities and increase resilience in the agricultural sector. The goal is to prevent attacks using ransomware, data theft, and financial losses.",
-    "published_date": "2025-08-01T20:54:45.493756",
+    "title": "Россия опустилась на 8 место в рейтинге DDoS-атак, в лидерах — США и Китай",
+    "title_translated": "Russia dropped to 8th place in the ranking of DDoS-attacks, the leaders are the United States and China",
+    "summary": "Cyberattacks intensified in the second quarter of 2025, with DDoS attacks increasing by 108% compared to the same period last year. Countries like Iran and Israel broke into the top 5 most attacked countries due to their conflict.",
+    "published_date": "2025-08-04T19:50:32.262324",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-31-111332/46854"
+    "url": "https://www.anti-malware.ru/news/2025-08-01-111332/46868",
+    "intrigue": 6.0
   },
   {
-    "title": "Межсетевой экран InfoWatch ARMA Стена получил сертификат ФСТЭК России",
-    "title_translated": "Firewall InfoWatch ARMA Wall received the certificate of FSTEC of Russia",
-    "summary": "The InfoWatch ARMASten (NGFW) has been certified by FSTEC of Russia, making it suitable for use at critical information infrastructure facilities.",
-    "published_date": "2025-08-01T20:54:46.329323",
+    "title": "Вредоносные файлы выдают за аниме — «Наруто», «Титаны» и др.",
+    "title_translated": "Malicious files are issued as anime - \"Naruto\", \"Titans\", etc.",
+    "summary": "Attackers use anime names as bait to lure victims into downloading malicious files, which can install data-stealing or remote-access tools.",
+    "published_date": "2025-08-04T19:50:33.860271",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-31-111332/46853"
+    "url": "https://www.anti-malware.ru/news/2025-08-01-111332/46867",
+    "intrigue": 8.0
   },
   {
-    "title": "Crosstech представила решение для защиты контейнерных сред",
-    "title_translated": "Crosstech unveils solution to protect container environments",
-    "summary": "Crosstech Solutions Group has launched a new cybersecurity product called Crosstech Container Security (CTCS) to protect container infrastructure. The solution covers the entire life cycle of working with containers and allows integration with Keycloak, LDAP/LDAPS, Syslog and Docker Registry (API v2).",
-    "published_date": "2025-08-01T20:54:47.252155",
+    "title": "Positive Technologies за первое полугодие увеличила отгрузки на 49%",
+    "title_translated": "Positive Technologies increased shipments by 49% in the first half of the year",
+    "summary": "Positive Technologies published financial results, showing growth in shipments and revenue. No unique CVE IDs present.",
+    "published_date": "2025-08-04T19:50:35.242304",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-31-111332/46852"
+    "url": "https://www.anti-malware.ru/news/2025-08-01-111332/46866",
+    "intrigue": 2.0
   },
   {
-    "title": "Количество взломов на заказ выросло на четверть",
-    "title_translated": "The number of hacks to order increased by a quarter",
-    "summary": "Custom hacker attacks on businesses are increasing, targeting technical documentation, customer databases, product development plans, and disrupting operations. Hackers use phishing, exploiting vulnerabilities, and DDoS attacks to gain access to valuable information.",
-    "published_date": "2025-08-01T20:54:48.112864",
+    "title": "Доступ к Госуслугам предлагают восстановить через MAX",
+    "title_translated": "Access to public services offered to restore through MAX",
+    "summary": "Attempted hacking and phishing activity on State Services portal due to increased access options.",
+    "published_date": "2025-08-04T19:50:36.603497",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-07-31-121598/46851"
+    "url": "https://www.anti-malware.ru/news/2025-08-01-121598/46864",
+    "intrigue": 6.0
   },
   {
     "title": "PaperCut NG/MF Cross-Site Request Forgery (CSRF) Vulnerability",
     "title_translated": "PaperCut NG/MF Cross-Site Request Forgery (CSRF) Vulnerability",
-    "summary": "PaperCut NG/MF contains a cross-site request forgery (CSRF) vulnerability, which could potentially enable an attacker to alter security settings or execute arbitrary code. Apply mitigations per vendor instructions.",
-    "published_date": "2025-08-01T20:54:48.422587",
+    "summary": "PaperCut NG/MF contains a cross-site request forgery (CSRF) vulnerability, which could potentially enable an attacker to alter security settings or execute arbitrary code.",
+    "published_date": "2025-08-04T19:50:36.817029",
     "original_language": "en",
     "source": "CISA KEV",
-    "url": "https://nvd.nist.gov/vuln/detail/CVE-2023-2533"
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2023-2533",
+    "intrigue": 5.0
+  },
+  {
+    "title": "Cisco Identity Services Engine Injection Vulnerability",
+    "title_translated": "Cisco Identity Services Engine Injection Vulnerability",
+    "summary": "Cisco Identity Services Engine contains an injection vulnerability in a specific API allowing remote code execution and obtaining root privileges on affected devices.",
+    "published_date": "2025-08-04T19:50:36.817217",
+    "original_language": "en",
+    "source": "CISA KEV",
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-20337",
+    "intrigue": 6.0
+  },
+  {
+    "title": "Cisco Identity Services Engine Injection Vulnerability",
+    "title_translated": "Cisco Identity Services Engine Injection Vulnerability",
+    "summary": "Cisco Identity Services Engine contains an injection vulnerability allowing remote code execution and obtaining root privileges on affected devices.",
+    "published_date": "2025-08-04T19:50:36.817277",
+    "original_language": "en",
+    "source": "CISA KEV",
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-20281",
+    "intrigue": 6.0
+  },
+  {
+    "title": "Malicious XDG Desktop File",
+    "title_translated": "Malicious XDG Desktop File",
+    "summary": "This module creates a malicious XDG Desktop file, which may not be trusted by default but can be run with user warning. Default file manager applications may impose stricter execution requirements.",
+    "published_date": "2025-08-04T19:50:39.162728",
+    "original_language": "en",
+    "source": "Rapid7",
+    "url": "https://www.rapid7.com/db/vulnerabilities/exploit/multi/fileformat/xdg_desktop/",
+    "intrigue": 4.0
+  },
+  {
+    "title": "Debian: CVE-2025-54572: ruby-saml -- security update",
+    "title_translated": "Debian: CVE-2025-54572: ruby-saml -- security update",
+    "summary": "The Ruby SAML library has a denial-of-service vulnerability in versions 1.18.0 and below, which occurs when validating Base64 format prior to checking message size, leading to potential resource exhaustion.",
+    "published_date": "2025-08-04T19:50:39.163696",
+    "original_language": "en",
+    "source": "Rapid7",
+    "url": "https://www.rapid7.com/db/vulnerabilities/debian-cve-2025-54572/",
+    "intrigue": 5.0
   }
 ]
