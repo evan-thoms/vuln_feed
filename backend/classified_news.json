@@ -1,0 +1,102 @@
+[
+  {
+    "title": "Flipper Zero定制固件可破解主流汽车品牌滚动码安全系统",
+    "title_translated": "Flipper Zero custom solid to break down the mainstream car brand rolling code security system",
+    "summary": "The Flipper Zero device can bypass rolling code security on major vehicle brands, allowing thieves to steal millions of vehicles. The attack is simple and requires only one signal capture.",
+    "published_date": "2025-08-07T23:42:45.010436",
+    "original_language": "zh",
+    "source": "FreeBuf",
+    "url": "https://www.freebuf.com/articles/443544.html",
+    "intrigue": 9.0
+  },
+  {
+    "title": "SocGholish恶意软件通过广告工具传播 为LockBit和Evil Corp等团伙提供初始访问权限",
+    "title_translated": "SocGholish malware is disseminated through advertising tools to provide initial access to groups like LockBit and Eville Corp.",
+    "summary": "SocGholish malware uses traffic distribution systems like Parrot TDS and Keitaro TDS to redirect users to malicious content, with possible links to TA569, Evil Corp, LockBit, Dridex, and Raspberry Robin.",
+    "published_date": "2025-08-07T23:42:51.325943",
+    "original_language": "zh",
+    "source": "FreeBuf",
+    "url": "https://www.freebuf.com/articles/es/443474.html",
+    "intrigue": 9.0
+  },
+  {
+    "title": "黑客利用嵌入恶意JavaScript的SVG文件在Windows系统执行恶意软件",
+    "title_translated": "Hackers implement malicious software in Windows using SVG files embedded in the malicious JavaScript",
+    "summary": "Cybercriminals use SVG documents to carry out malicious JavaScript on Windows, embedding scripts that execute when files are opened in the browser.",
+    "published_date": "2025-08-07T23:42:56.686826",
+    "original_language": "zh",
+    "source": "FreeBuf",
+    "url": "https://www.freebuf.com/articles/443482.html",
+    "intrigue": 9.0
+  },
+  {
+    "title": "微软修补被阿联酋黑客利用的零日漏洞",
+    "title_translated": "Microsoft fixes the zero-day loophole used by UAE hackers.",
+    "summary": "Microsoft closed a zero-day loophole in its Web application framework, which was exploited by Emirates Threat organizations as part of a spying campaign in the Middle East and Africa.",
+    "published_date": "2025-08-07T23:43:06.794985",
+    "original_language": "zh",
+    "source": "FreeBuf",
+    "url": "https://www.anquanke.com/post/id/308384",
+    "intrigue": 9.0
+  },
+  {
+    "title": "人工智能可能修复帮助传播了 15 年的漏洞",
+    "title_translated": "The repair of artificial intelligence may have helped spread a 15-year gap.",
+    "summary": "A vulnerability in a Node.js code snippet, released in 2010, allows an attacker to navigate outside the specified directory. The issue has been embedded in AI training data and affects static file servers.",
+    "published_date": "2025-08-07T23:43:04.669440",
+    "original_language": "zh",
+    "source": "FreeBuf",
+    "url": "https://www.anquanke.com/post/id/308401",
+    "intrigue": 8.0
+  },
+  {
+    "title": "Неизвестные хакеры взломали федеральную базу судов США",
+    "title_translated": "Unknown hackers broke into the federal base of US courts",
+    "summary": "Electronic system used by federal courts attacked, resulting in data leak containing confidential information.",
+    "published_date": "2025-08-07T23:43:10.774768",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-08-07-121598/46920",
+    "intrigue": 8.0
+  },
+  {
+    "title": "Через Контур Диадок начали рассылать зловред в архиве под видом RTF",
+    "title_translated": "Through the Contour Diadoc began to send malware in the archive under the guise of RTF",
+    "summary": "Malware distributed through Contour Diadok via infected user computers, using standard functionality for sending documents. Malware contains executable file disguised as text document.",
+    "published_date": "2025-08-07T23:43:13.664595",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-08-07-121598/46918",
+    "intrigue": 8.0
+  },
+  {
+    "title": "В сервисы и продукты BI.ZONE добавили ИИ-ассистента",
+    "title_translated": "AI assistant added to BI.ZONE services and products",
+    "summary": "AI assistant Cubi helps identify cyber incidents faster and respond to them with generative AI, speeding up initial incident analysis by 40%. SOC specialists can consult Cubi about specific alerts or incidents.",
+    "published_date": "2025-08-07T23:43:12.274973",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-08-07-111332/46919",
+    "intrigue": 6.0
+  },
+  {
+    "title": "Nvidia: в наших чипах нет бэкдоров и килл-свитчей — и быть не должно",
+    "title_translated": "Nvidia: Our chips don’t have backdoors and kill switches – and shouldn’t be",
+    "summary": "Nvidia denies allegations of backdoors and kill switches in their chips, citing concerns over cybersecurity principles and multi-layered security system.",
+    "published_date": "2025-08-07T23:43:16.419372",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-08-07-111332/46916",
+    "intrigue": 6.0
+  },
+  {
+    "title": "У ФСБ серьезные претензии к Max по защите персданных",
+    "title_translated": "The FSB has serious claims Max to protect Persians",
+    "summary": "The FSB has raised concerns about the security of the Max messenger, citing a lack of crypto protection and other requirements for ensuring personal data security.",
+    "published_date": "2025-08-07T23:43:17.838394",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-08-07-121598/46915",
+    "intrigue": 6.0
+  }
+]

@@ -7,19 +7,33 @@ from models import QueryParams, Article, Vulnerability, NewsItem
 from datetime import datetime, timedelta
 import json
 from dataclasses import asdict
-
+from tools.tools import (
+        analyze_data_needs,
+            retrieve_existing_data,
+            scrape_fresh_intel,
+            classify_intelligence,
+            evaluate_intel_sufficiency,
+            intensive_rescrape,
+            present_results
+)
 # Import your existing functions
 from scrapers.chinese_scrape import ChineseScraper
 from scrapers.english_scrape import EnglishScraper
 from scrapers.russian_scrape import RussianScraper
 from classify import classify_article
+from langchain_groq import ChatGroq
+
 from db import (
     init_db, insert_raw_article, is_article_scraped, mark_as_processed,
     get_unprocessed_articles, insert_cve, insert_newsitem, get_cves_by_filters, 
     get_news_by_filters, get_last_scrape_time, get_data_statistics
 )
+import os
 
-# Global state to store data between tools (avoids token bloat)
+api_key_name = "GROQ_API"
+
+# Get the value of the environment variable
+api_key = os.environ.get(api_key_name)
 _current_session = {
     "scraped_articles": [],
     "classified_cves": [],
@@ -37,9 +51,14 @@ def new_session():
         "session_id": datetime.now().strftime("%Y%m%d_%H%M%S")
     }
 
+
 class IntelligentCyberAgent:
     def __init__(self):
-        self.llm = ChatOllama(model="llama3.2")
+        self.llm = ChatGroq(
+            model="llama-3.3-70b-versatile",
+            groq_api_key=api_key,
+            temperature=0,
+        )
         self.tools = [
             analyze_data_needs,
             retrieve_existing_data,
@@ -143,4 +162,22 @@ Execute intelligence gathering workflow with these parameters.
             
         except Exception as e:
             return f"❌ Intelligence gathering failed: {str(e)}"
-
+        
+if __name__ == "__main__":
+    agent = IntelligentCyberAgent()
+    
+    # Test queries showcasing agentic decision-making
+    test_queries = [
+        "Show me critical CVEs from the last 3 days",
+        # "Get 20 recent cybersecurity news items with high intrigue",
+        # "Find all high and critical vulnerabilities from this week",
+        # "What are the latest zero-day exploits?"
+    ]
+    
+    for query in test_queries:
+        print(f"\n{'='*60}")
+        print(f"QUERY: {query}")
+        print('='*60)
+        response = agent.query(query)
+        print(response)
+        print("\n" + "="*60 + "\n")

@@ -107,7 +107,7 @@ def save_to_json(items: list, filename: str) -> None:
 
     with open(filename, "w", encoding="utf-8") as f:
         json.dump([vars(item) for item in items], f, ensure_ascii=False, indent=2, default=convert)
-@tool
+@tool("analyze_data_needs")
 def analyze_data_needs(content_type: str = "both", severity: str = None, days_back: int = 7, max_results: int = 10) -> str:
     """Analyze current intelligence database to determine if fresh scraping is needed."""
     print(f"🔍 Analyzing intelligence needs...")
@@ -163,7 +163,7 @@ def analyze_data_needs(content_type: str = "both", severity: str = None, days_ba
     })
 
 
-@tool
+@tool("retrieve_existing_data")
 def retrieve_existing_data(content_type: str = "both", severity: str = None, days_back: int = 7, max_results: int = 10) -> str:
     """Retrieve existing intelligence from database without scraping."""
     global _current_session
@@ -240,7 +240,7 @@ def scrape_fresh_intel(content_type: str = "both", max_results: int = 10) -> str
         # Translate and truncate
         
         for art in articles:
-            art.content = truncate_text(art.content, max_length=3000)
+            art.content = truncate_text(art.content, max_length=2000)
         
         translated_articles = translate_articles(articles)
         
