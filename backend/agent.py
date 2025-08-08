@@ -1,46 +1,75 @@
 from langchain_ollama import ChatOllama
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.prompts import ChatPromptTemplate
-from tools.tools import (
-    scrape_and_process_articles,
-    classify_articles, 
-    filter_and_rank_items,
-    format_and_present_results
-)
-from models import QueryParams
-import re
+from langchain.tools import tool
+from typing import List, Dict, Optional
+from models import QueryParams, Article, Vulnerability, NewsItem
+from datetime import datetime, timedelta
+import json
+from dataclasses import asdict
 
-class CybersecQueryAgent:
+# Import your existing functions
+from scrapers.chinese_scrape import ChineseScraper
+from scrapers.english_scrape import EnglishScraper
+from scrapers.russian_scrape import RussianScraper
+from classify import classify_article
+from db import (
+    init_db, insert_raw_article, is_article_scraped, mark_as_processed,
+    get_unprocessed_articles, insert_cve, insert_newsitem, get_cves_by_filters, 
+    get_news_by_filters, get_last_scrape_time, get_data_statistics
+)
+
+# Global state to store data between tools (avoids token bloat)
+_current_session = {
+    "scraped_articles": [],
+    "classified_cves": [],
+    "classified_news": [],
+    "session_id": None
+}
+
+def new_session():
+    """Start a new processing session"""
+    global _current_session
+    _current_session = {
+        "scraped_articles": [],
+        "classified_cves": [],
+        "classified_news": [],
+        "session_id": datetime.now().strftime("%Y%m%d_%H%M%S")
+    }
+
+class IntelligentCyberAgent:
     def __init__(self):
-        self.llm = ChatOllama(model="llama3")
-        
+        self.llm = ChatOllama(model="llama3.2")
         self.tools = [
-            scrape_and_process_articles,
-            classify_articles,
-            filter_and_rank_items, 
-            format_and_present_results,
+            analyze_data_needs,
+            retrieve_existing_data,
+            scrape_fresh_intel,
+            classify_intelligence,
+            evaluate_intel_sufficiency,
+            intensive_rescrape,
+            present_results
         ]
         
         prompt = ChatPromptTemplate.from_messages([
-            ("system", """You are a cybersecurity intelligence agent. Your job is to:
+            ("system", """You are an elite cybersecurity intelligence agent with advanced decision-making capabilities.
 
-1. Parse user queries to extract parameters
-2. Execute a 4-step pipeline: scrape → classify → filter/rank → present
+YOUR INTELLIGENT WORKFLOW:
+1. analyze_data_needs - Assess current intelligence quality/freshness
+2. Based on analysis:
+   - If sufficient: retrieve_existing_data
+   - If insufficient: scrape_fresh_intel
+3. classify_intelligence - Process any new raw intelligence
+4. evaluate_intel_sufficiency - Check if results meet requirements
+5. If insufficient after classification: intensive_rescrape
+6. present_results - Format final intelligence report
 
-When users ask questions, extract:
-- content_type: "cve", "news", or "both"
-- severity: "low", "medium", "high", "critical" (for CVEs)
-- days_back: number of days (default 7)
-- max_results: number of results (default 10)
-- output_format: "display" or "email"
+CRITICAL AGENTIC THINKING:
+- Always evaluate if your results meet the user's needs
+- If initial scraping yields poor results, DECIDE to intensify efforts
+- Show your reasoning for each strategic decision
+- Adapt your approach based on data quality, not just quantity
 
-ALWAYS execute these 4 tools IN ORDER:
-1. scrape_and_process_articles - Get and translate fresh articles
-2. classify_articles_pipeline - Classify as CVEs or news  
-3. filter_and_rank_items - Apply filters and ranking
-4. format_and_present_results - Format final output
-
-Be conversational and explain what you're doing."""),
+You are autonomous and make smart decisions about when to re-scrape."""),
             ("user", "{input}"),
             ("assistant", "{agent_scratchpad}")
         ])
@@ -50,76 +79,68 @@ Be conversational and explain what you're doing."""),
             agent=agent,
             tools=self.tools,
             verbose=True,
-            max_iterations=6
+            max_iterations=10,
+            handle_parsing_errors=True,
+            return_intermediate_steps=True
         )
     
     def parse_query(self, query: str) -> QueryParams:
-        """Extract parameters from natural language query"""
+        """Parse user query into structured parameters"""
         params = QueryParams()
-        
         query_lower = query.lower()
         
-        # Content type
-        if "cve" in query_lower and "news" not in query_lower:
-            params.content_type = "cve"
-        elif "news" in query_lower and "cve" not in query_lower:
+        # Content type detection
+        if any(word in query_lower for word in ["cve", "vulnerability"]):
+            params.content_type = "cve" if "news" not in query_lower else "both"
+        elif "news" in query_lower:
             params.content_type = "news"
         else:
             params.content_type = "both"
         
-        # Severity
+        # Severity extraction
+        severities = []
         for severity in ["critical", "high", "medium", "low"]:
             if severity in query_lower:
-                params.severity = severity
-                break
+                severities.append(severity)
+        params.severity = severities if severities else None
         
-        # Extract numbers
+        # Extract numbers for time/results
+        import re
         numbers = re.findall(r'\b(\d+)\b', query)
         for num in numbers:
             num_int = int(num)
-            if any(word in query_lower for word in ["day", "week", "month"]):
-                if "week" in query_lower:
-                    params.days_back = num_int * 7
-                elif "month" in query_lower:
-                    params.days_back = num_int * 30
-                else:
-                    params.days_back = num_int
-            else:
-                params.max_results = num_int
-        
-        # Email
-        if "email" in query_lower:
-            params.output_format = "email"
-            # Extract email address if present
-            email_match = re.search(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', query)
-            if email_match:
-                params.email_address = email_match.group()
+            if any(word in query_lower for word in ["day", "days"]):
+                params.days_back = num_int
+            elif any(word in query_lower for word in ["week", "weeks"]):
+                params.days_back = num_int * 7
+            elif any(word in query_lower for word in ["result", "results"]):
+                params.max_results = min(num_int, 50)
         
         return params
     
     def query(self, user_input: str) -> str:
-        """Process a natural language query"""
+        """Main query interface"""
         try:
-            # Parse parameters
+            # Start new session
+            new_session()
+            
             params = self.parse_query(user_input)
             
-            # Create enhanced prompt with parsed parameters
             enhanced_input = f"""
-User Query: "{user_input}"
+INTELLIGENCE REQUEST: "{user_input}"
 
-Parsed Parameters:
+Parameters:
 - Content Type: {params.content_type}
 - Severity: {params.severity or "Any"}
 - Days Back: {params.days_back}
 - Max Results: {params.max_results}
-- Output Format: {params.output_format}
-- Email: {params.email_address or "None"}
 
-Execute the 4-step pipeline with these parameters.
-"""
+Execute intelligence gathering workflow with these parameters.
+            """
             
             result = self.agent_executor.invoke({"input": enhanced_input})
             return result["output"]
             
         except Exception as e:
-            return f"❌ Error processing query: {str(e)}"
+            return f"❌ Intelligence gathering failed: {str(e)}"
+

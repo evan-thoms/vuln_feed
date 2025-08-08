@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
 
 DB_PATH = "articles.db"
 
@@ -85,5 +85,172 @@ def insert_newsitem( news):
         news.url,
         news.intrigue
     ))
+    conn.commit()
+    conn.close()
+
+def get_cves_by_filters(severity_filter=None, after_date=None, limit=50):
+    """Get CVEs with filters for agent decision making"""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    query = "SELECT * FROM cves WHERE 1=1"
+    params = []
+    
+    if severity_filter:
+        if isinstance(severity_filter, list):
+            placeholders = ",".join("?" * len(severity_filter))
+            query += f" AND UPPER(severity) IN ({placeholders})"
+            params.extend([s.upper() for s in severity_filter])
+        else:
+            query += " AND UPPER(severity) = ?"
+            params.append(severity_filter.upper())
+    
+    if after_date:
+        query += " AND published_date >= ?"
+        params.append(after_date.isoformat())
+    
+    query += " ORDER BY (cvss_score * 0.6 + intrigue * 0.4) DESC LIMIT ?"
+    params.append(limit)
+    
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    conn.close()
+    
+    # Convert to Vulnerability objects
+    vulnerabilities = []
+    for row in rows:
+        vuln = Vulnerability(
+            cve_id=row[1],
+            title=row[2], 
+            title_translated=row[3],
+            summary=row[4],
+            severity=row[5],
+            cvss_score=float(row[6]),
+            published_date=datetime.fromisoformat(row[7]),
+            original_language=row[8],
+            source=row[9],
+            url=row[10],
+            intrigue=float(row[11]),
+            affected_products=json.loads(row[12]) if row[12] else []
+        )
+        vulnerabilities.append(vuln)
+    
+    return vulnerabilities
+
+def get_news_by_filters(after_date=None, limit=50):
+    """Get news items with filters"""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    query = "SELECT * FROM newsitems WHERE 1=1"
+    params = []
+    
+    if after_date:
+        query += " AND published_date >= ?"
+        params.append(after_date.isoformat())
+    
+    query += " ORDER BY intrigue DESC LIMIT ?"
+    params.append(limit)
+    
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    conn.close()
+    
+    # Convert to NewsItem objects
+    news_items = []
+    for row in rows:
+        news = NewsItem(
+            title=row[1],
+            title_translated=row[2], 
+            summary=row[3],
+            published_date=datetime.fromisoformat(row[4]),
+            original_language=row[5],
+            source=row[6],
+            url=row[7],
+            intrigue=float(row[8])
+        )
+        news_items.append(news)
+    
+    return news_items
+
+def get_last_scrape_time():
+    """Get last scrape time by source for freshness calculation"""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    # Get most recent scrape time by source
+    query = """
+    SELECT source, MAX(scraped_at) as last_scrape
+    FROM raw_articles 
+    GROUP BY source
+    """
+    
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    conn.close()
+    
+    last_scrapes = {}
+    for source, last_scrape_str in rows:
+        if last_scrape_str:
+            try:
+                last_scrapes[source.lower()] = datetime.fromisoformat(last_scrape_str)
+            except ValueError:
+                last_scrapes[source.lower()] = None
+    
+    return last_scrapes
+
+def get_data_statistics():
+    """Get overall database statistics for agent insights"""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    stats = {}
+    
+    # CVE stats
+    cursor.execute("SELECT COUNT(*), AVG(cvss_score), AVG(intrigue) FROM cves")
+    cve_stats = cursor.fetchone()
+    stats["cves"] = {
+        "total": cve_stats[0],
+        "avg_cvss": round(cve_stats[1] or 0, 2),
+        "avg_intrigue": round(cve_stats[2] or 0, 2)
+    }
+    
+    # News stats
+    cursor.execute("SELECT COUNT(*), AVG(intrigue) FROM newsitems")
+    news_stats = cursor.fetchone()
+    stats["news"] = {
+        "total": news_stats[0],
+        "avg_intrigue": round(news_stats[1] or 0, 2)
+    }
+    
+    # Recent activity (last 24 hours)
+    yesterday = (datetime.now() - timedelta(days=1)).isoformat()
+    cursor.execute("SELECT COUNT(*) FROM raw_articles WHERE scraped_at >= ?", (yesterday,))
+    stats["recent_articles"] = cursor.fetchone()[0]
+    
+    conn.close()
+    return stats
+
+def record_scraping_session(sources_scraped, articles_found, triggered_by="agent"):
+    """Record scraping session for agent learning"""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    # Create scraping_sessions table if it doesn't exist
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS scraping_sessions (
+        id INTEGER PRIMARY KEY,
+        started_at TEXT,
+        sources_scraped TEXT,
+        articles_found INTEGER,
+        triggered_by TEXT
+    )
+    """)
+    
+    cursor.execute("""
+    INSERT INTO scraping_sessions (started_at, sources_scraped, articles_found, triggered_by)
+    VALUES (?, ?, ?, ?)
+    """, (datetime.now().isoformat(), json.dumps(sources_scraped), articles_found, triggered_by))
+    
     conn.commit()
     conn.close()
