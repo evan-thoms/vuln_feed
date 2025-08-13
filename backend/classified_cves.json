@@ -1,57 +1,53 @@
 [
   {
-    "cve_id": "CVE-2025-40585",
-    "title": "西门子能源紧急警报：专用 5G 核心中的关键漏洞 (CVSS 9.9) 暴露了敏感数据！",
-    "title_translated": "Siemens Energy Emergency Alert: A critical hole in the 5G core exposed sensitive data!",
-    "summary": "Elspec G5 Digital Fault Recorder contains a default certificate with managerial authority, allowing remote attackers to control the device and manipulate output.",
-    "severity": "Critical",
-    "cvss_score": 9.9,
-    "published_date": "2025-08-07T23:43:07.871483",
-    "original_language": "zh",
-    "source": "FreeBuf",
-    "url": "https://www.anquanke.com/post/id/308380",
-    "intrigue": 8.0,
-    "affected_products": [
-      "Siemens Energy Services",
-      "Elspec G5DR"
-    ]
-  },
-  {
-    "cve_id": "CVE-2025-5484",
-    "title": "美国CISA警告 SinoTrack GPS 跟踪器存在远程控制漏洞",
-    "title_translated": "US CISA warning SinoTrack GPS tracker has remote control gaps",
-    "summary": "Weak identification defect and observable response difference in SinoTrack GPS equipment allowing remote control, tracking, and fuel cut-off.",
-    "severity": "Critical",
-    "cvss_score": 8.8,
-    "published_date": "2025-08-07T23:43:05.775431",
-    "original_language": "zh",
-    "source": "FreeBuf",
-    "url": "https://www.anquanke.com/post/id/308398",
-    "intrigue": 9.0,
-    "affected_products": [
-      "SinoTrack IOT PC platform",
-      "all known SinoTrack equipment"
-    ]
-  },
-  {
     "cve_id": "CVE-2025-47162",
     "title": "微软 Office 漏洞允许攻击者执行远程代码",
     "title_translated": "Microsoft Office bug allows the assailant to execute remote code",
-    "summary": "Vulnerabilities in Microsoft Office allow attackers to enforce random codes on affected systems, affecting Windows, Mac, and Android platforms.",
-    "severity": "Critical",
+    "summary": "Several key loopholes in Microsoft Office allow attackers to enforce random codes on affected systems, affecting numerous versions of Windows, Mac and Android platforms.",
+    "severity": "High",
     "cvss_score": 8.4,
-    "published_date": "2025-08-07T23:43:03.570524",
+    "published_date": "2025-08-13T16:41:10.346213",
     "original_language": "zh",
     "source": "FreeBuf",
     "url": "https://www.anquanke.com/post/id/308412",
     "intrigue": 9.0,
     "affected_products": [
-      "Office 2016",
-      "Office 2019",
-      "Office LTSC 2021",
-      "Office LTSC 2024",
+      "Microsoft Office",
+      "Office LTSC 2021/2024",
       "Microsoft Apps for Enterprise",
       "Office for Android"
+    ]
+  },
+  {
+    "cve_id": "CVE-2025-33053",
+    "title": "微软修补被阿联酋黑客利用的零日漏洞",
+    "title_translated": "Microsoft fixes the zero-day loophole used by UAE hackers.",
+    "summary": "Microsoft closed a zero-day loophole in its Web application framework, which was exploited by Emirates Threat organizations as part of a spying campaign. The loophole was tracked as CVE-2025-33053 and affected Turkey, Qatar, Egypt, and Yemen.",
+    "severity": "High",
+    "cvss_score": 8.0,
+    "published_date": "2025-08-13T16:41:14.264348",
+    "original_language": "zh",
+    "source": "FreeBuf",
+    "url": "https://www.anquanke.com/post/id/308384",
+    "intrigue": 8.0,
+    "affected_products": [
+      "WebDAV"
+    ]
+  },
+  {
+    "cve_id": "CVE-2022-36579",
+    "title": "Microsoft Office: CVE-2025-53784: Microsoft Word: CVE-2025-53784",
+    "title_translated": "Microsoft Office: CVE-2025-53784: Microsoft Word: CVE-2025-53784",
+    "summary": "Security vulnerability in Microsoft Word",
+    "severity": "High",
+    "cvss_score": 7.0,
+    "published_date": "2025-08-13T16:40:57.858820",
+    "original_language": "en",
+    "source": "Rapid7",
+    "url": "https://www.rapid7.com/db/vulnerabilities/microsoft-office-cve-2025-53784/",
+    "intrigue": 6.0,
+    "affected_products": [
+      "Microsoft Word"
     ]
   }
 ]

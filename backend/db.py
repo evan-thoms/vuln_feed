@@ -92,52 +92,59 @@ def insert_newsitem( news):
 
 def get_cves_by_filters(severity_filter=None, after_date=None, limit=50):
     """Get CVEs with filters for agent decision making"""
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    
-    query = "SELECT * FROM cves WHERE 1=1"
-    params = []
-    
-    if severity_filter:
-        if isinstance(severity_filter, list):
-            placeholders = ",".join("?" * len(severity_filter))
-            query += f" AND UPPER(severity) IN ({placeholders})"
-            params.extend([s.upper() for s in severity_filter])
-        else:
-            query += " AND UPPER(severity) = ?"
-            params.append(severity_filter.upper())
-    
-    if after_date:
-        query += " AND published_date >= ?"
-        params.append(after_date.isoformat())
-    
-    query += " ORDER BY (cvss_score * 0.6 + intrigue * 0.4) DESC LIMIT ?"
-    params.append(limit)
-    
-    cursor.execute(query, params)
-    rows = cursor.fetchall()
-    conn.close()
-    
-    # Convert to Vulnerability objects
-    vulnerabilities = []
-    for row in rows:
-        vuln = Vulnerability(
-            cve_id=row[1],
-            title=row[2], 
-            title_translated=row[3],
-            summary=row[4],
-            severity=row[5],
-            cvss_score=float(row[6]),
-            published_date=datetime.fromisoformat(row[7]),
-            original_language=row[8],
-            source=row[9],
-            url=row[10],
-            intrigue=float(row[11]),
-            affected_products=json.loads(row[12]) if row[12] else []
-        )
-        vulnerabilities.append(vuln)
-    
-    return vulnerabilities
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        
+        query = "SELECT * FROM cves WHERE 1=1"
+        params = []
+        
+        if severity_filter:
+            if isinstance(severity_filter, list):
+                placeholders = ",".join("?" * len(severity_filter))
+                query += f" AND UPPER(severity) IN ({placeholders})"
+                params.extend([s.upper() for s in severity_filter])
+            else:
+                query += " AND UPPER(severity) = ?"
+                params.append(severity_filter.upper())
+        
+        if after_date:
+            query += " AND published_date >= ?"
+            params.append(after_date.isoformat())
+        
+        query += " ORDER BY (cvss_score * 0.6 + intrigue * 0.4) DESC LIMIT ?"
+        params.append(limit)
+        print("SQL QUERY:", query)
+        print("PARAMS:", params)
+        
+        cursor.execute(query, params)
+        rows = cursor.fetchall()
+        print("DB rows fetched:", rows)
+        conn.close()
+        
+        # Convert to Vulnerability objects
+        vulnerabilities = []
+        for row in rows:
+            vuln = Vulnerability(
+                cve_id=row[1],
+                title=row[2], 
+                title_translated=row[3],
+                summary=row[4],
+                severity=row[5],
+                cvss_score=float(row[6]),
+                published_date=datetime.fromisoformat(row[7]),
+                original_language=row[8],
+                source=row[9],
+                url=row[10],
+                intrigue=float(row[11]),
+                affected_products=row[12].split(',') if row[12] else []
+            )
+            vulnerabilities.append(vuln)
+        
+        return vulnerabilities
+    except Exception as e:
+        print(f"❌ CVE Database error: {e}")
+        return []  # Return empty list instead of None
 
 def get_news_by_filters(after_date=None, limit=50):
     """Get news items with filters"""

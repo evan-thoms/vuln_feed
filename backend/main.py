@@ -9,7 +9,6 @@ import json
 # Import your agent
 from agent import IntelligentCyberAgent
 from models import QueryParams
-from tools.tools import _current_session
 
 app = FastAPI(title="Cybersecurity Intelligence API", version="1.0.0")
 

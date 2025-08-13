@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 import json
 import argostranslate.package
 import argostranslate.translate
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 
 # Import your existing functions
 from scrapers.chinese_scrape import ChineseScraper
@@ -115,44 +117,64 @@ def analyze_data_needs(content_type: str = "both", severity: str = None, days_ba
     
     severity_list = [severity] if severity else None
     cutoff_date = datetime.now() - timedelta(days=days_back)
-    
-    existing_cves = get_cves_by_filters(
-        severity_filter=severity_list,
-        after_date=cutoff_date,
-        limit=max_results
-    )
-    
-    existing_news = get_news_by_filters(
-        after_date=cutoff_date,
-        limit=max_results
-    )
-    
-    # Count items based on content type requested
+    num_cves = 0
+    num_news = 0
+
     if content_type == "cve":
-        total_items = len(existing_cves)
-        needed = max_results
+        existing_cves = get_cves_by_filters(
+            severity_filter=severity_list,
+            after_date=cutoff_date,
+            limit=max_results
+        )
+        num_cves = len(existing_cves)
+        needed_cves = max_results
+        needed_news = 0
     elif content_type == "news":
-        total_items = len(existing_news)
-        needed = max_results
-    else:  # both
-        total_items = len(existing_cves) + len(existing_news)
-        needed = max_results
-    
+        existing_news = get_news_by_filters(
+            after_date=cutoff_date,
+            limit=max_results
+        )
+        num_news = len(existing_news)
+        needed_cves = 0
+        needed_news = max_results
+    # Count items based on content type requested
+    else:
+        print("content type both")
+        needed_cves = max_results//2
+        needed_news = max_results-needed_cves
+        existing_cves = get_cves_by_filters(
+            severity_filter=severity_list,
+            after_date=cutoff_date,
+            limit=needed_cves
+        )
+        print("cves worked ", existing_cves)
+        existing_news = get_news_by_filters(
+            after_date=cutoff_date,
+            limit=needed_news
+        )
+        print("news worked", existing_news)
+
+        num_cves = len(existing_cves or [])
+        num_news = len(existing_news or [])
+        print(existing_news, existing_cves, num_cves, num_news)
+
     # Simple decision: do we have enough items?
-    if total_items >= needed:
+    if num_cves >= needed_cves and num_news >=needed_news:
         recommendation = "sufficient"
-        reasoning = f"Found {total_items}/{needed} items in database"
+        reasoning = f"Found {num_cves}/{needed_cves} and {num_news}/{needed_news}  items in database"
     else:
         recommendation = "urgent_scrape"
-        reasoning = f"Need {needed} items, only have {total_items}"
+        reasoning = f"Need {needed_cves} cves and {needed_news} news items, only have {num_cves} cves and {num_news} news"
     
     print(f"📊 Analysis: {recommendation} - {reasoning}")
     
     return json.dumps({
         "recommendation": recommendation,
         "reasoning": reasoning,
-        "existing_items": total_items,
-        "needed_items": needed
+        "existing_cves": num_cves,
+        "existing_news": num_news,
+        "needed_news": needed_news,
+        "needed_cves": needed_cves
     })
 
 
@@ -177,6 +199,7 @@ def retrieve_existing_data(content_type: str = "both", severity: str = None, day
             after_date=cutoff_date,
             limit=cve_limit
         )
+        print("cves: ", cves)
         
         news = get_news_by_filters(
             after_date=cutoff_date,
@@ -211,25 +234,36 @@ def retrieve_existing_data(content_type: str = "both", severity: str = None, day
 @tool
 def scrape_fresh_intel(content_type: str = "both", max_results: int = 10) -> str:
     """Execute fresh intelligence collection from all sources."""
-    global _current_session
+    agent = scrape_fresh_intel._agent_instance
     print(f"🌐 Initiating fresh intelligence collection...")
     
     articles = []
     target_per_source = max(max_results // 2, 5)
     
     try:
-        # Multi-source scraping
-        print("🇨🇳 Scraping Chinese sources...")
-        c_scraper = ChineseScraper(target_per_source)
-        articles.extend(c_scraper.scrape_all())
+        # # Multi-source scraping
+        # print("🇨🇳 Scraping Chinese sources...")
+        # c_scraper = ChineseScraper(target_per_source)
+        # articles.extend(c_scraper.scrape_all())
         
-        print("🇷🇺 Scraping Russian sources...")
-        r_scraper = RussianScraper()
-        articles.extend(r_scraper.scrape_all())
+        # print("🇷🇺 Scraping Russian sources...")
+        # r_scraper = RussianScraper()
+        # articles.extend(r_scraper.scrape_all())
         
-        print("🇺🇸 Scraping English sources...")
-        e_scraper = EnglishScraper(target_per_source)
-        articles.extend(e_scraper.scrape_all())
+        # print("🇺🇸 Scraping English sources...")
+        # e_scraper = EnglishScraper(target_per_source)
+        # articles.extend(e_scraper.scrape_all())
+        scrapers = [
+            ChineseScraper(target_per_source),
+            RussianScraper(),
+            EnglishScraper(target_per_source)
+        ]
+        
+        articles = []
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            futures = [executor.submit(scraper.scrape_all) for scraper in scrapers]
+            for future in as_completed(futures):
+                articles.extend(future.result())
         
         # Process unprocessed articles
         unprocessed_rows = get_unprocessed_articles()
@@ -250,12 +284,10 @@ def scrape_fresh_intel(content_type: str = "both", max_results: int = 10) -> str
         
         translated_articles = translate_articles(articles)
         
-        # Store in session instead of returning full data
-        _current_session["scraped_articles"] = translated_articles
+        agent.current_session["scraped_articles"] = translated_articles
         
         print(f"✅ Fresh intel collected: {len(translated_articles)} articles")
         
-        # Return summary only
         return json.dumps({
             "success": True,
             "articles_collected": len(translated_articles),
@@ -377,8 +409,8 @@ def evaluate_intel_sufficiency(content_type: str = "both", max_results: int = 10
     agent = evaluate_intel_sufficiency._agent_instance
     print(f"📊 Evaluating intelligence sufficiency...")
     
-    cves = _current_session.get("classified_cves", [])
-    news = _current_session.get("classified_news", [])
+    cves = agent.current_session.get("classified_cves", [])
+    news = agent.current_session.get("classified_news", [])
     total_found = len(cves) + len(news)
     
     # Quality assessment
@@ -524,14 +556,15 @@ def present_results(output_format: str = "json") -> str:
     
     result = {
         "success": True,
-        "cves": cves_data,
-        "news": news_data,
-        "total_results": len(cves_data) + len(news_data),
-        "session_id": agent.current_session['session_id', 'Unknown'],
-        "generated_at": datetime.now().isoformat()
+        "cves_count": len(cves),
+        "news_count": len(news),
+        "total_results": len(cves) + len(news),
+        "session_id": agent.current_session.get('session_id', 'Unknown'),
+        "generated_at": datetime.now().isoformat(),
+        "status": "Data available in session"  # Key point - data is in session
     }
     
-    print(f"✅ Prepared {len(cves_data)} CVEs and {len(news_data)} news items")
+    print(f"✅ Summary prepared: {len(cves)} CVEs, {len(news)} news items in session")
     
     return json.dumps(result)
 

@@ -68,64 +68,6 @@ class IntelligentCyberAgent:
         for tool in self.tools:
             tool._agent_instance = self
         
-        
-#         prompt = ChatPromptTemplate.from_messages([
-#             ("system", """You are an elite cybersecurity intelligence agent with advanced decision-making capabilities.
-
-# MANDATORY WORKFLOW - FOLLOW THIS EXACT SEQUENCE:
-# 1. analyze_data_needs - Assess current intelligence quality/freshness
-# 2. Based on analysis recommendation:
-#    - If "sufficient": retrieve_existing_data → present_results → STOP
-#    - If "scrape_needed": scrape_fresh_intel → classify_intelligence → present_results → STOP  
-#    - If "urgent_scrape": scrape_fresh_intel → classify_intelligence → evaluate_intel_sufficiency → CONDITIONAL STEP 3
-# 3. CONDITIONAL (only if evaluate_intel_sufficiency returns "sufficient": false):
-#    - intensive_rescrape → classify_intelligence → present_results → STOP
-#    - If "sufficient": true → present_results → STOP
-
-# CRITICAL DECISION RULES:
-# - NEVER call intensive_rescrape if evaluate_intel_sufficiency returns {{"sufficient": true}}
-# - NEVER call present_results more than once
-# - NEVER call analyze_data_needs after presenting results
-# - ALWAYS stop after present_results
-# - Check the "sufficient" field in JSON responses, not just reasoning text
-
-# STOP CONDITIONS:
-# - After present_results is called once → WORKFLOW COMPLETE
-# - After retrieve_existing_data when analysis shows "sufficient" → present_results → STOP
-# - After evaluate_intel_sufficiency shows sufficient=true → present_results → STOP
-
-# You must parse JSON responses and make decisions based on structured data, not just reasoning text."""),
-#             ("user", "{input}"),
-#             ("assistant", "{agent_scratchpad}")
-#         ])
-#         prompt = ChatPromptTemplate.from_messages([
-#     ("system", """You are a cybersecurity intelligence agent that follows a strict workflow based on tool responses.
-
-# WORKFLOW SEQUENCE:
-# 1. analyze_data_needs → Parse JSON response for "recommendation" field
-# 2. Decision based on recommendation:
-#    - "sufficient" → retrieve_existing_data → present_results → STOP
-#    - "scrape_needed" → scrape_fresh_intel → classify_intelligence → present_results → STOP  
-#    - "urgent_scrape" → scrape_fresh_intel → classify_intelligence → evaluate_intel_sufficiency → Decision Point
-# 3. Decision Point - Parse evaluate_intel_sufficiency JSON for "sufficient" field:
-#    - true → present_results → STOP
-#    - false → intensive_rescrape → classify_intelligence → present_results → STOP
-
-# TOOL RESPONSE PARSING:
-# - analyze_data_needs returns: {{"recommendation": "sufficient|scrape_needed|urgent_scrape"}}
-# - evaluate_intel_sufficiency returns: {{"sufficient": true|false}}
-# - All other tools return: {{"success": true|false}}
-
-# DECISION RULES:
-# - Parse JSON responses, check specific fields, ignore reasoning text
-# - Never call present_results twice
-# - Always stop after present_results
-# - Only call intensive_rescrape if evaluate_intel_sufficiency returns "sufficient": false
-
-# Pass the original query parameters (content_type, severity, days_back, max_results) to each tool call."""),
-#     ("user", "{input}"),
-#     ("assistant", "{agent_scratchpad}")
-# ])
         prompt = ChatPromptTemplate.from_messages([
             ("system", """You are a cybersecurity intelligence agent. Follow this workflow:
 
@@ -138,68 +80,6 @@ Return only the final JSON from present_results. No additional commentary."""),
             ("user", "{input}"),
             ("assistant", "{agent_scratchpad}")
         ])
-
-        #____________________OG AND WORKS
-#         prompt = ChatPromptTemplate.from_messages([
-#     ("system", """You are an elite cybersecurity intelligence agent with advanced decision-making capabilities.
-
-# MANDATORY WORKFLOW:
-# 1. Call analyze_data_needs first
-# 2. Parse the JSON response "recommendation" field:
-#    - "sufficient" → call retrieve_existing_data → present_results → STOP
-#    - "urgent_scrape" → call scrape_fresh_intel → classify_intelligence → present_results → STOP
-# 3. NEVER call intensive_rescrape if any JSON response shows "sufficient": true
-     
-#      CRITICAL AGENTIC THINKING:
-#  - Always evaluate if your results meet the user's needs
-#  - Show your reasoning for each strategic decision
-
-
-# READ JSON RESPONSES CAREFULLY. The "sufficient" boolean field determines your next action, NOT the reasoning text."""),
-#     ("user", "{input}"),
-#     ("assistant", "{agent_scratchpad}")
-# ])
-        
-        #________________NEW FORM CLAUDE
-        # prompt = ChatPromptTemplate.from_messages([
-#             ("system", """You are a cybersecurity intelligence agent. Follow this EXACT workflow:
-
-# 1. ALWAYS start with analyze_data_needs
-# 2. Read the JSON "recommendation" field:
-#    - "sufficient" → retrieve_existing_data → present_results → STOP
-#    - "urgent_scrape" → scrape_fresh_intel → classify_intelligence → evaluate_intel_sufficiency
-# 3. After evaluate_intel_sufficiency, read "sufficient" field:
-#    - true → present_results → STOP  
-#    - false → intensive_rescrape → classify_intelligence → present_results → STOP
-
-# CRITICAL: Parse JSON responses. Never call intensive_rescrape if "sufficient": true."""),
-#             ("user", "{input}"),
-#             ("assistant", "{agent_scratchpad}")
-#         ])
-        #-------------------------------------------------------------------------------------------
-#         prompt = ChatPromptTemplate.from_messages([
-#             ("system", """You are an elite cybersecurity intelligence agent with advanced decision-making capabilities.
-
-# YOUR INTELLIGENT WORKFLOW:
-# 1. analyze_data_needs - Assess current intelligence quality/freshness
-# 2. Based on analysis:
-#    - If sufficient: retrieve_existing_data
-#    - If insufficient: scrape_fresh_intel
-# 3. classify_intelligence - Process any new raw intelligence
-# 4. evaluate_intel_sufficiency - Check if results meet requirements
-# 5. If insufficient after classification: intensive_rescrape
-# 6. present_results - Format final intelligence report
-
-# CRITICAL AGENTIC THINKING:
-# - Always evaluate if your results meet the user's needs
-# - If initial scraping yields poor results, DECIDE to intensify efforts
-# - Show your reasoning for each strategic decision
-# - Adapt your approach based on data quality, not just quantity
-
-# You are autonomous and make smart decisions about when to re-scrape."""),
-#             ("user", "{input}"),
-#             ("assistant", "{agent_scratchpad}")
-#         ])
         
         agent = create_tool_calling_agent(self.llm, self.tools, prompt)
         self.agent_executor = AgentExecutor(
