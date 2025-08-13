@@ -1,4 +1,5 @@
 from langchain_ollama import ChatOllama
+from langchain_openai import ChatOpenAI
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.tools import tool
@@ -34,31 +35,27 @@ api_key_name = "GROQ_API"
 
 # Get the value of the environment variable
 api_key = os.environ.get(api_key_name)
-_current_session = {
-    "scraped_articles": [],
-    "classified_cves": [],
-    "classified_news": [],
-    "session_id": None
-}
-
-def new_session():
-    """Start a new processing session"""
-    global _current_session
-    _current_session = {
-        "scraped_articles": [],
-        "classified_cves": [],
-        "classified_news": [],
-        "session_id": datetime.now().strftime("%Y%m%d_%H%M%S")
-    }
 
 
 class IntelligentCyberAgent:
     def __init__(self):
-        self.llm = ChatGroq(
-            model="llama-3.3-70b-versatile",
-            groq_api_key=api_key,
+        # self.llm = ChatGroq(
+        #     model="llama-3.3-70b-versatile",
+        #     groq_api_key=api_key,
+        #     temperature=0,
+        # )
+        self.llm = ChatOpenAI(
+            model="gpt-4o-mini",
+            openai_api_key=os.environ.get("OPENAI_API_KEY"),
             temperature=0,
+            max_retries=3
         )
+        self.current_session = {
+            "scraped_articles": [],
+            "classified_cves": [],
+            "classified_news": [],
+            "session_id": None
+        }
         self.tools = [
             analyze_data_needs,
             retrieve_existing_data,
@@ -68,39 +65,151 @@ class IntelligentCyberAgent:
             intensive_rescrape,
             present_results
         ]
+        for tool in self.tools:
+            tool._agent_instance = self
         
+        
+#         prompt = ChatPromptTemplate.from_messages([
+#             ("system", """You are an elite cybersecurity intelligence agent with advanced decision-making capabilities.
+
+# MANDATORY WORKFLOW - FOLLOW THIS EXACT SEQUENCE:
+# 1. analyze_data_needs - Assess current intelligence quality/freshness
+# 2. Based on analysis recommendation:
+#    - If "sufficient": retrieve_existing_data → present_results → STOP
+#    - If "scrape_needed": scrape_fresh_intel → classify_intelligence → present_results → STOP  
+#    - If "urgent_scrape": scrape_fresh_intel → classify_intelligence → evaluate_intel_sufficiency → CONDITIONAL STEP 3
+# 3. CONDITIONAL (only if evaluate_intel_sufficiency returns "sufficient": false):
+#    - intensive_rescrape → classify_intelligence → present_results → STOP
+#    - If "sufficient": true → present_results → STOP
+
+# CRITICAL DECISION RULES:
+# - NEVER call intensive_rescrape if evaluate_intel_sufficiency returns {{"sufficient": true}}
+# - NEVER call present_results more than once
+# - NEVER call analyze_data_needs after presenting results
+# - ALWAYS stop after present_results
+# - Check the "sufficient" field in JSON responses, not just reasoning text
+
+# STOP CONDITIONS:
+# - After present_results is called once → WORKFLOW COMPLETE
+# - After retrieve_existing_data when analysis shows "sufficient" → present_results → STOP
+# - After evaluate_intel_sufficiency shows sufficient=true → present_results → STOP
+
+# You must parse JSON responses and make decisions based on structured data, not just reasoning text."""),
+#             ("user", "{input}"),
+#             ("assistant", "{agent_scratchpad}")
+#         ])
+#         prompt = ChatPromptTemplate.from_messages([
+#     ("system", """You are a cybersecurity intelligence agent that follows a strict workflow based on tool responses.
+
+# WORKFLOW SEQUENCE:
+# 1. analyze_data_needs → Parse JSON response for "recommendation" field
+# 2. Decision based on recommendation:
+#    - "sufficient" → retrieve_existing_data → present_results → STOP
+#    - "scrape_needed" → scrape_fresh_intel → classify_intelligence → present_results → STOP  
+#    - "urgent_scrape" → scrape_fresh_intel → classify_intelligence → evaluate_intel_sufficiency → Decision Point
+# 3. Decision Point - Parse evaluate_intel_sufficiency JSON for "sufficient" field:
+#    - true → present_results → STOP
+#    - false → intensive_rescrape → classify_intelligence → present_results → STOP
+
+# TOOL RESPONSE PARSING:
+# - analyze_data_needs returns: {{"recommendation": "sufficient|scrape_needed|urgent_scrape"}}
+# - evaluate_intel_sufficiency returns: {{"sufficient": true|false}}
+# - All other tools return: {{"success": true|false}}
+
+# DECISION RULES:
+# - Parse JSON responses, check specific fields, ignore reasoning text
+# - Never call present_results twice
+# - Always stop after present_results
+# - Only call intensive_rescrape if evaluate_intel_sufficiency returns "sufficient": false
+
+# Pass the original query parameters (content_type, severity, days_back, max_results) to each tool call."""),
+#     ("user", "{input}"),
+#     ("assistant", "{agent_scratchpad}")
+# ])
         prompt = ChatPromptTemplate.from_messages([
-            ("system", """You are an elite cybersecurity intelligence agent with advanced decision-making capabilities.
+            ("system", """You are a cybersecurity intelligence agent. Follow this workflow:
 
-YOUR INTELLIGENT WORKFLOW:
-1. analyze_data_needs - Assess current intelligence quality/freshness
-2. Based on analysis:
-   - If sufficient: retrieve_existing_data
-   - If insufficient: scrape_fresh_intel
-3. classify_intelligence - Process any new raw intelligence
-4. evaluate_intel_sufficiency - Check if results meet requirements
-5. If insufficient after classification: intensive_rescrape
-6. present_results - Format final intelligence report
+1. analyze_data_needs - Check existing data
+2. Based on JSON "recommendation":
+   - "sufficient" → retrieve_existing_data → present_results → STOP
+   - "urgent_scrape" → scrape_fresh_intel → classify_intelligence → present_results → STOP
 
-CRITICAL AGENTIC THINKING:
-- Always evaluate if your results meet the user's needs
-- If initial scraping yields poor results, DECIDE to intensify efforts
-- Show your reasoning for each strategic decision
-- Adapt your approach based on data quality, not just quantity
-
-You are autonomous and make smart decisions about when to re-scrape."""),
+Return only the final JSON from present_results. No additional commentary."""),
             ("user", "{input}"),
             ("assistant", "{agent_scratchpad}")
         ])
+
+        #____________________OG AND WORKS
+#         prompt = ChatPromptTemplate.from_messages([
+#     ("system", """You are an elite cybersecurity intelligence agent with advanced decision-making capabilities.
+
+# MANDATORY WORKFLOW:
+# 1. Call analyze_data_needs first
+# 2. Parse the JSON response "recommendation" field:
+#    - "sufficient" → call retrieve_existing_data → present_results → STOP
+#    - "urgent_scrape" → call scrape_fresh_intel → classify_intelligence → present_results → STOP
+# 3. NEVER call intensive_rescrape if any JSON response shows "sufficient": true
+     
+#      CRITICAL AGENTIC THINKING:
+#  - Always evaluate if your results meet the user's needs
+#  - Show your reasoning for each strategic decision
+
+
+# READ JSON RESPONSES CAREFULLY. The "sufficient" boolean field determines your next action, NOT the reasoning text."""),
+#     ("user", "{input}"),
+#     ("assistant", "{agent_scratchpad}")
+# ])
+        
+        #________________NEW FORM CLAUDE
+        # prompt = ChatPromptTemplate.from_messages([
+#             ("system", """You are a cybersecurity intelligence agent. Follow this EXACT workflow:
+
+# 1. ALWAYS start with analyze_data_needs
+# 2. Read the JSON "recommendation" field:
+#    - "sufficient" → retrieve_existing_data → present_results → STOP
+#    - "urgent_scrape" → scrape_fresh_intel → classify_intelligence → evaluate_intel_sufficiency
+# 3. After evaluate_intel_sufficiency, read "sufficient" field:
+#    - true → present_results → STOP  
+#    - false → intensive_rescrape → classify_intelligence → present_results → STOP
+
+# CRITICAL: Parse JSON responses. Never call intensive_rescrape if "sufficient": true."""),
+#             ("user", "{input}"),
+#             ("assistant", "{agent_scratchpad}")
+#         ])
+        #-------------------------------------------------------------------------------------------
+#         prompt = ChatPromptTemplate.from_messages([
+#             ("system", """You are an elite cybersecurity intelligence agent with advanced decision-making capabilities.
+
+# YOUR INTELLIGENT WORKFLOW:
+# 1. analyze_data_needs - Assess current intelligence quality/freshness
+# 2. Based on analysis:
+#    - If sufficient: retrieve_existing_data
+#    - If insufficient: scrape_fresh_intel
+# 3. classify_intelligence - Process any new raw intelligence
+# 4. evaluate_intel_sufficiency - Check if results meet requirements
+# 5. If insufficient after classification: intensive_rescrape
+# 6. present_results - Format final intelligence report
+
+# CRITICAL AGENTIC THINKING:
+# - Always evaluate if your results meet the user's needs
+# - If initial scraping yields poor results, DECIDE to intensify efforts
+# - Show your reasoning for each strategic decision
+# - Adapt your approach based on data quality, not just quantity
+
+# You are autonomous and make smart decisions about when to re-scrape."""),
+#             ("user", "{input}"),
+#             ("assistant", "{agent_scratchpad}")
+#         ])
         
         agent = create_tool_calling_agent(self.llm, self.tools, prompt)
         self.agent_executor = AgentExecutor(
             agent=agent,
             tools=self.tools,
             verbose=True,
-            max_iterations=10,
+            max_iterations=8,
             handle_parsing_errors=True,
-            return_intermediate_steps=True
+            return_intermediate_steps=True,
+            early_stopping_method="generate"
         )
     
     def parse_query(self, query: str) -> QueryParams:
@@ -136,39 +245,106 @@ You are autonomous and make smart decisions about when to re-scrape."""),
                 params.max_results = min(num_int, 50)
         
         return params
-    
-    def query(self, user_input: str) -> str:
+    def new_session(self):
+        self.current_session = {
+            "scraped_articles": [],
+            "classified_cves": [],
+            "classified_news": [],
+            "session_id": datetime.now().strftime("%Y%m%d_%H%M%S")
+        }
+    def query(self, params: dict) -> dict:
         """Main query interface"""
         try:
             # Start new session
-            new_session()
-            
-            params = self.parse_query(user_input)
-            
+            self.new_session()
             enhanced_input = f"""
-INTELLIGENCE REQUEST: "{user_input}"
-
-Parameters:
-- Content Type: {params.content_type}
-- Severity: {params.severity or "Any"}
-- Days Back: {params.days_back}
-- Max Results: {params.max_results}
-
-Execute intelligence gathering workflow with these parameters.
-            """
+            Execute cybersecurity intelligence workflow with these exact parameters:
+                - content_type: {params['content_type']}
+                - severity: {params.get('severity')}
+                - days_back: {params['days_back']}
+                - max_results: {params['max_results']}
+                            """
+                        
+            # params = self.parse_query(user_input)
             
+            # enhanced_input = f"""
+            #     INTELLIGENCE REQUEST: "{user_input}"
+
+            #     Parameters:
+            #     - Content Type: {params.content_type}
+            #     - Severity: {params.severity or "Any"}
+            #     - Days Back: {params.days_back}
+            #     - Max Results: {params.max_results}
+
+            #     Execute intelligence gathering workflow with these parameters.
+            # """
+            print("input print", enhanced_input)
             result = self.agent_executor.invoke({"input": enhanced_input})
-            return result["output"]
+
+
+
+            # return result["output"]
+            return self._build_response_from_session()
+        
+            # try:
+            #     json_result = json.loads(result["output"])
+            #     # Validate it has expected structure
+            #     if "cves" in json_result and "news" in json_result:
+            #         return json_result
+            # except (json.JSONDecodeError, KeyError):
+            #     pass
+            #     # Fallback: extract from session if agent didn't return proper JSON
+            # return self._build_response_from_session()
             
         except Exception as e:
-            return f"❌ Intelligence gathering failed: {str(e)}"
+            return {"success": False, "error": str(e), "cves": [], "news": []}
+    def _build_response_from_session(self) -> dict:
+        """Build response from session data - more reliable than parsing agent output"""
+        cves_data = []
+        for cve in self.current_session.get("classified_cves", []):
+            cves_data.append({
+                "cve_id": cve.cve_id,
+                "title": cve.title,
+                "title_translated": cve.title_translated,
+                "summary": cve.summary,
+                "severity": cve.severity,
+                "cvss_score": float(cve.cvss_score),
+                "intrigue": float(cve.intrigue),
+                "published_date": cve.published_date.isoformat() if hasattr(cve.published_date, 'isoformat') else str(cve.published_date),
+                "original_language": cve.original_language,
+                "source": cve.source,
+                "url": cve.url,
+                "affected_products": getattr(cve, 'affected_products', [])
+            })
         
+        news_data = []
+        for news in self.current_session.get("classified_news", []):
+            news_data.append({
+                "title": news.title,
+                "title_translated": news.title_translated,
+                "summary": news.summary,
+                "intrigue": float(news.intrigue),
+                "published_date": news.published_date.isoformat() if hasattr(news.published_date, 'isoformat') else str(news.published_date),
+                "original_language": news.original_language,
+                "source": news.source,
+                "url": news.url
+            })
+        
+        return {
+            "success": True,
+            "cves": cves_data,
+            "news": news_data,
+            "total_results": len(cves_data) + len(news_data),
+            "session_id": self.current_session.get('session_id', 'Unknown'),
+            "generated_at": datetime.now().isoformat()
+        }
+
 if __name__ == "__main__":
     agent = IntelligentCyberAgent()
     
     # Test queries showcasing agentic decision-making
     test_queries = [
-        "Show me critical CVEs from the last 3 days",
+        {'content_type': 'both', 'days_back': 7, 'max_results': 10, 'severity': 'high'}
         # "Get 20 recent cybersecurity news items with high intrigue",
         # "Find all high and critical vulnerabilities from this week",
         # "What are the latest zero-day exploits?"

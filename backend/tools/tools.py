@@ -22,22 +22,22 @@ from db import (
     get_cves_by_filters, get_news_by_filters, get_last_scrape_time, get_data_statistics
 )
 
-_current_session = {
-    "scraped_articles": [],
-    "classified_cves": [],
-    "classified_news": [],
-    "session_id": None
-}
+# _current_session = {
+#     "scraped_articles": [],
+#     "classified_cves": [],
+#     "classified_news": [],
+#     "session_id": None
+# }
 
-def new_session():
-    """Start a new processing session"""
-    global _current_session
-    _current_session = {
-        "scraped_articles": [],
-        "classified_cves": [],
-        "classified_news": [],
-        "session_id": datetime.now().strftime("%Y%m%d_%H%M%S")
-    }
+# def new_session():
+#     """Start a new processing session"""
+#     global _current_session
+#     _current_session = {
+#         "scraped_articles": [],
+#         "classified_cves": [],
+#         "classified_news": [],
+#         "session_id": datetime.now().strftime("%Y%m%d_%H%M%S")
+#     }
 # Your existing helper functions
 def translate_articles(articles):
     """Reuse your existing translation logic"""
@@ -107,66 +107,59 @@ def save_to_json(items: list, filename: str) -> None:
 
     with open(filename, "w", encoding="utf-8") as f:
         json.dump([vars(item) for item in items], f, ensure_ascii=False, indent=2, default=convert)
-@tool("analyze_data_needs")
+
+@tool
 def analyze_data_needs(content_type: str = "both", severity: str = None, days_back: int = 7, max_results: int = 10) -> str:
     """Analyze current intelligence database to determine if fresh scraping is needed."""
     print(f"🔍 Analyzing intelligence needs...")
     
-    stats = get_data_statistics()
     severity_list = [severity] if severity else None
     cutoff_date = datetime.now() - timedelta(days=days_back)
     
     existing_cves = get_cves_by_filters(
         severity_filter=severity_list,
         after_date=cutoff_date,
-        limit=max_results * 2
+        limit=max_results
     )
     
     existing_news = get_news_by_filters(
         after_date=cutoff_date,
-        limit=max_results * 2
+        limit=max_results
     )
     
-    last_scrapes = get_last_scrape_time()
+    # Count items based on content type requested
+    if content_type == "cve":
+        total_items = len(existing_cves)
+        needed = max_results
+    elif content_type == "news":
+        total_items = len(existing_news)
+        needed = max_results
+    else:  # both
+        total_items = len(existing_cves) + len(existing_news)
+        needed = max_results
     
-    def hours_since_scrape(last_scrape):
-        if not last_scrape:
-            return 999
-        return (datetime.now() - last_scrape).total_seconds() / 3600
-    
-    avg_age = sum([
-        hours_since_scrape(last_scrapes.get("chinese")),
-        hours_since_scrape(last_scrapes.get("russian")),
-        hours_since_scrape(last_scrapes.get("english"))
-    ]) / 3
-    
-    total_items = len(existing_cves) + len(existing_news)
-    
-    if total_items >= max_results and avg_age < 12:
+    # Simple decision: do we have enough items?
+    if total_items >= needed:
         recommendation = "sufficient"
-        reasoning = f"Found {total_items} recent items, avg age {avg_age:.1f}h"
-    elif total_items >= max_results // 2 and avg_age < 48:
-        recommendation = "scrape_needed"
-        reasoning = f"Partial data ({total_items} items) but aging ({avg_age:.1f}h old)"
+        reasoning = f"Found {total_items}/{needed} items in database"
     else:
         recommendation = "urgent_scrape"
-        reasoning = f"Critical need: only {total_items} items, {avg_age:.1f}h old"
+        reasoning = f"Need {needed} items, only have {total_items}"
     
     print(f"📊 Analysis: {recommendation} - {reasoning}")
     
-    # Return minimal response to save tokens
     return json.dumps({
         "recommendation": recommendation,
         "reasoning": reasoning,
         "existing_items": total_items,
-        "avg_age_hours": round(avg_age, 1)
+        "needed_items": needed
     })
 
 
-@tool("retrieve_existing_data")
+@tool
 def retrieve_existing_data(content_type: str = "both", severity: str = None, days_back: int = 7, max_results: int = 10) -> str:
     """Retrieve existing intelligence from database without scraping."""
-    global _current_session
+    agent = retrieve_existing_data._agent_instance
     print(f"🗄️ Retrieving existing intelligence...")
     
     severity_list = [severity] if severity else None
@@ -175,22 +168,35 @@ def retrieve_existing_data(content_type: str = "both", severity: str = None, day
     cves = []
     news = []
     
-    if content_type in ["cve", "both"]:
+    if content_type == "both":
+        cve_limit = max_results // 2
+        news_limit = max_results - cve_limit 
+        
+        cves = get_cves_by_filters(
+            severity_filter=severity_list,
+            after_date=cutoff_date,
+            limit=cve_limit
+        )
+        
+        news = get_news_by_filters(
+            after_date=cutoff_date,
+            limit=news_limit
+        )
+    elif content_type == "cve":
         cves = get_cves_by_filters(
             severity_filter=severity_list,
             after_date=cutoff_date,
             limit=max_results
         )
-    
-    if content_type in ["news", "both"]:
+    else:  # news
         news = get_news_by_filters(
             after_date=cutoff_date,
             limit=max_results
         )
     
     # Store in session, return summary only
-    _current_session["classified_cves"] = cves[:max_results]
-    _current_session["classified_news"] = news[:max_results]
+    agent.current_session["classified_cves"] = cves
+    agent.current_session["classified_news"] = news
     
     print(f"✅ Retrieved {len(cves)} CVEs and {len(news)} news items")
     
@@ -267,13 +273,13 @@ def scrape_fresh_intel(content_type: str = "both", max_results: int = 10) -> str
 @tool
 def classify_intelligence(content_type: str = "both", severity: str = None, days_back: int = 7, max_results: int = 10) -> str:
     """Process and classify raw intelligence into CVEs and news items."""
-    global _current_session
+    agent = classify_intelligence._agent_instance
     print(f"🤖 Classifying intelligence...")
     
-    if not _current_session["scraped_articles"]:
+    if not agent.current_session["scraped_articles"]:
         return json.dumps({"error": "No scraped articles to classify"})
     
-    articles = _current_session["scraped_articles"]
+    articles = agent.current_session["scraped_articles"]
     cves = []
     news = []
     severity_list = [severity.upper()] if severity else []
@@ -339,11 +345,10 @@ def classify_intelligence(content_type: str = "both", severity: str = None, days
             reverse=True
         )[:max_results]
         
-        _current_session["classified_cves"] = ranked_cves
-        _current_session["classified_news"] = ranked_news
+        agent.current_session["classified_cves"] = ranked_cves
+        agent.current_session["classified_news"] = ranked_news
         
         # Save to files for backup
-        from tools.tools import save_to_json
         save_to_json(ranked_cves, "classified_cves.json")
         save_to_json(ranked_news, "classified_news.json")
         
@@ -369,7 +374,7 @@ def classify_intelligence(content_type: str = "both", severity: str = None, days
 @tool
 def evaluate_intel_sufficiency(content_type: str = "both", max_results: int = 10) -> str:
     """Evaluate if classified intelligence meets requirements."""
-    global _current_session
+    agent = evaluate_intel_sufficiency._agent_instance
     print(f"📊 Evaluating intelligence sufficiency...")
     
     cves = _current_session.get("classified_cves", [])
@@ -416,10 +421,10 @@ def evaluate_intel_sufficiency(content_type: str = "both", max_results: int = 10
 @tool
 def intensive_rescrape(content_type: str = "both", max_results: int = 10) -> str:
     """Execute intensive re-scraping with increased targets."""
-    global _current_session
+    agent = intensive_rescrape._agent_instance
     print(f"🔥 Initiating INTENSIVE intelligence collection...")
     
-    articles = _current_session.get("scraped_articles", [])  # Keep existing
+    articles = agent.current_session["scraped_articles"]
     intensive_target = max(max_results, 10)
     
     try:
@@ -452,7 +457,7 @@ def intensive_rescrape(content_type: str = "both", max_results: int = 10) -> str
             art.content = truncate_text(art.content, max_length=3000)
         
         translated_articles = translate_articles(unique_articles)
-        _current_session["scraped_articles"] = translated_articles
+        agent.current_session["scraped_articles"] = translated_articles
         
         print(f"🔥 INTENSIVE collection complete: {len(translated_articles)} unique articles")
         
@@ -469,89 +474,148 @@ def intensive_rescrape(content_type: str = "both", max_results: int = 10) -> str
             "error": str(e),
             "articles_collected": 0
         })
-
-
 @tool
-def present_results(output_format: str = "display") -> str:
-    """Format and present the final intelligence report."""
-    global _current_session
-    print(f"📋 Preparing intelligence report...")
+def present_results(output_format: str = "json") -> str:
+    """Return final intelligence data as JSON for frontend consumption."""
+    agent = present_results._agent_instance
+    print(f"📋 Preparing intelligence data...")
     
-    cves = _current_session.get("classified_cves", [])
-    news = _current_session.get("classified_news", [])
+    cves = agent.current_session.get("classified_cves", [])
+    news = agent.current_session.get("classified_news", [])
     
     if not cves and not news:
-        return "❌ No intelligence data available. Run the data collection workflow first."
+        return json.dumps({
+            "success": False,
+            "error": "No intelligence data available",
+            "cves": [],
+            "news": []
+        })
     
-    # Build comprehensive report
-    report = f"""
-🔒 **CYBERSECURITY INTELLIGENCE REPORT**
-📊 **Summary**: {len(cves)} Vulnerabilities | {len(news)} News Items
-⏰ **Generated**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}
-🆔 **Session**: {_current_session.get('session_id', 'Unknown')}
-{"="*60}
-
-"""
+    # Convert to JSON-serializable format
+    cves_data = []
+    for cve in cves:
+        cves_data.append({
+            "cve_id": cve.cve_id,
+            "title": cve.title,
+            "title_translated": cve.title_translated,
+            "summary": cve.summary,
+            "severity": cve.severity,
+            "cvss_score": float(cve.cvss_score),
+            "intrigue": float(cve.intrigue),
+            "published_date": cve.published_date.isoformat() if hasattr(cve.published_date, 'isoformat') else str(cve.published_date),
+            "original_language": cve.original_language,
+            "source": cve.source,
+            "url": cve.url,
+            "affected_products": getattr(cve, 'affected_products', [])
+        })
     
-    # Vulnerabilities Section
-    if cves:
-        report += f"""
-🚨 **CRITICAL VULNERABILITIES ({len(cves)})**
+    news_data = []
+    for news_item in news:
+        news_data.append({
+            "title": news_item.title,
+            "title_translated": news_item.title_translated,
+            "summary": news_item.summary,
+            "intrigue": float(news_item.intrigue),
+            "published_date": news_item.published_date.isoformat() if hasattr(news_item.published_date, 'isoformat') else str(news_item.published_date),
+            "original_language": news_item.original_language,
+            "source": news_item.source,
+            "url": news_item.url
+        })
+    
+    result = {
+        "success": True,
+        "cves": cves_data,
+        "news": news_data,
+        "total_results": len(cves_data) + len(news_data),
+        "session_id": agent.current_session['session_id', 'Unknown'],
+        "generated_at": datetime.now().isoformat()
+    }
+    
+    print(f"✅ Prepared {len(cves_data)} CVEs and {len(news_data)} news items")
+    
+    return json.dumps(result)
 
-"""
-        for i, cve in enumerate(cves, 1):
-            severity_emoji = {
-                "CRITICAL": "🔴",
-                "HIGH": "🟠", 
-                "MEDIUM": "🟡",
-                "LOW": "🟢"
-            }.get(cve.severity.upper(), "⚪")
+# @tool
+# def present_results(output_format: str = "display") -> str:
+#     """Format and present the final intelligence report."""
+#     global _current_session
+#     print(f"📋 Preparing intelligence report...")
+    
+#     cves = _current_session.get("classified_cves", [])
+#     news = _current_session.get("classified_news", [])
+    
+#     if not cves and not news:
+#         return "❌ No intelligence data available. Run the data collection workflow first."
+    
+#     # Build comprehensive report
+#     report = f"""
+# 🔒 **CYBERSECURITY INTELLIGENCE REPORT**
+# 📊 **Summary**: {len(cves)} Vulnerabilities | {len(news)} News Items
+# ⏰ **Generated**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}
+# 🆔 **Session**: {_current_session.get('session_id', 'Unknown')}
+# {"="*60}
+
+# """
+    
+#     # Vulnerabilities Section
+#     if cves:
+#         report += f"""
+# 🚨 **CRITICAL VULNERABILITIES ({len(cves)})**
+
+# """
+#         for i, cve in enumerate(cves, 1):
+#             severity_emoji = {
+#                 "CRITICAL": "🔴",
+#                 "HIGH": "🟠", 
+#                 "MEDIUM": "🟡",
+#                 "LOW": "🟢"
+#             }.get(cve.severity.upper(), "⚪")
             
-            pub_date = cve.published_date
-            if isinstance(pub_date, datetime):
-                pub_date = pub_date.strftime('%Y-%m-%d')
+#             pub_date = cve.published_date
+#             if isinstance(pub_date, datetime):
+#                 pub_date = pub_date.strftime('%Y-%m-%d')
             
-            report += f"""**{i}. {cve.title_translated}**
-{severity_emoji} **{cve.cve_id}** | Severity: {cve.severity} | CVSS: {cve.cvss_score:.1f}
-📝 {cve.summary[:300]}{'...' if len(cve.summary) > 300 else ''}
-📅 Published: {pub_date}
-🌐 Source: {cve.source} ({cve.original_language})
-🎯 Intrigue Score: {cve.intrigue:.1f}/10
-🔗 {cve.url}
-{"-"*40}
+#             report += f"""**{i}. {cve.title_translated}**
+# {severity_emoji} **{cve.cve_id}** | Severity: {cve.severity} | CVSS: {cve.cvss_score:.1f}
+# 📝 {cve.summary[:300]}{'...' if len(cve.summary) > 300 else ''}
+# 📅 Published: {pub_date}
+# 🌐 Source: {cve.source} ({cve.original_language})
+# 🎯 Intrigue Score: {cve.intrigue:.1f}/10
+# 🔗 {cve.url}
+# {"-"*40}
 
-"""
+# """
     
-    # News Section
-    if news:
-        report += f"""
-📰 **THREAT INTELLIGENCE NEWS ({len(news)})**
+#     # News Section
+#     if news:
+#         report += f"""
+# 📰 **THREAT INTELLIGENCE NEWS ({len(news)})**
 
-"""
-        for i, item in enumerate(news, 1):
-            pub_date = item.published_date
-            if isinstance(pub_date, datetime):
-                pub_date = pub_date.strftime('%Y-%m-%d')
+# """
+#         for i, item in enumerate(news, 1):
+#             pub_date = item.published_date
+#             if isinstance(pub_date, datetime):
+#                 pub_date = pub_date.strftime('%Y-%m-%d')
                 
-            report += f"""**{i}. {item.title_translated}**
-📝 {item.summary[:300]}{'...' if len(item.summary) > 300 else ''}
-📅 Published: {pub_date}
-🌐 Source: {item.source} ({item.original_language})
-🎯 Intrigue Score: {item.intrigue:.1f}/10
-🔗 {item.url}
-{"-"*40}
+#             report += f"""**{i}. {item.title_translated}**
+# 📝 {item.summary[:300]}{'...' if len(item.summary) > 300 else ''}
+# 📅 Published: {pub_date}
+# 🌐 Source: {item.source} ({item.original_language})
+# 🎯 Intrigue Score: {item.intrigue:.1f}/10
+# 🔗 {item.url}
+# {"-"*40}
 
-"""
+# """
     
-    if not cves and not news:
-        report += "\n❌ **No intelligence items found matching your criteria.**\n"
-        report += "💡 Try expanding your search parameters or check back later for fresh intelligence.\n"
+#     if not cves and not news:
+#         report += "\n❌ **No intelligence items found matching your criteria.**\n"
+#         report += "💡 Try expanding your search parameters or check back later for fresh intelligence.\n"
     
-    report += f"""
-{"="*60}
-🤖 **Intelligence gathered by CyberIntel Agent**
-📈 **Next automatic collection**: Every 6 hours
-🔄 **Manual refresh**: Available on demand
-"""
+#     report += f"""
+# {"="*60}
+# 🤖 **Intelligence gathered by CyberIntel Agent**
+# 📈 **Next automatic collection**: Every 6 hours
+# 🔄 **Manual refresh**: Available on demand
+# """
     
-    return report
+#     return report

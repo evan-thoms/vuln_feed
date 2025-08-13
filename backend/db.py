@@ -1,5 +1,7 @@
 import sqlite3
 from datetime import datetime, timedelta
+import json
+from models import Vulnerability, NewsItem
 
 DB_PATH = "articles.db"
 
@@ -254,3 +256,13 @@ def record_scraping_session(sources_scraped, articles_found, triggered_by="agent
     
     conn.commit()
     conn.close()
+if __name__ == "__main__":
+    # Initialize DB first if needed
+    init_db()
+    
+    # Test the function
+    stats = get_data_statistics()
+    print("Database Statistics:")
+    print(f"CVEs: {stats['cves']}")
+    print(f"News: {stats['news']}")
+    print(f"Recent articles (24h): {stats['recent_articles']}")
