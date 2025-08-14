@@ -6,12 +6,24 @@ from bs4 import BeautifulSoup
 import time
 from db import is_article_scraped
 from dateutil import parser
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 
 class ChineseScraper:
     def __init__(self, num_articles):
         self.max_arts = num_articles
         self.FORCE = True
+        self.session = self._create_fast_session()
+    def _create_fast_session(self):
+        """Fast session with minimal retry and proper timeout"""
+        session = requests.Session()
+        retry_strategy = Retry(total=2, backoff_factor=0.5)  # Quick retries
+        adapter = HTTPAdapter(max_retries=retry_strategy)
+        session.mount("http://", adapter)
+        session.mount("https://", adapter)
+        session.headers.update({'User-Agent': 'Mozilla/5.0 (compatible; scraper)'})
+        return session
 
     def scrape_freebuf(self, days_back: int = 7):
         print("[FreeBuf] Starting RSS scrape...")
@@ -90,10 +102,15 @@ class ChineseScraper:
             if not url.startswith("http"):
                 url = "https://" + url
             r = requests.get(url)
-            
-            if r.status_code == 404:
-                print(f"Skipping 404 URL: {url}")
-                return "404"
+            try:
+                # ESSENTIAL: Add timeout to prevent hanging
+                r = self.session.get(url, timeout=10)  # 10 second timeout
+                if r.status_code == 404:
+                    print(f"Skipping 404 URL: {url}")
+                    return "404"
+            except Exception as e:
+                print(f"Error fetching {url}: {e}")
+                return ""  # ESSENTIAL: Return empty instead of crashing
             soup = BeautifulSoup(r.text, "html.parser")
             if site == "FreeBuf":
                 content_div = soup.find("div", class_="artical-body")
@@ -116,8 +133,14 @@ class ChineseScraper:
                 "page": page,
                 "tag": TAG
             }
-            r = requests.get(API_URL, params=params)
-            data = r.json()
+            try:
+                # ESSENTIAL: Add timeout to API call
+                r = self.session.get(API_URL, params=params, timeout=10)
+                data = r.json()
+            except Exception as e:
+                print(f"API error page {page}: {e}")
+                continue  # ESSENTIAL: Continue with next page instead of crashing
+
             for post in data['data'][:self.max_arts]:
                 original_url = f"https://www.anquanke.com/post/id/{post['id']}"
                 articles_meta.append({
@@ -134,10 +157,13 @@ class ChineseScraper:
                 continue
             print(f"Fetching: {article['title']} ({article['url']})")
             content = self.fetch_article_content(article['url'], "Anquanke")
+            # ESSENTIAL: Skip failed articles instead of crashing
+            if not content or content == "404":
+                continue
             print(f"Content preview:\n{content[:100]}...\n") 
             article = Article(
                         id= None,
-                        source= "FreeBuf",
+                        source= "Anquanke",
                         title= article["title"],
                         title_translated="",
                         url= article["url"],
@@ -149,6 +175,7 @@ class ChineseScraper:
                     )
             articles.append(article)
         return articles
+        
     def scrape_freebuf_vuls(self):
         API_URL = "https://www.freebuf.com/fapi/frontend/category/list"
         max_pages = 1

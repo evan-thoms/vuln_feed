@@ -1,10 +1,20 @@
 from langchain_ollama import ChatOllama
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_openai import ChatOpenAI
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import time
+
 import json
 import re
+import os
 
-llm = ChatOllama(model="llama3")
-
+llm = ChatOpenAI(
+    model="gpt-4o-mini",  # Much cheaper than GPT-4, great for classification
+    openai_api_key=os.environ.get("OPENAI_API_KEY"),
+    temperature=0,  # Consistent output
+    max_tokens=500,  # Limit tokens to save cost
+    max_retries=2
+)
 # REQUIRED FORMAT:
 # {
 #   "type": "CVE" | "News",
@@ -31,7 +41,7 @@ summary: Provide a 2-3 sentence consise and compact summary of the details the v
 intrigue: Rate how intriguing and exciting this information is by providing a number from 1 to 10, with ten being the most intriguing, must-read information for someone getting updates about cybersecurity.
 affected_products: Create simple list of affected products as a list of strings
 
-Return nothing else besides this exact JSON format as this example below. Do not provide an explanation for your answers.
+Return nothing else besides this exact JSON format as this example below. Do not provide an explanation for your answers or comments.
 {{
   "type": "CVE",
   "cve_id": ["CVE-2023-12345"],
@@ -63,15 +73,99 @@ def extract_multiple_json_objects(llm_output: str):
     return json_objects
 
 def classify_article(article: str) -> dict:
-    chain = prompt | llm | (lambda x: x.content)
-    result = chain.invoke({"article": article})
-    print("result ", result)
+    if not article or not article.strip():
+        print("⚠️  Empty article content, skipping classification")
+        return []
     
-    matches =extract_multiple_json_objects(result)
-    if not matches:
-        raise ValueError("No JSON found in response:\n" + result)
-    return matches
+    try:
+        print(f"🔍 Classifying article (length: {len(article)} chars)...")
+            
+        chain = prompt | llm | (lambda x: x.content)
+        result = chain.invoke({"article": article[:2500]})
+        print("result ", result)
+        
+        matches =extract_multiple_json_objects(result)
 
+        if not matches:
+            print("❌ No valid JSON found, creating fallback classification")
+            # Return fallback classification instead of crashing
+            return [{
+                "type": "News",
+                "cve_id": ["Unknown"],
+                "severity": "Medium",
+                "cvss_score": 5.0,
+                "summary": "Classification failed - manual review needed",
+                "intrigue": 3,
+                "affected_products": ["Unknown"]
+            }]
+        print(f"✅ Successfully extracted {len(matches)} classifications")
+        return matches
+    
+    except Exception as e:
+        print(f"❌ Classification error: {e}")
+        # Return empty list instead of crashing
+        return []
+
+def classify_single_article_safe(article_data):
+    """
+    Thread-safe wrapper for single article classification.
+    Input: (index, article_content, article_url)
+    Output: (index, success, results, error_msg)
+    """
+    index, content, url = article_data
+    
+    try:
+        print(f"🔍 [{index}] Processing: {url[:50]}...")
+        results = classify_article(content)
+        return (index, True, results, None)
+    except Exception as e:
+        print(f"❌ [{index}] Error: {e}")
+        return (index, False, [], str(e))
+
+def classify_articles_parallel(articles_data, max_workers=5):
+    """
+    Classify multiple articles in parallel.
+    
+    Args:
+        articles_data: List of (index, content, url) tuples
+        max_workers: Number of concurrent threads (don't exceed OpenAI rate limits)
+    
+    Returns:
+        List of (index, success, results, error_msg) tuples
+    """
+    print(f"🚀 Starting parallel classification with {max_workers} workers...")
+    print(f"📊 Processing {len(articles_data)} articles...")
+    
+    results = []
+    start_time = time.time()
+    
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        # Submit all tasks
+        future_to_index = {
+            executor.submit(classify_single_article_safe, data): data[0] 
+            for data in articles_data
+        }
+        
+        # Collect results as they complete
+        completed = 0
+        for future in as_completed(future_to_index):
+            result = future.result()
+            results.append(result)
+            completed += 1
+            print(f"📈 Progress: {completed}/{len(articles_data)} completed")
+    
+    elapsed = time.time() - start_time
+    successful = sum(1 for _, success, _, _ in results if success)
+    failed = len(results) - successful
+    
+    print(f"🎯 Parallel classification complete!")
+    print(f"⏱️  Time: {elapsed:.2f} seconds")
+    print(f"✅ Successful: {successful}")
+    print(f"❌ Failed: {failed}")
+    print(f"🚀 Speed: {len(articles_data)/elapsed:.1f} articles/second")
+    
+    # Sort results by original index to maintain order
+    return sorted(results, key=lambda x: x[0])
 
 if __name__ == "__main__":
     # example_text = "在Fortinet VPN产品中发现了一个新的远程代码执行漏洞，编号CVE-2024-12345，CVSS评分9.8..."

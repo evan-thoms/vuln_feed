@@ -114,12 +114,12 @@ def get_cves_by_filters(severity_filter=None, after_date=None, limit=50):
         
         query += " ORDER BY (cvss_score * 0.6 + intrigue * 0.4) DESC LIMIT ?"
         params.append(limit)
-        print("SQL QUERY:", query)
-        print("PARAMS:", params)
+        # print("SQL QUERY:", query)
+        # print("PARAMS:", params)
         
         cursor.execute(query, params)
         rows = cursor.fetchall()
-        print("DB rows fetched:", rows)
+        # print("DB rows fetched:", rows)
         conn.close()
         
         # Convert to Vulnerability objects

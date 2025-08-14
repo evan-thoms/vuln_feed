@@ -6,13 +6,16 @@ import json
 import argostranslate.package
 import argostranslate.translate
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import os
+from openai import OpenAI
+openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 
 # Import your existing functions
 from scrapers.chinese_scrape import ChineseScraper
 from scrapers.english_scrape import EnglishScraper
 from scrapers.russian_scrape import RussianScraper
-from classify import classify_article
+from classify import classify_article, classify_articles_parallel
 from db import (
     init_db,
     insert_raw_article,
@@ -41,6 +44,67 @@ from db import (
 #         "session_id": datetime.now().strftime("%Y%m%d_%H%M%S")
 #     }
 # Your existing helper functions
+def translate_openai(text: str, source_lang: str, target_lang: str = "en") -> str:
+    """Fast OpenAI translation"""
+    if source_lang == target_lang:
+        return text
+    
+    # Language mapping
+    lang_map = {
+        "zh": "Chinese",
+        "ru": "Russian", 
+        "en": "English"
+    }
+    source_name = lang_map.get(source_lang, source_lang)
+    
+    try:
+        response = openai_client.chat.completions.create(
+            model="gpt-4o-mini",  # Fastest and cheapest
+            messages=[{
+                "role": "user", 
+                "content": f"Translate this {source_name} text to English. Return only the translation, no explanations:\n\n{text}"
+            }],
+            temperature=0,
+            max_tokens=len(text) + 100  # Efficient token usage
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        print(f"Translation error: {e}")
+        return text
+def translate_articles_parallel(articles):
+    """Parallel OpenAI translation - super fast"""
+    print(f"🌍 Translating {len(articles)} articles with OpenAI...")
+    
+    with ThreadPoolExecutor(max_workers=10) as executor:  # Higher workers for OpenAI
+        # Submit all translation jobs
+        future_to_article = {}
+        for art in articles:
+            if art.language != "en":
+                # Translate title
+                title_future = executor.submit(translate_openai, art.title, art.language)
+                content_future = executor.submit(translate_openai, art.content, art.language)
+                future_to_article[title_future] = (art, 'title')
+                future_to_article[content_future] = (art, 'content')
+        
+        # Collect results
+        for future in as_completed(future_to_article):
+            art, field = future_to_article[future]
+            try:
+                result = future.result()
+                if field == 'title':
+                    art.title_translated = result
+                else:
+                    art.content_translated = result
+            except Exception as e:
+                print(f"Translation failed: {e}")
+                # Fallback to original text
+                if field == 'title':
+                    art.title_translated = art.title
+                else:
+                    art.content_translated = art.content
+    
+    return articles
+
 def translate_articles(articles):
     """Reuse your existing translation logic"""
     for i, art in enumerate(articles):
@@ -114,7 +178,7 @@ def save_to_json(items: list, filename: str) -> None:
 def analyze_data_needs(content_type: str = "both", severity: str = None, days_back: int = 7, max_results: int = 10) -> str:
     """Analyze current intelligence database to determine if fresh scraping is needed."""
     print(f"🔍 Analyzing intelligence needs...")
-    
+    init_db()
     severity_list = [severity] if severity else None
     cutoff_date = datetime.now() - timedelta(days=days_back)
     num_cves = 0
@@ -282,7 +346,7 @@ def scrape_fresh_intel(content_type: str = "both", max_results: int = 10) -> str
         for art in articles:
             art.content = truncate_text(art.content, max_length=2000)
         
-        translated_articles = translate_articles(articles)
+        translated_articles = translate_articles_parallel(articles)
         
         agent.current_session["scraped_articles"] = translated_articles
         
@@ -301,106 +365,296 @@ def scrape_fresh_intel(content_type: str = "both", max_results: int = 10) -> str
             "articles_collected": 0
         })
 
-
 @tool
-def classify_intelligence(content_type: str = "both", severity: str = None, days_back: int = 7, max_results: int = 10) -> str:
-    """Process and classify raw intelligence into CVEs and news items."""
+def classify_intelligence(content_type: str = "both", severity: str = None, days_back: int = 7, max_results: int = 10, max_workers: int = 5) -> str:
+    """Process and classify raw intelligence into CVEs and news items using parallel processing."""
     agent = classify_intelligence._agent_instance
-    print(f"🤖 Classifying intelligence...")
+    print(f"🤖 Starting PARALLEL classification...")
     
     if not agent.current_session["scraped_articles"]:
         return json.dumps({"error": "No scraped articles to classify"})
     
     articles = agent.current_session["scraped_articles"]
-    cves = []
-    news = []
     severity_list = [severity.upper()] if severity else []
     cutoff_date = datetime.now() - timedelta(days=days_back)
+
+    recent_articles = [art for art in articles if art.scraped_at >= cutoff_date]
+    print(f"📅 Filtered to {len(recent_articles)} recent articles (within {days_back} days)")
     
+    if not recent_articles:
+        return json.dumps({"error": "No recent articles to process"})
+ 
     try:
-        for art in articles:
-            print(f"🔍 Processing: {art.url[:50]}...")
+        # Prepare data for parallel processing
+        articles_data = []
+        for i, art in enumerate(recent_articles):
+            content_to_classify = art.content_translated or art.content
+            if content_to_classify:  # Only include articles with content
+                articles_data.append((i, content_to_classify, art.url))
+        
+        print(f"📊 Prepared {len(articles_data)} articles for parallel classification")
+        
+        if not articles_data:
+            return json.dumps({"error": "No articles with content to classify"})
+        
+        # Parallel classification
+        parallel_results = classify_articles_parallel(articles_data, max_workers=max_workers)
+        
+        # Process results
+        cves = []
+        news = []
+        successful_classifications = 0
+        failed_classifications = 0
+        
+        # Create a mapping from index to article object
+        article_map = {i: recent_articles[i] for i in range(len(recent_articles))}
+        
+        for index, success, results, error_msg in parallel_results:
+            art = article_map[index]
             
-            results = classify_article(art.content_translated)
+            if not success or not results:
+                print(f"❌ Failed to classify {art.url}: {error_msg}")
+                failed_classifications += 1
+                mark_as_processed(art.url)  # Still mark as processed
+                continue
+            
+            # Process each classification result for this article
             for result in results:
-                if result["type"] == "CVE":
-                    if severity_list and result["severity"].upper() not in severity_list:
-                        continue
-                        
-                    vul = Vulnerability(
-                        cve_id=result["cve_id"][0] if result["cve_id"] else "Unknown",
-                        title=art.title,
-                        title_translated=art.title_translated,
-                        summary=result["summary"],
-                        severity=result["severity"],
-                        cvss_score=float(result["cvss_score"]) if result["cvss_score"] else 0.0,
-                        published_date=art.scraped_at,
-                        original_language=art.language,
-                        source=art.source,
-                        url=art.url,
-                        intrigue=float(result["intrigue"]) if result["intrigue"] else 0.0,
-                        affected_products=result["affected_products"]
-                    )
-                    
-                    if vul.published_date >= cutoff_date:
+                try:
+                    if result["type"] == "CVE" and content_type in ["cve", "both"]:
+                        if severity_list and result["severity"].upper() not in severity_list:
+                            continue
+                            
+                        # Handle cve_id being a list or single value
+                        cve_id_value = result["cve_id"]
+                        if isinstance(cve_id_value, list):
+                            cve_id = cve_id_value[0] if cve_id_value else "Unknown"
+                        else:
+                            cve_id = cve_id_value or "Unknown"
+                            
+                        vul = Vulnerability(
+                            cve_id=cve_id,
+                            title=art.title,
+                            title_translated=art.title_translated,
+                            summary=result["summary"],
+                            severity=result["severity"],
+                            cvss_score=float(result["cvss_score"]) if result["cvss_score"] else 0.0,
+                            published_date=art.scraped_at,
+                            original_language=art.language,
+                            source=art.source,
+                            url=art.url,
+                            intrigue=float(result["intrigue"]) if result["intrigue"] else 0.0,
+                            affected_products=result.get("affected_products", [])
+                        )
+           
                         cves.append(vul)
                         insert_cve(vul)
+                            
+                    elif result["type"] != "CVE" and content_type in ["news", "both"]:  # News item
+                        news_item = NewsItem(
+                            title=art.title,
+                            title_translated=art.title_translated,
+                            summary=result["summary"],
+                            published_date=art.scraped_at,
+                            original_language=art.language,
+                            source=art.source,
+                            intrigue=float(result["intrigue"]) if result["intrigue"] else 0.0,
+                            url=art.url
+                        )
                         
-                else:  # News item
-                    news_item = NewsItem(
-                        title=art.title,
-                        title_translated=art.title_translated,
-                        summary=result["summary"],
-                        published_date=art.scraped_at,
-                        original_language=art.language,
-                        source=art.source,
-                        intrigue=float(result["intrigue"]) if result["intrigue"] else 0.0,
-                        url=art.url
-                    )
-                    
-                    if news_item.published_date >= cutoff_date:
                         news.append(news_item)
                         insert_newsitem(news_item)
-                
-                mark_as_processed(art.url)
+                    
+                    successful_classifications += 1
+                    
+                except Exception as e:
+                    print(f"⚠️  Error processing classification result for {art.url}: {e}")
+                    failed_classifications += 1
+                    continue
+            
+            # Mark article as processed regardless of classification success
+            mark_as_processed(art.url)
         
-        # Rank and store in session
+        print(f"📊 Classification Summary:")
+        print(f"  ✅ Successful: {successful_classifications}")
+        print(f"  ❌ Failed: {failed_classifications}")
+        print(f"  📈 CVEs found: {len(cves)}")
+        print(f"  📰 News found: {len(news)}")
+        
+        # Rank and store in session (same logic as before)
         ranked_cves = sorted(
             cves,
             key=lambda c: (c.cvss_score * 0.6 + c.intrigue * 0.4),
             reverse=True
-        )[:max_results]
-        
+        )
         ranked_news = sorted(
-            news, 
+            news,   
             key=lambda n: n.intrigue, 
             reverse=True
-        )[:max_results]
+        )
+
+        if content_type == "cve":
+            final_cves = ranked_cves[:max_results]
+            final_news = []
+        elif content_type == "news":
+            final_cves = []
+            final_news = ranked_news[:max_results]
+        else:  # both - dynamic allocation
+            target_cves = max_results // 2
+            target_news = max_results // 2
+            
+            # Take what we can get for CVEs
+            final_cves = ranked_cves[:target_cves]
+            remaining_slots = max_results - len(final_cves)
+            
+            # Fill remaining slots with news
+            final_news = ranked_news[:remaining_slots]
         
-        agent.current_session["classified_cves"] = ranked_cves
-        agent.current_session["classified_news"] = ranked_news
+        agent.current_session["classified_cves"] = final_cves
+        agent.current_session["classified_news"] = final_news
         
         # Save to files for backup
-        save_to_json(ranked_cves, "classified_cves.json")
-        save_to_json(ranked_news, "classified_news.json")
+        save_to_json(final_cves, "classified_cves.json")
+        save_to_json(final_news, "classified_news.json")
         
-        print(f"🤖 Classified into {len(ranked_cves)} CVEs and {len(ranked_news)} news items")
+        print(f"🎯 PARALLEL classification complete!")
+        print(f"🚀 Final results: {len(final_cves)} CVEs and {len(final_news)} news items")
         
-        # Return summary only
+        # Return summary
         return json.dumps({
             "success": True,
-            "cves_found": len(ranked_cves),
-            "news_found": len(ranked_news),
-            "status": "classification_complete"
+            "cves_found": len(final_cves),
+            "news_found": len(final_news),
+            "successful_classifications": successful_classifications,
+            "failed_classifications": failed_classifications,
+            "status": "parallel_classification_complete"
         })
         
     except Exception as e:
+        print(f"❌ Critical error in parallel classification: {e}")
         return json.dumps({
             "success": False,
             "error": str(e),
             "cves_found": 0,
             "news_found": 0
         })
+# @tool
+# def classify_intelligence(content_type: str = "both", severity: str = None, days_back: int = 7, max_results: int = 10) -> str:
+#     """Process and classify raw intelligence into CVEs and news items."""
+#     agent = classify_intelligence._agent_instance
+#     print(f"🤖 Classifying intelligence...")
+    
+#     if not agent.current_session["scraped_articles"]:
+#         return json.dumps({"error": "No scraped articles to classify"})
+    
+#     articles = agent.current_session["scraped_articles"]
+#     cves = []
+#     news = []
+#     severity_list = [severity.upper()] if severity else []
+#     cutoff_date = datetime.now() - timedelta(days=days_back)
+
+#     recent_articles = [art for art in articles if art.scraped_at >= cutoff_date]
+#     print(f"📅 Filtered to {len(recent_articles)} recent articles (within {days_back} days)")
+ 
+#     try:
+#         for art in recent_articles:
+#             print(f"🔍 Processing: {art.url[:50]}...")
+            
+#             results = classify_article(art.content_translated)
+#             for result in results:
+#                 if result["type"] == "CVE" and content_type in ["cve", "both"]:
+#                     if severity_list and result["severity"].upper() not in severity_list:
+#                         continue
+                        
+#                     vul = Vulnerability(
+#                         cve_id=result["cve_id"][0] if result["cve_id"] else "Unknown",
+#                         title=art.title,
+#                         title_translated=art.title_translated,
+#                         summary=result["summary"],
+#                         severity=result["severity"],
+#                         cvss_score=float(result["cvss_score"]) if result["cvss_score"] else 0.0,
+#                         published_date=art.scraped_at,
+#                         original_language=art.language,
+#                         source=art.source,
+#                         url=art.url,
+#                         intrigue=float(result["intrigue"]) if result["intrigue"] else 0.0,
+#                         affected_products=result["affected_products"]
+#                     )
+       
+#                     cves.append(vul)
+#                     insert_cve(vul)
+                        
+#                 elif result["type"] != "CVE" and content_type in ["news", "both"]:  # News item
+#                     news_item = NewsItem(
+#                         title=art.title,
+#                         title_translated=art.title_translated,
+#                         summary=result["summary"],
+#                         published_date=art.scraped_at,
+#                         original_language=art.language,
+#                         source=art.source,
+#                         intrigue=float(result["intrigue"]) if result["intrigue"] else 0.0,
+#                         url=art.url
+#                     )
+                    
+
+#                     news.append(news_item)
+#                     insert_newsitem(news_item)
+                
+#                 mark_as_processed(art.url)
+        
+#         # Rank and store in session
+#         ranked_cves = sorted(
+#             cves,
+#             key=lambda c: (c.cvss_score * 0.6 + c.intrigue * 0.4),
+#             reverse=True
+#         )
+#         ranked_news = sorted(
+#             news,   
+#             key=lambda n: n.intrigue, 
+#             reverse=True
+#         )
+
+#         if content_type == "cve":
+#             final_cves = ranked_cves[:max_results]
+#             final_news = []
+#         elif content_type == "news":
+#             final_cves = []
+#             final_news = ranked_news[:max_results]
+#         else:  # both - dynamic allocation
+#             target_cves = max_results // 2
+#             target_news = max_results // 2
+            
+#             # Take what we can get for CVEs
+#             final_cves = ranked_cves[:target_cves]
+#             remaining_slots = max_results - len(final_cves)
+            
+#             # Fill remaining slots with news
+#             final_news = ranked_news[:remaining_slots]
+        
+#         agent.current_session["classified_cves"] = final_cves
+#         agent.current_session["classified_news"] = final_news
+        
+#         # Save to files for backup
+#         save_to_json(final_cves, "classified_cves.json")
+#         save_to_json(final_news, "classified_news.json")
+        
+#         print(f"🤖 Classified into {len(final_cves)} CVEs and {len(final_news)} news items")
+        
+#         # Return summary only
+#         return json.dumps({
+#             "success": True,
+#             "cves_found": len(final_cves),
+#             "news_found": len(final_news),
+#             "status": "classification_complete"
+#         })
+        
+#     except Exception as e:
+#         return json.dumps({
+#             "success": False,
+#             "error": str(e),
+#             "cves_found": 0,
+#             "news_found": 0
+#         })
 
 
 @tool

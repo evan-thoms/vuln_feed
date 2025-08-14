@@ -1,53 +1,19 @@
 [
   {
-    "cve_id": "CVE-2025-47162",
-    "title": "微软 Office 漏洞允许攻击者执行远程代码",
-    "title_translated": "Microsoft Office bug allows the assailant to execute remote code",
-    "summary": "Several key loopholes in Microsoft Office allow attackers to enforce random codes on affected systems, affecting numerous versions of Windows, Mac and Android platforms.",
-    "severity": "High",
-    "cvss_score": 8.4,
-    "published_date": "2025-08-13T16:41:10.346213",
-    "original_language": "zh",
-    "source": "FreeBuf",
-    "url": "https://www.anquanke.com/post/id/308412",
-    "intrigue": 9.0,
-    "affected_products": [
-      "Microsoft Office",
-      "Office LTSC 2021/2024",
-      "Microsoft Apps for Enterprise",
-      "Office for Android"
-    ]
-  },
-  {
     "cve_id": "CVE-2025-33053",
     "title": "微软修补被阿联酋黑客利用的零日漏洞",
-    "title_translated": "Microsoft fixes the zero-day loophole used by UAE hackers.",
-    "summary": "Microsoft closed a zero-day loophole in its Web application framework, which was exploited by Emirates Threat organizations as part of a spying campaign. The loophole was tracked as CVE-2025-33053 and affected Turkey, Qatar, Egypt, and Yemen.",
+    "title_translated": "Microsoft patches zero-day vulnerability exploited by UAE hackers.",
+    "summary": "Microsoft patched a zero-day remote code execution vulnerability in WebDAV exploited by the UAE threat group Stealth Falcon for espionage activities. The group deployed malware, including keyloggers and backdoors, targeting organizations in Turkey, Qatar, Egypt, and Yemen through phishing emails and a custom implant named Horus Agent.",
     "severity": "High",
-    "cvss_score": 8.0,
-    "published_date": "2025-08-13T16:41:14.264348",
+    "cvss_score": 8.5,
+    "published_date": "2025-08-14T15:01:24.041694",
     "original_language": "zh",
-    "source": "FreeBuf",
+    "source": "Anquanke",
     "url": "https://www.anquanke.com/post/id/308384",
-    "intrigue": 8.0,
+    "intrigue": 9.0,
     "affected_products": [
+      "Microsoft Web Application Framework",
       "WebDAV"
-    ]
-  },
-  {
-    "cve_id": "CVE-2022-36579",
-    "title": "Microsoft Office: CVE-2025-53784: Microsoft Word: CVE-2025-53784",
-    "title_translated": "Microsoft Office: CVE-2025-53784: Microsoft Word: CVE-2025-53784",
-    "summary": "Security vulnerability in Microsoft Word",
-    "severity": "High",
-    "cvss_score": 7.0,
-    "published_date": "2025-08-13T16:40:57.858820",
-    "original_language": "en",
-    "source": "Rapid7",
-    "url": "https://www.rapid7.com/db/vulnerabilities/microsoft-office-cve-2025-53784/",
-    "intrigue": 6.0,
-    "affected_products": [
-      "Microsoft Word"
     ]
   }
 ]
