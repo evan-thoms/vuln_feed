@@ -1,19 +1,83 @@
 [
   {
-    "cve_id": "CVE-2025-33053",
-    "title": "微软修补被阿联酋黑客利用的零日漏洞",
-    "title_translated": "Microsoft patches zero-day vulnerability exploited by UAE hackers.",
-    "summary": "Microsoft patched a zero-day remote code execution vulnerability in WebDAV exploited by the UAE threat group Stealth Falcon for espionage activities. The group deployed malware, including keyloggers and backdoors, targeting organizations in Turkey, Qatar, Egypt, and Yemen through phishing emails and a custom implant named Horus Agent.",
-    "severity": "High",
-    "cvss_score": 8.5,
-    "published_date": "2025-08-14T15:01:24.041694",
-    "original_language": "zh",
-    "source": "Anquanke",
-    "url": "https://www.anquanke.com/post/id/308384",
+    "cve_id": "CVE-2025-8901",
+    "title": "Google Chrome Vulnerability: CVE-2025-8901 Out of bounds write in ANGLE",
+    "title_translated": "Google Chrome Vulnerability: CVE-2025-8901 Out of bounds write in ANGLE",
+    "summary": "CVE-2025-8901 is a critical vulnerability in Google Chrome that allows for an out-of-bounds write in the ANGLE component. This could potentially allow attackers to execute arbitrary code on affected systems, leading to severe security breaches.",
+    "severity": "Critical",
+    "cvss_score": 10.0,
+    "published_date": "2025-08-14T17:02:35.849595",
+    "original_language": "en",
+    "source": "Rapid7",
+    "url": "https://www.rapid7.com/db/vulnerabilities/google-chrome-cve-2025-8901/",
     "intrigue": 9.0,
     "affected_products": [
-      "Microsoft Web Application Framework",
-      "WebDAV"
+      "Google Chrome"
+    ]
+  },
+  {
+    "cve_id": "CVE-2025-8882",
+    "title": "Google Chrome Vulnerability: CVE-2025-8882 Use after free in Aura",
+    "title_translated": "Google Chrome Vulnerability: CVE-2025-8882 Use after free in Aura",
+    "summary": "CVE-2025-8882 is a use-after-free vulnerability in the Aura component of Google Chrome, which could allow an attacker to execute arbitrary code. Successful exploitation may lead to complete system compromise, affecting users who have the browser installed.",
+    "severity": "Critical",
+    "cvss_score": 10.0,
+    "published_date": "2025-08-14T17:02:35.849847",
+    "original_language": "en",
+    "source": "Rapid7",
+    "url": "https://www.rapid7.com/db/vulnerabilities/google-chrome-cve-2025-8882/",
+    "intrigue": 9.0,
+    "affected_products": [
+      "Google Chrome"
+    ]
+  },
+  {
+    "cve_id": "CVE-2025-8881",
+    "title": "Google Chrome Vulnerability: CVE-2025-8881 Inappropriate implementation in File Picker",
+    "title_translated": "Google Chrome Vulnerability: CVE-2025-8881 Inappropriate implementation in File Picker",
+    "summary": "CVE-2025-8881 describes a critical vulnerability in Google Chrome's File Picker implementation, which could allow attackers to exploit the flaw and gain unauthorized access to sensitive files. This vulnerability poses a significant risk to users, as it can be exploited remotely without user interaction.",
+    "severity": "Critical",
+    "cvss_score": 10.0,
+    "published_date": "2025-08-14T17:02:35.850054",
+    "original_language": "en",
+    "source": "Rapid7",
+    "url": "https://www.rapid7.com/db/vulnerabilities/google-chrome-cve-2025-8881/",
+    "intrigue": 9.0,
+    "affected_products": [
+      "Google Chrome"
+    ]
+  },
+  {
+    "cve_id": "CVE-2025-8880",
+    "title": "Google Chrome Vulnerability: CVE-2025-8880 Race in V8",
+    "title_translated": "Google Chrome Vulnerability: CVE-2025-8880 Race in V8",
+    "summary": "CVE-2025-8880 is a critical race condition vulnerability in the V8 JavaScript engine used by Google Chrome. Exploitation of this vulnerability could allow attackers to execute arbitrary code, potentially compromising affected systems. Users are advised to update their browsers immediately to mitigate risks.",
+    "severity": "Critical",
+    "cvss_score": 10.0,
+    "published_date": "2025-08-14T17:02:35.850282",
+    "original_language": "en",
+    "source": "Rapid7",
+    "url": "https://www.rapid7.com/db/vulnerabilities/google-chrome-cve-2025-8880/",
+    "intrigue": 9.0,
+    "affected_products": [
+      "Google Chrome"
+    ]
+  },
+  {
+    "cve_id": "CVE-2025-40585",
+    "title": "西门子能源紧急警报：专用 5G 核心中的关键漏洞 (CVSS 9.9) 暴露了敏感数据！",
+    "title_translated": "Siemens Energy Emergency Alert: Critical Vulnerability (CVSS 9.9) in Dedicated 5G Core Exposes Sensitive Data!",
+    "summary": "Siemens has identified a critical vulnerability in the Elspec G5 Digital Fault Recorder involving hardcoded default credentials that can be exploited by unauthenticated remote attackers. This allows for potential manipulation of fault monitoring data and erroneous readings in critical infrastructure systems. Immediate action is required to change default credentials to mitigate risks.",
+    "severity": "Critical",
+    "cvss_score": 9.9,
+    "published_date": "2025-08-14T17:02:58.319619",
+    "original_language": "zh",
+    "source": "Anquanke",
+    "url": "https://www.anquanke.com/post/id/308380",
+    "intrigue": 9.0,
+    "affected_products": [
+      "Siemens Energy Services with Elspec G5DFR",
+      "All currently deployed versions"
     ]
   }
 ]

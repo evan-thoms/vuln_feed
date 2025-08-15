@@ -75,7 +75,7 @@ def translate_articles_parallel(articles):
     """Parallel OpenAI translation - super fast"""
     print(f"🌍 Translating {len(articles)} articles with OpenAI...")
     
-    with ThreadPoolExecutor(max_workers=10) as executor:  # Higher workers for OpenAI
+    with ThreadPoolExecutor(max_workers=50) as executor:  # Higher workers for OpenAI
         # Submit all translation jobs
         future_to_article = {}
         for art in articles:
@@ -147,8 +147,12 @@ def translate_argos(text: str, source_lang: str, target_lang: str = "en") -> str
     """Your existing argos translate function"""
     return argostranslate.translate.translate(text, source_lang, target_lang)
 
-def truncate_text(text, max_length=2000):
+def truncate_text(text, language,max_length=2000):
     """Your existing truncate function"""
+    if language == "zh":
+        max_length = int(max_length * 0.4)  # 800 chars for Chinese
+    elif language == "ru": 
+        max_length = int(max_length * 0.7)
     return text[:max_length]
 
 def row_to_article(row):
@@ -324,7 +328,7 @@ def scrape_fresh_intel(content_type: str = "both", max_results: int = 10) -> str
         ]
         
         articles = []
-        with ThreadPoolExecutor(max_workers=3) as executor:
+        with ThreadPoolExecutor(max_workers=6) as executor:
             futures = [executor.submit(scraper.scrape_all) for scraper in scrapers]
             for future in as_completed(futures):
                 articles.extend(future.result())
@@ -344,7 +348,7 @@ def scrape_fresh_intel(content_type: str = "both", max_results: int = 10) -> str
         # Translate and truncate
         
         for art in articles:
-            art.content = truncate_text(art.content, max_length=2000)
+            art.content = truncate_text(art.content, art.language, max_length=2000)
         
         translated_articles = translate_articles_parallel(articles)
         
@@ -366,7 +370,7 @@ def scrape_fresh_intel(content_type: str = "both", max_results: int = 10) -> str
         })
 
 @tool
-def classify_intelligence(content_type: str = "both", severity: str = None, days_back: int = 7, max_results: int = 10, max_workers: int = 5) -> str:
+def classify_intelligence(content_type: str = "both", severity: str = None, days_back: int = 7, max_results: int = 10, max_workers: int = 10) -> str:
     """Process and classify raw intelligence into CVEs and news items using parallel processing."""
     agent = classify_intelligence._agent_instance
     print(f"🤖 Starting PARALLEL classification...")
