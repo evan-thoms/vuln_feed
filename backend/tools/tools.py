@@ -74,17 +74,26 @@ def translate_openai(text: str, source_lang: str, target_lang: str = "en") -> st
 def translate_articles_parallel(articles):
     """Parallel OpenAI translation - super fast"""
     print(f"🌍 Translating {len(articles)} articles with OpenAI...")
+
+    non_english_articles = [art for art in articles if art.language != "en"]
+    print(f"📊 Skipping {len(articles) - len(non_english_articles)} English articles")
     
     with ThreadPoolExecutor(max_workers=50) as executor:  # Higher workers for OpenAI
         # Submit all translation jobs
         future_to_article = {}
-        for art in articles:
+
+        for art in non_english_articles:
             if art.language != "en":
                 # Translate title
                 title_future = executor.submit(translate_openai, art.title, art.language)
                 content_future = executor.submit(translate_openai, art.content, art.language)
                 future_to_article[title_future] = (art, 'title')
                 future_to_article[content_future] = (art, 'content')
+
+        for art in articles:
+            if art.language == "en":
+                art.title_translated = art.title
+                art.content_translated = art.content
         
         # Collect results
         for future in as_completed(future_to_article):
@@ -179,11 +188,19 @@ def save_to_json(items: list, filename: str) -> None:
         json.dump([vars(item) for item in items], f, ensure_ascii=False, indent=2, default=convert)
 
 @tool
-def analyze_data_needs(content_type: str = "both", severity: str = None, days_back: int = 7, max_results: int = 10) -> str:
+def analyze_data_needs(content_type: str = "both", severity = None, days_back: int = 7, max_results: int = 10) -> str:
     """Analyze current intelligence database to determine if fresh scraping is needed."""
     print(f"🔍 Analyzing intelligence needs...")
     init_db()
-    severity_list = [severity] if severity else None
+
+    if severity is None:
+        severity_list = None
+    elif isinstance(severity, str):
+        severity_list = [severity.upper()]
+    elif isinstance(severity, list):
+        severity_list = [s.upper() for s in severity] if severity else None
+    else:
+        severity_list = None
     cutoff_date = datetime.now() - timedelta(days=days_back)
     num_cves = 0
     num_news = 0
@@ -207,7 +224,6 @@ def analyze_data_needs(content_type: str = "both", severity: str = None, days_ba
         needed_news = max_results
     # Count items based on content type requested
     else:
-        print("content type both")
         needed_cves = max_results//2
         needed_news = max_results-needed_cves
         existing_cves = get_cves_by_filters(
@@ -215,16 +231,13 @@ def analyze_data_needs(content_type: str = "both", severity: str = None, days_ba
             after_date=cutoff_date,
             limit=needed_cves
         )
-        print("cves worked ", existing_cves)
         existing_news = get_news_by_filters(
             after_date=cutoff_date,
             limit=needed_news
         )
-        print("news worked", existing_news)
 
         num_cves = len(existing_cves or [])
         num_news = len(existing_news or [])
-        print(existing_news, existing_cves, num_cves, num_news)
 
     # Simple decision: do we have enough items?
     if num_cves >= needed_cves and num_news >=needed_news:
@@ -252,7 +265,14 @@ def retrieve_existing_data(content_type: str = "both", severity: str = None, day
     agent = retrieve_existing_data._agent_instance
     print(f"🗄️ Retrieving existing intelligence...")
     
-    severity_list = [severity] if severity else None
+    if severity is None:
+        severity_list = None
+    elif isinstance(severity, str):
+        severity_list = [severity.upper()]
+    elif isinstance(severity, list):
+        severity_list = [s.upper() for s in severity] if severity else None
+    else:
+        severity_list = None
     cutoff_date = datetime.now() - timedelta(days=days_back)
     
     cves = []
@@ -267,7 +287,6 @@ def retrieve_existing_data(content_type: str = "both", severity: str = None, day
             after_date=cutoff_date,
             limit=cve_limit
         )
-        print("cves: ", cves)
         
         news = get_news_by_filters(
             after_date=cutoff_date,
@@ -368,6 +387,25 @@ def scrape_fresh_intel(content_type: str = "both", max_results: int = 10) -> str
             "error": str(e),
             "articles_collected": 0
         })
+def should_classify_article(article, min_length=200):
+    """Filter out articles that aren't worth classifying"""
+    content = article.content_translated or article.content
+    
+    # Skip if too short (your logs show 81-99 char articles being processed)
+    if not content or len(content.strip()) < min_length:
+        return False
+    
+    # Skip if no cybersecurity keywords
+    text = (article.title + " " + content).lower()
+    security_keywords = [
+        "cve", "vulnerability", "exploit", "security", "attack", 
+        "breach", "malware", "ransomware", "patch", "zero-day"
+    ]
+    
+    if not any(keyword in text for keyword in security_keywords):
+        return False
+    
+    return True
 
 @tool
 def classify_intelligence(content_type: str = "both", severity: str = None, days_back: int = 7, max_results: int = 10, max_workers: int = 10) -> str:
@@ -379,19 +417,42 @@ def classify_intelligence(content_type: str = "both", severity: str = None, days
         return json.dumps({"error": "No scraped articles to classify"})
     
     articles = agent.current_session["scraped_articles"]
-    severity_list = [severity.upper()] if severity else []
+    if severity is None:
+        severity_list = []
+    elif isinstance(severity, str):
+        severity_list = [severity.upper()]
+    elif isinstance(severity, list):
+        severity_list = [s.upper() for s in severity] if severity else []
+    else:
+        severity_list = []
+    
+    print(f"🎯 Severity filter: {severity_list}")  # Debug line
     cutoff_date = datetime.now() - timedelta(days=days_back)
 
-    recent_articles = [art for art in articles if art.scraped_at >= cutoff_date]
-    print(f"📅 Filtered to {len(recent_articles)} recent articles (within {days_back} days)")
+    recent_articles = []
+    for art in articles:
+        # Skip if outside date range
+        if art.scraped_at < cutoff_date:
+            continue
+        # Skip if too short (your logs show 81-99 char articles)
+        content_to_check = art.content_translated or art.content
+        if not content_to_check or len(content_to_check.strip()) < 200:
+            print(f"⚠️  Skipping short article: {len(content_to_check) if content_to_check else 0} chars")
+            continue
+        recent_articles.append(art)
+    
+    print(f"📅 Filtered to {len(recent_articles)} recent articles (within {days_back} days, min 200 chars)")
     
     if not recent_articles:
         return json.dumps({"error": "No recent articles to process"})
- 
+    max_to_process = min(len(recent_articles), max_results * 2)
+    articles_to_process = recent_articles[:max_to_process]
+    print(f"📊 Processing {len(articles_to_process)} articles (limited from {len(recent_articles)})")
+
     try:
         # Prepare data for parallel processing
         articles_data = []
-        for i, art in enumerate(recent_articles):
+        for i, art in enumerate(articles_to_process):
             content_to_classify = art.content_translated or art.content
             if content_to_classify:  # Only include articles with content
                 articles_data.append((i, content_to_classify, art.url))
@@ -402,7 +463,7 @@ def classify_intelligence(content_type: str = "both", severity: str = None, days
             return json.dumps({"error": "No articles with content to classify"})
         
         # Parallel classification
-        parallel_results = classify_articles_parallel(articles_data, max_workers=max_workers)
+        parallel_results = classify_articles_parallel(articles_data, max_workers=max_workers, target_results=max_results )
         
         # Process results
         cves = []
@@ -412,6 +473,7 @@ def classify_intelligence(content_type: str = "both", severity: str = None, days
         
         # Create a mapping from index to article object
         article_map = {i: recent_articles[i] for i in range(len(recent_articles))}
+
         
         for index, success, results, error_msg in parallel_results:
             art = article_map[index]
@@ -425,8 +487,12 @@ def classify_intelligence(content_type: str = "both", severity: str = None, days
             # Process each classification result for this article
             for result in results:
                 try:
+                    print(f"🔍 Processing result: {result}")
                     if result["type"] == "CVE" and content_type in ["cve", "both"]:
+                        print(f"🚨 Found CVE: {result['cve_id']}")
+
                         if severity_list and result["severity"].upper() not in severity_list:
+                            print(f"⚠️  CVE {result['cve_id']} severity '{result['severity']}' not in filter {severity_list}")
                             continue
                             
                         # Handle cve_id being a list or single value
@@ -453,6 +519,7 @@ def classify_intelligence(content_type: str = "both", severity: str = None, days
            
                         cves.append(vul)
                         insert_cve(vul)
+                        print(f"✅ Added CVE to list: {cve_id}")
                             
                     elif result["type"] != "CVE" and content_type in ["news", "both"]:  # News item
                         news_item = NewsItem(
@@ -470,6 +537,9 @@ def classify_intelligence(content_type: str = "both", severity: str = None, days
                         insert_newsitem(news_item)
                     
                     successful_classifications += 1
+                
+                   
+                
                     
                 except Exception as e:
                     print(f"⚠️  Error processing classification result for {art.url}: {e}")

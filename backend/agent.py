@@ -22,7 +22,6 @@ from scrapers.chinese_scrape import ChineseScraper
 from scrapers.english_scrape import EnglishScraper
 from scrapers.russian_scrape import RussianScraper
 from classify import classify_article
-from langchain_groq import ChatGroq
 
 from db import (
     init_db, insert_raw_article, is_article_scraped, mark_as_processed,
@@ -137,45 +136,29 @@ Return only the final JSON from present_results. No additional commentary."""),
         try:
             # Start new session
             self.new_session()
+
+            self.current_params = {
+                'content_type': params['content_type'],
+                'severity': params.get('severity'),  # Keep as list
+                'days_back': params['days_back'],
+                'max_results': params['max_results']
+            }
+            
+            
             enhanced_input = f"""
             Execute cybersecurity intelligence workflow with these exact parameters:
                 - content_type: {params['content_type']}
-                - severity: {params.get('severity')}
+                - severity: {params.get('severity', [])} 
                 - days_back: {params['days_back']}
                 - max_results: {params['max_results']}
                             """
-                        
-            # params = self.parse_query(user_input)
-            
-            # enhanced_input = f"""
-            #     INTELLIGENCE REQUEST: "{user_input}"
-
-            #     Parameters:
-            #     - Content Type: {params.content_type}
-            #     - Severity: {params.severity or "Any"}
-            #     - Days Back: {params.days_back}
-            #     - Max Results: {params.max_results}
-
-            #     Execute intelligence gathering workflow with these parameters.
-            # """
+    
             print("input print", enhanced_input)
             result = self.agent_executor.invoke({"input": enhanced_input})
 
-
-
-            # return result["output"]
             return self._build_response_from_session()
         
-            # try:
-            #     json_result = json.loads(result["output"])
-            #     # Validate it has expected structure
-            #     if "cves" in json_result and "news" in json_result:
-            #         return json_result
-            # except (json.JSONDecodeError, KeyError):
-            #     pass
-            #     # Fallback: extract from session if agent didn't return proper JSON
-            # return self._build_response_from_session()
-            
+
         except Exception as e:
             return {"success": False, "error": str(e), "cves": [], "news": []}
     def _build_response_from_session(self) -> dict:

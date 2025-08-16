@@ -38,17 +38,10 @@ async def search_intelligence(request: SearchRequest):
     start_time = datetime.now()
     
     try:
-        # Convert severity list to single string for agent
-        # severity_str = request.severity[0] if request.severity else None
-        
-        # # Create query string for agent
-        # query = f"Find {request.content_type} cybersecurity intelligence from last {request.days_back} days"
-        # if severity_str:
-        #     query += f" with {severity_str} severity"
-        # query += f", show {request.max_results} results"
+
         params = {
             'content_type': request.content_type,
-            'severity': request.severity[0] if request.severity else None,
+            'severity': request.severity,
             'days_back': request.days_back,
             'max_results': request.max_results
         }
@@ -60,52 +53,7 @@ async def search_intelligence(request: SearchRequest):
         agent_response["query_params"] = request.dict()
         
         return agent_response
-        
-        # Get structured data from session
-        cves = _current_session.get("classified_cves", [])
-        news = _current_session.get("classified_news", [])
-        
-        # Convert to dict format for JSON response
-        cves_data = []
-        for cve in cves:
-            cves_data.append({
-                "cve_id": cve.cve_id,
-                "title": cve.title,
-                "title_translated": cve.title_translated,
-                "summary": cve.summary,
-                "severity": cve.severity,
-                "cvss_score": cve.cvss_score,
-                "intrigue": cve.intrigue,
-                "published_date": cve.published_date.isoformat() if hasattr(cve.published_date, 'isoformat') else str(cve.published_date),
-                "original_language": cve.original_language,
-                "source": cve.source,
-                "url": cve.url,
-                "affected_products": getattr(cve, 'affected_products', [])
-            })
-        
-        news_data = []
-        for news in news:
-            news_data.append({
-                "title": news.title,
-                "title_translated": news.title_translated,
-                "summary": news.summary,
-                "intrigue": news.intrigue,
-                "published_date": news.published_date.isoformat() if hasattr(news.published_date, 'isoformat') else str(news.published_date),
-                "original_language": news.original_language,
-                "source": news.source,
-                "url": news.url
-            })
-        
-        processing_time = (datetime.now() - start_time).total_seconds()
-        
-        return {
-            "cves": cves_data,
-            "news": news_data,
-            "total_results": len(cves_data) + len(news_data),
-            "processing_time": processing_time,
-            "agent_response": agent_response,
-            "query_params": request.dict()
-        }
+
     
         
     except Exception as e:

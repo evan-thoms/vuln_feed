@@ -115,14 +115,14 @@ def classify_single_article_safe(article_data):
     index, content, url = article_data
     
     try:
-        print(f"🔍 [{index}] Processing: {url[:50]}...")
+        print(f"🔍 [{index}] Processing: {url}...")
         results = classify_article(content)
         return (index, True, results, None)
     except Exception as e:
         print(f"❌ [{index}] Error: {e}")
         return (index, False, [], str(e))
 
-def classify_articles_parallel(articles_data, max_workers=5):
+def classify_articles_parallel(articles_data, max_workers=5, target_results=None):
     """
     Classify multiple articles in parallel.
     

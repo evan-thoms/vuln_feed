@@ -124,7 +124,8 @@ class ChineseScraper:
             return ""
     def scrape_anquanke(self):
         API_URL = "https://api.anquanke.com/data/v1/posts"
-        TAG = "漏洞"
+        # TAG = "漏洞"
+        TAG = "漏洞情报"
         pages = 1
         articles_meta = []
 
@@ -175,7 +176,7 @@ class ChineseScraper:
                     )
             articles.append(article)
         return articles
-        
+
     def scrape_freebuf_vuls(self):
         API_URL = "https://www.freebuf.com/fapi/frontend/category/list"
         max_pages = 1
@@ -246,15 +247,16 @@ class ChineseScraper:
 
 
 if __name__ == "__main__":
-    scraper = ChineseScraper(2)
-    articles = scraper.scrape_freebuf_vuls()
+    scraper = ChineseScraper(10)
+    articles = scraper.scrape_anquanke()
     for art in articles:
         print(f"ID: {art.id}")
-        print(f"Source: {art.source}")
+        # print(f"Source: {art.source}")
         print(f"Title: {art.title}")
         print(f"Link: {art.url}")
-        print(f"Language: {art.language}")
-        print(f"Scraped at: {art.scraped_at}")
+        # print(f"Language: {art.language}")
+        # print(f"Scraped at: {art.scraped_at}")
         print(f"Content preview:\n{art.content[:300]}") 
+        print("SDFJKSLDF")
         print(f"date: {art.published_date}"  ) # first 300 chars
         print("-" * 40)
