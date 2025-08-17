@@ -9,7 +9,7 @@ from dateutil import parser
 class RussianScraper():
     def __init__(self):
         self.max_arts = 8
-        self.FORCE = True
+        self.FORCE = False  # Changed from True to False to enable duplicate checking
     
     def normalize_date(self, date_str):
         month_map = {

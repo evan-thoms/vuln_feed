@@ -47,7 +47,7 @@ class Vulnerability:
     
 @dataclass
 class Article:
-    id: int | None
+    id: Optional[int]
     source: str
     title: str
     title_translated: str

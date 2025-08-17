@@ -13,7 +13,7 @@ from urllib3.util.retry import Retry
 class ChineseScraper:
     def __init__(self, num_articles):
         self.max_arts = num_articles
-        self.FORCE = True
+        self.FORCE = False  # Changed from True to False to enable duplicate checking
         self.session = self._create_fast_session()
     def _create_fast_session(self):
         """Fast session with minimal retry and proper timeout"""

@@ -43,12 +43,17 @@ class IntelligentCyberAgent:
         #     groq_api_key=api_key,
         #     temperature=0,
         # )
-        self.llm = ChatOpenAI(
-            model="gpt-4o-mini",
-            openai_api_key=os.environ.get("OPENAI_API_KEY"),
-            temperature=0,
-            max_retries=3
-        )
+        try:
+            self.llm = ChatOpenAI(
+                model="gpt-4o-mini",
+                openai_api_key=os.environ.get("OPENAI_API_KEY"),
+                temperature=0,
+                max_retries=3
+            )
+        except Exception as e:
+            print(f"⚠️ Failed to initialize OpenAI client: {e}")
+            self.llm = None
+            
         self.current_session = {
             "scraped_articles": [],
             "classified_cves": [],

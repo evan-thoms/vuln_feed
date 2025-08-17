@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS raw_articles (
     content_translated TEXT,
     language TEXT,
     scraped_at DATETIME,
+    published_date DATETIME,
     processed INTEGER DEFAULT 0
 );
 
@@ -22,7 +23,7 @@ CREATE TABLE IF NOT EXISTS cves (
     published_date DATETIME,
     original_language TEXT,
     source TEXT,
-    url TEXT,
+    url TEXT UNIQUE,
     intrigue REAL,
     affected_products TEXT
 );
@@ -35,6 +36,6 @@ CREATE TABLE IF NOT EXISTS newsitems (
     published_date DATETIME,
     original_language TEXT,
     source TEXT,
-    url TEXT,
+    url TEXT UNIQUE,
     intrigue REAL
 );

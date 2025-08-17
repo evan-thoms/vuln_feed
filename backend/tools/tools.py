@@ -8,7 +8,11 @@ import argostranslate.translate
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import os
 from openai import OpenAI
-openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+try:
+    openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+except Exception as e:
+    print("⚠️ OpenAI API key not configured. Some features disabled.")
+    openai_client = None
 
 
 # Import your existing functions
@@ -509,7 +513,7 @@ def classify_intelligence(content_type: str = "both", severity: str = None, days
                             summary=result["summary"],
                             severity=result["severity"],
                             cvss_score=float(result["cvss_score"]) if result["cvss_score"] else 0.0,
-                            published_date=art.scraped_at,
+                            published_date=art.published_date,
                             original_language=art.language,
                             source=art.source,
                             url=art.url,
@@ -526,7 +530,7 @@ def classify_intelligence(content_type: str = "both", severity: str = None, days
                             title=art.title,
                             title_translated=art.title_translated,
                             summary=result["summary"],
-                            published_date=art.scraped_at,
+                            published_date=art.published_date,
                             original_language=art.language,
                             source=art.source,
                             intrigue=float(result["intrigue"]) if result["intrigue"] else 0.0,

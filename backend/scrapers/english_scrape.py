@@ -10,7 +10,7 @@ from dateutil import parser
 
 class EnglishScraper:
     def __init__(self, num_articles) -> None:
-        self.FORCE = True
+        self.FORCE = False  # Changed from True to False to enable duplicate checking
         self.max_arts = num_articles
 
     def normalize_date(self, date_str):
