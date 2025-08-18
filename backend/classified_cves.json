@@ -1,18 +1,1 @@
-[
-  {
-    "cve_id": "CVE-2025-25256",
-    "title": "Fortinet FortiSIEM 命令注入漏洞（CVE-2025-25256）技术细节披露",
-    "title_translated": "Fortinet FortiSIEM Command Injection Vulnerability (CVE-2025-25256) Technical Details Disclosure",
-    "summary": "A critical command injection vulnerability in the Fortinet FortiSIEM system allows attackers to execute arbitrary commands through a specially crafted request. The flaw is due to improper input filtering in the phMonitor service, which can be exploited under specific conditions.",
-    "severity": "Critical",
-    "cvss_score": 9.8,
-    "published_date": "2025-08-16T07:55:40+08:00",
-    "original_language": "zh",
-    "source": "FreeBuf",
-    "url": "https://www.freebuf.com/articles/444578.html",
-    "intrigue": 9.0,
-    "affected_products": [
-      "Fortinet FortiSIEM"
-    ]
-  }
-]
+[]

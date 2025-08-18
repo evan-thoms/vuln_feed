@@ -9,6 +9,7 @@ import json
 # Import your agent
 from agent import IntelligentCyberAgent
 from models import QueryParams
+from db import get_data_freshness_info
 
 app = FastAPI(title="Cybersecurity Intelligence API", version="1.0.0")
 
@@ -49,6 +50,35 @@ async def search_intelligence(request: SearchRequest):
         # Run agent
         agent_response = agent.query(params)
 
+        # Add freshness information
+        freshness_info = get_data_freshness_info()
+        
+        # Format freshness data for frontend
+        formatted_freshness = {
+            "last_update": None,
+            "total_articles": 0
+        }
+        
+        # Get the most recent update time
+        latest_times = []
+        for source_info in freshness_info.get("scraping", {}).values():
+            if source_info.get("last_scrape"):
+                latest_times.append(source_info["last_scrape"])
+        for type_info in freshness_info.get("classification", {}).values():
+            if type_info.get("last_classified"):
+                latest_times.append(type_info["last_classified"])
+        
+        if latest_times:
+            formatted_freshness["last_update"] = max(latest_times).isoformat()
+        
+        # Get total articles
+        total_articles = sum(
+            source_info.get("total_articles", 0) 
+            for source_info in freshness_info.get("scraping", {}).values()
+        )
+        formatted_freshness["total_articles"] = total_articles
+        
+        agent_response["freshness"] = formatted_freshness
         agent_response["processing_time"] = (datetime.now() - start_time).total_seconds()
         agent_response["query_params"] = request.dict()
         
