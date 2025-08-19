@@ -1,102 +1,52 @@
 [
   {
-    "title": "超越传统钓鱼：AI与深度伪造技术如何驱动新一代诈骗",
-    "title_translated": "Beyond Traditional Fishing: How AI and Deepfake Technology Drive a New Generation of Scams",
-    "summary": "Cybercriminals are increasingly using AI, deepfakes, and advanced social engineering techniques to execute sophisticated phishing scams that mimic genuine communications. These tactics include creating flawless emails and cloned websites, as well as using deepfake technology to impersonate trusted figures, leading to significant risks for victims. The shift towards obtaining biometric data and exploiting legitimate services poses a serious threat to security.",
-    "published_date": "2025-08-18T00:28:32+08:00",
-    "original_language": "zh",
-    "source": "FreeBuf",
-    "url": "https://www.freebuf.com/articles/ai-security/444652.html",
-    "intrigue": 9.0
-  },
-  {
-    "title": "黑客论坛兜售1580万组PayPal明文凭证，或源自信息窃取恶意软件",
-    "title_translated": "A hacker forum is selling 15.8 million plaintext PayPal credentials, possibly sourced from information-stealing malware.",
-    "summary": "A threat actor is selling a dataset containing over 15.8 million PayPal credentials, including email-password combinations and associated URLs, which could facilitate automated login attacks. The authenticity of the data remains unverified, but if legitimate, it represents a significant security risk for users across multiple email service providers.",
-    "published_date": "2025-08-17T23:12:08+08:00",
-    "original_language": "zh",
-    "source": "FreeBuf",
-    "url": "https://www.freebuf.com/articles/database/444639.html",
-    "intrigue": 9.0
-  },
-  {
-    "title": "提示词中间人攻击：威胁ChatGPT等AI系统的隐形威胁",
-    "title_translated": "Prompt Injection Attacks: The Invisible Threat to AI Systems like ChatGPT",
-    "summary": "\"Man-in-the-Prompt\" attacks exploit vulnerabilities in browser extensions to access and manipulate prompts in AI tools like ChatGPT and Gemini, potentially leading to data theft and information leaks. This threat is particularly concerning for enterprise users, as 99% have at least one extension installed, increasing risk exposure.",
-    "published_date": "2025-08-16T17:27:18+08:00",
-    "original_language": "zh",
-    "source": "FreeBuf",
-    "url": "https://www.freebuf.com/articles/ai-security/444618.html",
-    "intrigue": 9.0
-  },
-  {
-    "title": "Microsoft Office Excel Remote Code Execution Vulnerability",
-    "title_translated": "Microsoft Office Excel Remote Code Execution Vulnerability",
-    "summary": "Microsoft Office Excel has a remote code execution vulnerability that can be exploited by opening a specially crafted Excel file. This file may be delivered via email or hosted on malicious websites, allowing attackers to execute remote code on affected systems.",
-    "published_date": "2025-08-12T00:00:00",
-    "original_language": "en",
-    "source": "CISA KEV",
-    "url": "https://nvd.nist.gov/vuln/detail/CVE-2007-0671",
-    "intrigue": 8.0
-  },
-  {
-    "title": "Alma Linux: CVE-2025-6558: Important: webkit2gtk3 security update (Multiple Advisories)",
-    "title_translated": "Alma Linux: CVE-2025-6558: Important: webkit2gtk3 security update (Multiple Advisories)",
-    "summary": "A vulnerability in ANGLE and GPU components of Google Chrome prior to version 138.0.7204.157 allows remote attackers to potentially escape the sandbox through a specially crafted HTML page. This poses a significant risk as it could lead to unauthorized access to system resources.",
-    "published_date": "2025-08-16T19:17:23.803000+00:00",
-    "original_language": "en",
-    "source": "Rapid7",
-    "url": "https://errata.almalinux.org/8/ALSA-2025-13780.html",
-    "intrigue": 8.0
-  },
-  {
-    "title": "Группировка Kinsing впервые провела масштабные атаки в России",
-    "title_translated": "The Kinsing group has conducted large-scale attacks in Russia for the first time.",
-    "summary": "The Kinsing group has launched a series of attacks targeting Russian companies in the financial, logistics, and telecom sectors, aiming to infect servers with malware for cryptocurrency mining. The exploitation process involves identifying software vulnerabilities to deploy malicious code, leading to performance degradation and equipment wear.",
-    "published_date": "2025-08-14T00:00:00",
+    "title": "PhantomCard: опасный Android-троян для бесконтактного клонирования карт",
+    "title_translated": "PhantomCard: a dangerous Android Trojan for contactless card cloning",
+    "summary": "PhantomCard is a new Android Trojan that exploits NFC technology to remotely clone credit cards, allowing fraudsters to make unauthorized transactions. It is distributed as a fake app and captures sensitive card information, including PIN codes, from unsuspecting users.",
+    "published_date": "2025-08-15T00:00:00",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-08-14-111332/46995",
+    "url": "https://www.anti-malware.ru/news/2025-08-15-111332/47011",
+    "intrigue": 9.0
+  },
+  {
+    "title": "Elastic EDR曝 0day漏洞：攻击者可绕过检测执行恶意程序并触发蓝屏崩溃",
+    "title_translated": "Elastic EDR exposes 0day vulnerability: Attackers can bypass detection to execute malicious programs and trigger blue screen crashes.",
+    "summary": "A zero-day vulnerability in Elastic's Endpoint Detection and Response solution allows attackers to bypass security mechanisms, execute malicious code, and trigger system crashes. The flaw in the 'elastic-endpoint-driver.sys' kernel driver can be exploited to gain complete control over affected systems, leading to persistent denial of service.",
+    "published_date": "2025-08-18T17:30:19",
+    "original_language": "zh",
+    "source": "Anquanke",
+    "url": "https://www.anquanke.com/post/id/311323",
+    "intrigue": 9.0
+  },
+  {
+    "title": "Trend Micro Apex One OS Command Injection Vulnerability",
+    "title_translated": "Trend Micro Apex One OS Command Injection Vulnerability",
+    "summary": "Trend Micro Apex One Management Console has an OS command injection vulnerability that allows pre-authenticated remote attackers to upload malicious code and execute commands. Affected installations should apply vendor mitigations or discontinue use if mitigations are unavailable.",
+    "published_date": "2025-08-18T00:00:00",
+    "original_language": "en",
+    "source": "CISA KEV",
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-54948",
     "intrigue": 8.0
   },
   {
-    "title": "N-able N-Central Command Injection Vulnerability",
-    "title_translated": "N-able N-Central Command Injection Vulnerability",
-    "summary": "N-able N-Central has a command injection vulnerability due to improper sanitization of user input, which could allow attackers to execute arbitrary commands. Users are advised to apply mitigations as per vendor instructions or discontinue use if mitigations are unavailable.",
-    "published_date": "2025-08-13T00:00:00",
-    "original_language": "en",
-    "source": "CISA KEV",
-    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-8876",
-    "intrigue": 6.0
+    "title": "В Новосибирске набирает обороты мошенничество от имени маркетплейсов",
+    "title_translated": "In Novosibirsk, fraud in the name of marketplaces is gaining momentum.",
+    "summary": "A new fraudulent scheme in Novosibirsk involves scammers posing as marketplace employees to hijack accounts on the State Services portal. They extract recovery data by claiming to facilitate order transfers, leading victims to unwittingly compromise their accounts and finances.",
+    "published_date": "2025-08-15T00:00:00",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-08-15-121598/47012",
+    "intrigue": 8.0
   },
   {
-    "title": "N-able N-Central Insecure Deserialization Vulnerability",
-    "title_translated": "N-able N-Central Insecure Deserialization Vulnerability",
-    "summary": "N-able N-Central has an insecure deserialization vulnerability that may allow for command execution. Users are advised to apply mitigations as per vendor instructions or discontinue use if mitigations are not available.",
-    "published_date": "2025-08-13T00:00:00",
-    "original_language": "en",
-    "source": "CISA KEV",
-    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-8875",
-    "intrigue": 6.0
-  },
-  {
-    "title": "RARLAB WinRAR Path Traversal Vulnerability",
-    "title_translated": "RARLAB WinRAR Path Traversal Vulnerability",
-    "summary": "RARLAB WinRAR has a path traversal vulnerability in its Windows version that could allow attackers to execute arbitrary code through malicious archive files. Users are advised to apply vendor mitigations or discontinue use if no mitigations are available.",
-    "published_date": "2025-08-12T00:00:00",
-    "original_language": "en",
-    "source": "CISA KEV",
-    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-8088",
-    "intrigue": 6.0
-  },
-  {
-    "title": "Microsoft Internet Explorer Resource Management Errors Vulnerability",
-    "title_translated": "Microsoft Internet Explorer Resource Management Errors Vulnerability",
-    "summary": "Microsoft Internet Explorer has a memory corruption vulnerability that enables remote code execution. Users are advised to discontinue use of the product or apply mitigations as per vendor instructions, especially since the affected products may be end-of-life or end-of-service.",
-    "published_date": "2025-08-12T00:00:00",
-    "original_language": "en",
-    "source": "CISA KEV",
-    "url": "https://nvd.nist.gov/vuln/detail/CVE-2013-3893",
-    "intrigue": 6.0
+    "title": "dddd-red v3.0更新：红队打点再进化，不仅快，还会“自己跑”",
+    "title_translated": "dddd-red v3.0 update: Red team scoring has evolved again, not only faster but also capable of \"running by itself.\"",
+    "summary": "The update introduces new features in dddd-red and dddd-rust tools aimed at enhancing speed and efficiency in vulnerability detection and management. These tools streamline the process of discovering targets, verifying vulnerabilities, and notifying teams, significantly improving response times and reducing manual intervention.",
+    "published_date": "2025-08-18T14:23:56+08:00",
+    "original_language": "zh",
+    "source": "FreeBuf",
+    "url": "https://www.freebuf.com/articles/sectool/444689.html",
+    "intrigue": 8.0
   }
 ]

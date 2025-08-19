@@ -21,14 +21,10 @@ from scrapers.english_scrape import EnglishScraper
 from scrapers.russian_scrape import RussianScraper
 from classify import classify_article, classify_articles_parallel
 from db import (
-    init_db,
-    insert_raw_article,
-    is_article_scraped,
-    mark_as_processed,
-    get_unprocessed_articles,
-    insert_cve,
-    insert_newsitem,
-    get_cves_by_filters, get_news_by_filters, get_last_scrape_time, get_data_statistics
+    init_db, insert_raw_article, is_article_scraped, mark_as_processed, 
+    get_unprocessed_articles, insert_cve, insert_newsitem,
+    get_cves_by_filters, get_news_by_filters, get_last_scrape_time, get_data_statistics,
+    is_article_classified, get_classified_article
 )
 
 # _current_session = {
@@ -48,9 +44,9 @@ from db import (
 #         "session_id": datetime.now().strftime("%Y%m%d_%H%M%S")
 #     }
 # Your existing helper functions
-def translate_openai(text: str, source_lang: str, target_lang: str = "en") -> str:
-    """Fast OpenAI translation"""
-    if source_lang == target_lang:
+def translate_openai(text: str, source_lang: str) -> str:
+    """Fast OpenAI translation with optimized settings"""
+    if source_lang == "en":
         return text
     
     # Language mapping
@@ -63,13 +59,14 @@ def translate_openai(text: str, source_lang: str, target_lang: str = "en") -> st
     
     try:
         response = openai_client.chat.completions.create(
-            model="gpt-4o-mini",  # Fastest and cheapest
-            messages=[{
-                "role": "user", 
-                "content": f"Translate this {source_name} text to English. Return only the translation, no explanations:\n\n{text}"
-            }],
-            temperature=0,
-            max_tokens=len(text) + 100  # Efficient token usage
+            model="gpt-3.5-turbo",  # Faster than gpt-4
+            messages=[
+                {"role": "system", "content": f"Translate the following text from {source_lang} to English. Keep it concise and accurate."},
+                {"role": "user", "content": text}
+            ],
+            max_tokens=200,  # Limit response length
+            temperature=0.1,  # More deterministic
+            timeout=10  # Add timeout
         )
         return response.choices[0].message.content.strip()
     except Exception as e:
@@ -79,14 +76,35 @@ def translate_articles_parallel(articles):
     """Parallel OpenAI translation - super fast"""
     print(f"🌍 Translating {len(articles)} articles with OpenAI...")
 
-    non_english_articles = [art for art in articles if art.language != "en"]
-    print(f"📊 Skipping {len(articles) - len(non_english_articles)} English articles")
+    # Filter out articles that are already translated
+    articles_to_translate = []
+    already_translated = []
     
-    with ThreadPoolExecutor(max_workers=50) as executor:  # Higher workers for OpenAI
+    for art in articles:
+        if art.language == "en":
+            # English articles don't need translation
+            art.title_translated = art.title
+            art.content_translated = art.content
+            already_translated.append(art)
+        elif art.title_translated and art.content_translated:
+            # Already translated articles
+            already_translated.append(art)
+            print(f"⏭️  Skipping already translated: {art.url}")
+        else:
+            # Need translation
+            articles_to_translate.append(art)
+    
+    print(f"📊 Skipping {len(already_translated)} already translated articles")
+    print(f"🌍 Translating {len(articles_to_translate)} articles...")
+
+    if not articles_to_translate:
+        return articles  # All articles are already translated
+    
+    with ThreadPoolExecutor(max_workers=100) as executor:  # Increased from 50 to 100 for faster processing
         # Submit all translation jobs
         future_to_article = {}
 
-        for art in non_english_articles:
+        for art in articles_to_translate:
             if art.language != "en":
                 # Translate title
                 title_future = executor.submit(translate_openai, art.title, art.language)
@@ -94,11 +112,6 @@ def translate_articles_parallel(articles):
                 future_to_article[title_future] = (art, 'title')
                 future_to_article[content_future] = (art, 'content')
 
-        for art in articles:
-            if art.language == "en":
-                art.title_translated = art.title
-                art.content_translated = art.content
-        
         # Collect results
         for future in as_completed(future_to_article):
             art, field = future_to_article[future]
@@ -264,10 +277,11 @@ def analyze_data_needs(content_type: str = "both", severity = None, days_back: i
 
 
 @tool
-def retrieve_existing_data(content_type: str = "both", severity: str = None, days_back: int = 7, max_results: int = 10) -> str:
+def retrieve_existing_data(content_type: str = "both", severity = None, days_back: int = 7, max_results: int = 10) -> str:
     """Retrieve existing intelligence from database without scraping."""
     agent = retrieve_existing_data._agent_instance
     print(f"🗄️ Retrieving existing intelligence...")
+    print(f"🔍 DEBUG: Received severity parameter: {severity} (type: {type(severity)})")
     
     if severity is None:
         severity_list = None
@@ -277,7 +291,12 @@ def retrieve_existing_data(content_type: str = "both", severity: str = None, day
         severity_list = [s.upper() for s in severity] if severity else None
     else:
         severity_list = None
-    cutoff_date = datetime.now() - timedelta(days=days_back)
+    
+    print(f"🔍 DEBUG: Processed severity_list: {severity_list}")
+    
+    # Use a more generous date filter to include recently scraped articles
+    # This accounts for articles that were scraped recently but might have older published dates
+    cutoff_date = datetime.now() - timedelta(days=days_back)  # Back to original logic
     
     cves = []
     news = []
@@ -313,6 +332,9 @@ def retrieve_existing_data(content_type: str = "both", severity: str = None, day
     agent.current_session["classified_news"] = news
     
     print(f"✅ Retrieved {len(cves)} CVEs and {len(news)} news items")
+    print(f"📅 Using cutoff date: {cutoff_date.isoformat()}")
+    print(f"🎯 Severity filter: {severity_list}")
+    print(f"📊 Content type: {content_type}, Max results: {max_results}")
     
     return json.dumps({
         "success": True,
@@ -346,7 +368,7 @@ def scrape_fresh_intel(content_type: str = "both", max_results: int = 10) -> str
         # articles.extend(e_scraper.scrape_all())
         scrapers = [
             ChineseScraper(target_per_source),
-            RussianScraper(),
+            RussianScraper(target_per_source),
             EnglishScraper(target_per_source)
         ]
         
@@ -368,14 +390,28 @@ def scrape_fresh_intel(content_type: str = "both", max_results: int = 10) -> str
                 )
                 articles.append(article)
         
-        # Translate and truncate
-        
+        # Check for already classified articles and add them to output
+        already_classified_articles = []
         for art in articles:
-            art.content = truncate_text(art.content, art.language, max_length=2000)
+            if is_article_classified(art.url):
+                classified_data = get_classified_article(art.url)
+                if classified_data:
+                    already_classified_articles.append(classified_data)
+                    print(f"📋 Found already classified article: {art.url}")
         
-        translated_articles = translate_articles_parallel(articles)
+        # Filter out already classified articles from processing pipeline
+        articles_to_process = [art for art in articles if not is_article_classified(art.url)]
+        print(f"📊 Processing {len(articles_to_process)} new articles (skipping {len(articles) - len(articles_to_process)} already classified)")
         
+        # Translate and truncate only new articles
+        for art in articles_to_process:
+            art.content = truncate_text(art.content, art.language, max_length=1000)  # Reduced from 2000 to 1000
+        
+        translated_articles = translate_articles_parallel(articles_to_process)
+        
+        # Store both new and already classified articles
         agent.current_session["scraped_articles"] = translated_articles
+        agent.current_session["already_classified_articles"] = already_classified_articles
         
         print(f"✅ Fresh intel collected: {len(translated_articles)} articles")
         
@@ -443,25 +479,42 @@ def classify_intelligence(content_type: str = "both", severity: str = None, days
         if not content_to_check or len(content_to_check.strip()) < 200:
             print(f"⚠️  Skipping short article: {len(content_to_check) if content_to_check else 0} chars")
             continue
+        
+        # Early filtering: skip if no security keywords
+        text = (art.title + " " + content_to_check).lower()
+        security_keywords = ["cve", "vulnerability", "exploit", "security", "attack", "breach", "malware"]
+        if not any(keyword in text for keyword in security_keywords):
+            print(f"⚠️  Skipping non-security article: {art.title[:50]}...")
+            continue
+            
         recent_articles.append(art)
     
     print(f"📅 Filtered to {len(recent_articles)} recent articles (within {days_back} days, min 200 chars)")
     
     if not recent_articles:
         return json.dumps({"error": "No recent articles to process"})
-    max_to_process = min(len(recent_articles), max_results * 2)
+    max_to_process = min(len(recent_articles), max_results)  # Reduced from max_results * 2 to just max_results
     articles_to_process = recent_articles[:max_to_process]
     print(f"📊 Processing {len(articles_to_process)} articles (limited from {len(recent_articles)})")
 
     try:
         # Prepare data for parallel processing
         articles_data = []
+        skipped_already_classified = 0
+        
         for i, art in enumerate(articles_to_process):
+            # Skip if already classified
+            if is_article_classified(art.url):
+                skipped_already_classified += 1
+                print(f"⏭️  Skipping already classified: {art.url}")
+                continue
+                
             content_to_classify = art.content_translated or art.content
             if content_to_classify:  # Only include articles with content
                 articles_data.append((i, content_to_classify, art.url))
         
         print(f"📊 Prepared {len(articles_data)} articles for parallel classification")
+        print(f"⏭️  Skipped {skipped_already_classified} already classified articles")
         
         if not articles_data:
             return json.dumps({"error": "No articles with content to classify"})
@@ -558,6 +611,49 @@ def classify_intelligence(content_type: str = "both", severity: str = None, days
         print(f"  ❌ Failed: {failed_classifications}")
         print(f"  📈 CVEs found: {len(cves)}")
         print(f"  📰 News found: {len(news)}")
+        
+        # Add already classified articles to the results
+        already_classified_articles = agent.current_session.get("already_classified_articles", [])
+        print(f"📋 Including {len(already_classified_articles)} already classified articles")
+        
+        for classified_data in already_classified_articles:
+            if classified_data["type"] == "CVE" and content_type in ["cve", "both"]:
+                data = classified_data["data"]
+                # Check severity filter
+                if severity_list and data["severity"].upper() not in severity_list:
+                    continue
+                    
+                vul = Vulnerability(
+                    cve_id=data["cve_id"],
+                    title=data["title"],
+                    title_translated=data["title_translated"],
+                    summary=data["summary"],
+                    severity=data["severity"],
+                    cvss_score=data["cvss_score"],
+                    published_date=data["published_date"],
+                    original_language=data["original_language"],
+                    source=data["source"],
+                    url=data["url"],
+                    intrigue=data["intrigue"],
+                    affected_products=data["affected_products"]
+                )
+                cves.append(vul)
+                print(f"📋 Added already classified CVE: {data['cve_id']}")
+                
+            elif classified_data["type"] == "News" and content_type in ["news", "both"]:
+                data = classified_data["data"]
+                news_item = NewsItem(
+                    title=data["title"],
+                    title_translated=data["title_translated"],
+                    summary=data["summary"],
+                    published_date=data["published_date"],
+                    original_language=data["original_language"],
+                    source=data["source"],
+                    url=data["url"],
+                    intrigue=data["intrigue"]
+                )
+                news.append(news_item)
+                print(f"📋 Added already classified news: {data['title'][:50]}...")
         
         # Rank and store in session (same logic as before)
         ranked_cves = sorted(
@@ -984,3 +1080,28 @@ def present_results(output_format: str = "json") -> str:
 # """
     
 #     return report
+
+def translate_batch_openai(texts: list, source_lang: str) -> list:
+    """Batch translate multiple texts in one API call for efficiency"""
+    if source_lang == "en":
+        return texts
+    
+    # Combine texts with separators
+    combined_text = "\n---\n".join(texts[:5])  # Limit to 5 texts per batch
+    
+    try:
+        response = openai_client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": f"Translate the following {len(texts)} texts from {source_lang} to English. Separate each translation with '---'."},
+                {"role": "user", "content": combined_text}
+            ],
+            max_tokens=500,
+            temperature=0.1,
+            timeout=15
+        )
+        result = response.choices[0].message.content.strip()
+        return result.split("---")
+    except Exception as e:
+        print(f"Batch translation error: {e}")
+        return texts  # Return original texts as fallback

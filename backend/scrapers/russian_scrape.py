@@ -7,8 +7,8 @@ from dateutil import parser
 
 
 class RussianScraper():
-    def __init__(self):
-        self.max_arts = 8
+    def __init__(self, num_articles=8):
+        self.max_arts = num_articles
         self.FORCE = False  # Changed from True to False to enable duplicate checking
     
     def normalize_date(self, date_str):
@@ -90,7 +90,7 @@ class RussianScraper():
                 content_div = article_soup.find("div", class_="txt-wrap")
                 if not content_div:
                     print("no content")
-                    return ""
+                    continue
                 
                 paragraphs = content_div.find_all(["p", "blockquote"])
                 full_text = "\n\n".join(p.get_text(strip=True) for p in paragraphs)
@@ -122,7 +122,7 @@ class RussianScraper():
 
 
 if __name__ == "__main__":
-    scraper = RussianScraper()
+    scraper = RussianScraper(8)
     articles = scraper.scrape_all()
     for art in articles:
         print(f"ID: {art.id}")

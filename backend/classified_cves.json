@@ -1,1 +1,93 @@
-[]
+[
+  {
+    "cve_id": "CVE-2025-7384",
+    "title": "WordPress 插件曝RCE高危漏洞（CVE-2025-7384，CVSS 9.8），逾 7 万网站面临数据泄露与破坏风险",
+    "title_translated": "WordPress plugin exposes high-risk RCE vulnerability (CVE-2025-7384, CVSS 9.8), over 70,000 websites face risks of data leakage and destruction.",
+    "summary": "The vulnerability CVE-2025-7384 in a widely used WordPress plugin allows attackers to exploit a PHP object injection flaw without authentication, potentially leading to denial of service and remote code execution. This affects all versions 1.4.3 and below, particularly when used with Contact Form 7, increasing the risk of critical file deletions and site takeover.",
+    "severity": "Critical",
+    "cvss_score": 9.8,
+    "published_date": "2025-08-15T17:22:15",
+    "original_language": "zh",
+    "source": "Anquanke",
+    "url": "https://www.anquanke.com/post/id/311249",
+    "intrigue": 9.0,
+    "affected_products": [
+      "Database for Contact Form 7",
+      "WPforms",
+      "Elementor Forms",
+      "CRM Perks Forms"
+    ]
+  },
+  {
+    "cve_id": "CVE-2025-52970",
+    "title": "研究人员将发布FortiWeb身份验证完全绕过漏洞利用代码",
+    "title_translated": "Researchers will release exploit code for the FortiWeb authentication bypass vulnerability.",
+    "summary": "A buffer read vulnerability in FortiWeb allows remote attackers to bypass authentication by exploiting the Era parameter, leading to complete impersonation of any active user. The attack requires the target user to maintain an active session while the attacker brute-forces a small numeric field in the cookie. This issue affects FortiWeb versions 7.0 to 7.6, with patches available in later versions.",
+    "severity": "Critical",
+    "cvss_score": 9.0,
+    "published_date": "2025-08-18T17:40:02",
+    "original_language": "zh",
+    "source": "Anquanke",
+    "url": "https://www.anquanke.com/post/id/311301",
+    "intrigue": 8.0,
+    "affected_products": [
+      "FortiWeb 7.0",
+      "FortiWeb 7.2",
+      "FortiWeb 7.4",
+      "FortiWeb 7.6"
+    ]
+  },
+  {
+    "cve_id": "CVE-2025-8713",
+    "title": "PostgreSQL核心组件曝高危RCE漏洞，官方发布紧急修复补丁",
+    "title_translated": "PostgreSQL core component exposes critical RCE vulnerability, official emergency patch released.",
+    "summary": "The PostgreSQL update addresses three vulnerabilities, including CVE-2025-8714 and CVE-2025-8715, which allow for arbitrary code execution through the pg_dump tool due to untrusted data injection and improper handling of newline characters. These vulnerabilities affect PostgreSQL versions 13 to 17 and could lead to significant security breaches if exploited.",
+    "severity": "High",
+    "cvss_score": 8.8,
+    "published_date": "2025-08-18T17:31:37",
+    "original_language": "zh",
+    "source": "Anquanke",
+    "url": "https://www.anquanke.com/post/id/311307",
+    "intrigue": 8.0,
+    "affected_products": [
+      "PostgreSQL 17.6",
+      "PostgreSQL 16.10",
+      "PostgreSQL 15.14",
+      "PostgreSQL 14.19",
+      "PostgreSQL 13.22",
+      "PostgreSQL 18 beta3"
+    ]
+  },
+  {
+    "cve_id": "CVE-2025-3248",
+    "title": "Langflow远程代码执行漏洞（CVE-2025-3248）",
+    "title_translated": "Langflow Remote Code Execution Vulnerability (CVE-2025-3248)",
+    "summary": "CVE-2025-3248 is a high-severity remote code execution vulnerability in the Langflow platform, allowing attackers to execute arbitrary code on the server without authentication. The flaw exists in the code validation feature, affecting all versions from 1.0.0 to 1.2.9.",
+    "severity": "High",
+    "cvss_score": 8.5,
+    "published_date": "2025-08-18T17:28:20+08:00",
+    "original_language": "zh",
+    "source": "FreeBuf",
+    "url": "https://www.freebuf.com/articles/web/444713.html",
+    "intrigue": 8.0,
+    "affected_products": [
+      "Langflow"
+    ]
+  },
+  {
+    "cve_id": "CVE-2025-8875",
+    "title": "CISA警告：N-able N-central 平台漏洞被用于零日攻击",
+    "title_translated": "CISA warns: Vulnerability in N-able N-central platform used in zero-day attacks.",
+    "summary": "Two vulnerabilities in N-able's N-central platform, involving insecure deserialization and insufficient input validation, are being actively exploited for remote command execution and command injection. N-able has released a patch and urged on-premises customers to upgrade to mitigate these risks.",
+    "severity": "High",
+    "cvss_score": 8.0,
+    "published_date": "2025-08-15T17:21:42",
+    "original_language": "zh",
+    "source": "Anquanke",
+    "url": "https://www.anquanke.com/post/id/311245",
+    "intrigue": 8.0,
+    "affected_products": [
+      "N-able N-central"
+    ]
+  }
+]
