@@ -1,36 +1,83 @@
 [
   {
-    "cve_id": "CVE-2025-7384",
-    "title": "WordPress 插件曝RCE高危漏洞（CVE-2025-7384，CVSS 9.8），逾 7 万网站面临数据泄露与破坏风险",
-    "title_translated": "WordPress plugin has a critical RCE vulnerability (CVE-2025-7384, CVSS 9.8), posing data leakage and damage risks to over 70,000 websites.",
-    "summary": "A serious vulnerability in WordPress database plugins for Contact Form 7, WPForms, and Elementor Forms allows attackers to exploit it without authentication, potentially leading to denial of service or remote code execution. The issue is rooted in the PHP function get_lead_detail and affects all versions 1.4.3 and below.",
-    "severity": "Critical",
-    "cvss_score": 9.8,
-    "published_date": "2025-08-15T17:22:15",
-    "original_language": "zh",
-    "source": "Anquanke",
-    "url": "https://www.anquanke.com/post/id/311249",
-    "intrigue": 9.0,
+    "cve_id": "CVE-2025-8901",
+    "title": "Microsoft Edge Chromium: CVE-2025-8901 Out of bounds write in ANGLE",
+    "title_translated": "Microsoft Edge Chromium: CVE-2025-8901 Out of bounds write in ANGLE",
+    "summary": "CVE-2025-8901 describes an out of bounds write vulnerability in ANGLE within Microsoft Edge Chromium. This flaw allows remote attackers to exploit memory access through specially crafted HTML pages, posing significant risks to affected users.",
+    "severity": "High",
+    "cvss_score": 9.0,
+    "published_date": "2025-08-19T19:16:10.524000+00:00",
+    "original_language": "en",
+    "source": "Rapid7",
+    "url": "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-8901",
+    "intrigue": 8.0,
     "affected_products": [
-      "Contact Form 7",
-      "WPForms",
-      "Elementor Forms"
+      "Microsoft Edge Chromium",
+      "Google Chrome"
     ]
   },
   {
-    "cve_id": "CVE-2025-52970",
-    "title": "研究人员将发布FortiWeb身份验证完全绕过漏洞利用代码",
-    "title_translated": "Researchers will release exploit code for a complete bypass vulnerability in FortiWeb authentication.",
-    "summary": "A vulnerability in the FortiWeb web application firewall allows remote attackers to bypass authentication by exploiting an out-of-bounds read when parsing cookies. This enables attackers to impersonate any active user, including administrators, if they manipulate the cookie while the target user maintains an active session.",
-    "severity": "Critical",
-    "cvss_score": 9.0,
-    "published_date": "2025-08-18T17:40:02",
-    "original_language": "zh",
-    "source": "Anquanke",
-    "url": "https://www.anquanke.com/post/id/311301",
+    "cve_id": "CVE-2025-8145",
+    "title": "CVE-2025-8145",
+    "title_translated": "CVE-2025-8145",
+    "summary": "The Redirection for Contact Form 7 plugin for WordPress is vulnerable to PHP Object Injection due to deserialization of untrusted input, allowing unauthenticated attackers to inject PHP Objects. This vulnerability can lead to arbitrary file deletion and, in certain configurations, Remote Code Execution.",
+    "severity": "High",
+    "cvss_score": 8.8,
+    "published_date": "2025-08-20T03:15:35",
+    "original_language": "en",
+    "source": "Vulners",
+    "url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2025-8145",
     "intrigue": 8.0,
     "affected_products": [
-      "FortiWeb"
+      "Redirection for Contact Form 7"
+    ]
+  },
+  {
+    "cve_id": "CVE-2025-57790",
+    "title": "CVE-2025-57790",
+    "title_translated": "CVE-2025-57790",
+    "summary": "A vulnerability in Commvault before version 11.36.60 allows remote attackers to exploit a path traversal issue, leading to unauthorized file system access. This could potentially result in remote code execution on affected systems.",
+    "severity": "High",
+    "cvss_score": 8.7,
+    "published_date": "2025-08-20T04:16:04",
+    "original_language": "en",
+    "source": "Vulners",
+    "url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2025-57790",
+    "intrigue": 8.0,
+    "affected_products": [
+      "Commvault"
+    ]
+  },
+  {
+    "cve_id": "CVE-2025-54948",
+    "title": "Trend Micro Apex One OS Command Injection Vulnerability",
+    "title_translated": "Trend Micro Apex One OS Command Injection Vulnerability",
+    "summary": "Trend Micro Apex One Management Console has an OS command injection vulnerability that allows pre-authenticated remote attackers to upload malicious code and execute commands. This poses a significant risk to affected installations, necessitating immediate mitigations or discontinuation of the product.",
+    "severity": "High",
+    "cvss_score": 8.0,
+    "published_date": "2025-08-18T00:00:00",
+    "original_language": "en",
+    "source": "CISA KEV",
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-54948",
+    "intrigue": 8.0,
+    "affected_products": [
+      "Trend Micro Apex One Management Console"
+    ]
+  },
+  {
+    "cve_id": "CVE-2025-55163",
+    "title": "Red Hat JBoss EAP: CVE-2025-55163: Allocation of Resources Without Limits or Throttling",
+    "title_translated": "Red Hat JBoss EAP: CVE-2025-55163: Allocation of Resources Without Limits or Throttling",
+    "summary": "Red Hat JBoss EAP is vulnerable to a logical flaw in the HTTP/2 protocol that allows for resource exhaustion through malformed control frames, leading to a potential DDoS attack. This vulnerability affects versions prior to 4.1.124.Final and 4.2.4.Final, which have been patched.",
+    "severity": "High",
+    "cvss_score": 8.0,
+    "published_date": "2025-08-19T19:17:15.391000+00:00",
+    "original_language": "en",
+    "source": "Rapid7",
+    "url": "https://access.redhat.com/security/cve/CVE-2025-55163",
+    "intrigue": 8.0,
+    "affected_products": [
+      "Red Hat JBoss EAP"
     ]
   },
   {
@@ -50,40 +97,67 @@
     ]
   },
   {
-    "cve_id": "CVE-2025-8875",
-    "title": "CISA警告：N-able N-central 平台漏洞被用于零日攻击",
-    "title_translated": "CISA warning: N-able N-central platform vulnerability exploited in zero-day attacks.",
-    "summary": "Two zero-day vulnerabilities in N-able's N-central RMM platform allow authenticated attackers to remotely execute commands and perform command injection due to insecure deserialization and insufficient input validation. N-able has confirmed active exploitation and released patches in version 2025.3.1.",
+    "cve_id": "CVE-2025-8876",
+    "title": "N-able N-Central Command Injection Vulnerability",
+    "title_translated": "N-able N-Central Command Injection Vulnerability",
+    "summary": "N-able N-Central has a command injection vulnerability due to improper sanitization of user input, allowing attackers to execute arbitrary commands. Users are advised to apply mitigations as per vendor instructions or discontinue use if mitigations are unavailable.",
     "severity": "High",
-    "cvss_score": 8.0,
-    "published_date": "2025-08-15T17:21:42",
-    "original_language": "zh",
-    "source": "Anquanke",
-    "url": "https://www.anquanke.com/post/id/311245",
+    "cvss_score": 7.5,
+    "published_date": "2025-08-13T00:00:00",
+    "original_language": "en",
+    "source": "CISA KEV",
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-8876",
     "intrigue": 8.0,
     "affected_products": [
-      "N-able N-central"
+      "N-able N-Central"
     ]
   },
   {
-    "cve_id": "CVE-2025-8713",
-    "title": "PostgreSQL核心组件曝高危RCE漏洞，官方发布紧急修复补丁",
-    "title_translated": "High-risk RCE vulnerability in PostgreSQL core components exposed, official emergency patch released.",
-    "summary": "CVE-2025-8713 allows users to read sampled data from views without access rights, potentially exposing sensitive information. This vulnerability affects PostgreSQL versions 13 to 17 and could enable malicious users to bypass access control and row-level security policies.",
-    "severity": "Medium",
-    "cvss_score": 3.1,
-    "published_date": "2025-08-18T17:31:37",
-    "original_language": "zh",
-    "source": "Anquanke",
-    "url": "https://www.anquanke.com/post/id/311307",
+    "cve_id": "CVE-2025-8875",
+    "title": "N-able N-Central Insecure Deserialization Vulnerability",
+    "title_translated": "N-able N-Central Insecure Deserialization Vulnerability",
+    "summary": "N-able N-Central has an insecure deserialization vulnerability that may allow for command execution. Users are advised to apply mitigations as per vendor instructions or discontinue use if mitigations are not available.",
+    "severity": "High",
+    "cvss_score": 7.5,
+    "published_date": "2025-08-13T00:00:00",
+    "original_language": "en",
+    "source": "CISA KEV",
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-8875",
+    "intrigue": 8.0,
+    "affected_products": [
+      "N-able N-Central"
+    ]
+  },
+  {
+    "cve_id": "CVE-2025-8088",
+    "title": "RARLAB WinRAR Path Traversal Vulnerability",
+    "title_translated": "RARLAB WinRAR Path Traversal Vulnerability",
+    "summary": "RARLAB WinRAR has a path traversal vulnerability in its Windows version that allows attackers to execute arbitrary code through malicious archive files. Users are advised to apply vendor mitigations or discontinue use if fixes are unavailable.",
+    "severity": "High",
+    "cvss_score": 7.5,
+    "published_date": "2025-08-12T00:00:00",
+    "original_language": "en",
+    "source": "CISA KEV",
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-8088",
+    "intrigue": 8.0,
+    "affected_products": [
+      "WinRAR"
+    ]
+  },
+  {
+    "cve_id": "CVE-2025-38292",
+    "title": "Alma Linux: CVE-2025-38292: Moderate: kernel security update (ALSA-2025-13602)",
+    "title_translated": "Alma Linux: CVE-2025-38292: Moderate: kernel security update (ALSA-2025-13602)",
+    "summary": "A vulnerability in the Linux kernel's ath12k driver allows for a use-after-free error due to improper memory access after freeing a socket buffer. This could potentially lead to system instability or exploitation. The issue has been addressed in a security update.",
+    "severity": "High",
+    "cvss_score": 8.0,
+    "published_date": "2025-08-19T19:17:34.578000+00:00",
+    "original_language": "en",
+    "source": "Rapid7",
+    "url": "https://errata.almalinux.org/9/ALSA-2025-13602.html",
     "intrigue": 6.0,
     "affected_products": [
-      "PostgreSQL 17.6",
-      "PostgreSQL 16.10",
-      "PostgreSQL 15.14",
-      "PostgreSQL 14.19",
-      "PostgreSQL 13.22",
-      "PostgreSQL 18 beta3"
+      "Alma Linux"
     ]
   }
 ]

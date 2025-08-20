@@ -131,7 +131,7 @@ class ChineseScraper:
         API_URL = "https://api.anquanke.com/data/v1/posts"
         # TAG = "漏洞"
         TAG = "漏洞情报"
-        pages = 1
+        pages = 3  # Increased from 1 to 3 pages for more CVEs
         articles_meta = []
 
         for page in range(1, pages + 1):
@@ -147,7 +147,9 @@ class ChineseScraper:
                 print(f"API error page {page}: {e}")
                 continue  # ESSENTIAL: Continue with next page instead of crashing
 
-            for post in data['data'][:self.max_arts]:
+            # Get more articles from Anquanke since it has high CVE density
+            anquanke_limit = min(self.max_arts * 2, 15)  # Double the limit, max 15
+            for post in data['data'][:anquanke_limit]:
                 original_url = f"https://www.anquanke.com/post/id/{post['id']}"
                 articles_meta.append({
                     "title": post['title'],

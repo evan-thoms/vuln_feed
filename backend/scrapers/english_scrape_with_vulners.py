@@ -123,8 +123,8 @@ class EnglishScraperWithVulners:
                         title=title,
                         title_translated=title,
                         url=cve_url,
-                        content=description + severity_info,
-                        content_translated=description + severity_info,
+                        content=f"CVE ID: {cve_id}. {description}{severity_info}",
+                        content_translated=f"CVE ID: {cve_id}. {description}{severity_info}",
                         language="en",
                         scraped_at=datetime.now(),
                         published_date=published_date
@@ -170,8 +170,8 @@ class EnglishScraperWithVulners:
                 title= v.get("vulnerabilityName"),
                 title_translated=v.get("vulnerabilityName"),
                 url=cve_url,
-                content=v.get("shortDescription")+v.get("requiredAction"),
-                content_translated=v.get("shortDescription")+v.get("requiredAction"),
+                content=f"CVE ID: {v.get('cveID')}. {v.get('shortDescription')}{v.get('requiredAction')}",
+                content_translated=f"CVE ID: {v.get('cveID')}. {v.get('shortDescription')}{v.get('requiredAction')}",
                 language="en",
                 scraped_at=datetime.now(),
                 published_date=self.normalize_date(v.get("dateAdded"))
@@ -220,8 +220,8 @@ class EnglishScraperWithVulners:
                     title=item["title"],
                     title_translated=item["title"],
                     url=url,
-                    content=item["description"] + " Severity: "+str(item["data"].get("severity", [])),
-                    content_translated=item["description"] + " Severity: "+str(item["data"].get("severity", [])),
+                    content=f"{item['title']}. {item['description']} Severity: {str(item['data'].get('severity', []))}",
+                    content_translated=f"{item['title']}. {item['description']} Severity: {str(item['data'].get('severity', []))}",
                     language="en",
                     scraped_at=datetime.now(),
                     published_date=self.normalize_date(item.get("created_at"))
