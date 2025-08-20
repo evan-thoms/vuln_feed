@@ -1,0 +1,26 @@
+[
+  {
+    "title": "CVE-2024-12893: Vulnerability",
+    "content": "Vulnerability details for CVE-2024-12893",
+    "url": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2024-12893",
+    "source": "MITRE CVE",
+    "language": "en",
+    "published_date": "2025-08-19 18:52:34.517443",
+    "scraped_at": "2025-08-19 18:52:34.517463",
+    "cve_id": "CVE-2024-12893",
+    "cvss_score": 5.0,
+    "severity": "MEDIUM"
+  },
+  {
+    "title": "CVE-2024-3690: Vulnerability",
+    "content": "Vulnerability details for CVE-2024-3690",
+    "url": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2024-3690",
+    "source": "MITRE CVE",
+    "language": "en",
+    "published_date": "2025-08-19 18:52:35.503130",
+    "scraped_at": "2025-08-19 18:52:35.503144",
+    "cve_id": "CVE-2024-3690",
+    "cvss_score": 5.0,
+    "severity": "MEDIUM"
+  }
+]

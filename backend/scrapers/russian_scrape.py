@@ -8,7 +8,7 @@ from dateutil import parser
 
 class RussianScraper():
     def __init__(self, num_articles=8):
-        self.max_arts = num_articles
+        self.max_arts = 2*num_articles
         self.FORCE = False  # Changed from True to False to enable duplicate checking
     
     def normalize_date(self, date_str):

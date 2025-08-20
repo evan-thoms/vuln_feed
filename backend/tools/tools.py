@@ -17,7 +17,7 @@ except Exception as e:
 
 # Import your existing functions
 from scrapers.chinese_scrape import ChineseScraper
-from scrapers.english_scrape import EnglishScraper
+from scrapers.english_scrape_with_vulners import EnglishScraperWithVulners
 from scrapers.russian_scrape import RussianScraper
 from classify import classify_article, classify_articles_parallel
 from db import (
@@ -66,16 +66,15 @@ def translate_openai(text: str, source_lang: str) -> str:
             ],
             max_tokens=200,  # Limit response length
             temperature=0.1,  # More deterministic
-            timeout=10  # Add timeout
+            timeout=15  # Increased timeout for translation
         )
-        return response.choices[0].message.content.strip()
+        result = response.choices[0].message.content.strip()
+        return result
     except Exception as e:
-        print(f"Translation error: {e}")
+        print(f"❌ Translation error: {e}")
         return text
 def translate_articles_parallel(articles):
     """Parallel OpenAI translation - super fast"""
-    print(f"🌍 Translating {len(articles)} articles with OpenAI...")
-
     # Filter out articles that are already translated
     articles_to_translate = []
     already_translated = []
@@ -89,18 +88,14 @@ def translate_articles_parallel(articles):
         elif art.title_translated and art.content_translated:
             # Already translated articles
             already_translated.append(art)
-            print(f"⏭️  Skipping already translated: {art.url}")
         else:
             # Need translation
             articles_to_translate.append(art)
-    
-    print(f"📊 Skipping {len(already_translated)} already translated articles")
-    print(f"🌍 Translating {len(articles_to_translate)} articles...")
 
     if not articles_to_translate:
         return articles  # All articles are already translated
     
-    with ThreadPoolExecutor(max_workers=100) as executor:  # Increased from 50 to 100 for faster processing
+    with ThreadPoolExecutor(max_workers=40) as executor:
         # Submit all translation jobs
         future_to_article = {}
 
@@ -122,7 +117,7 @@ def translate_articles_parallel(articles):
                 else:
                     art.content_translated = result
             except Exception as e:
-                print(f"Translation failed: {e}")
+                print(f"❌ Translation failed: {e}")
                 # Fallback to original text
                 if field == 'title':
                     art.title_translated = art.title
@@ -347,7 +342,6 @@ def retrieve_existing_data(content_type: str = "both", severity = None, days_bac
 @tool
 def scrape_fresh_intel(content_type: str = "both", max_results: int = 10) -> str:
     """Execute fresh intelligence collection from all sources."""
-    agent = scrape_fresh_intel._agent_instance
     print(f"🌐 Initiating fresh intelligence collection...")
     
     articles = []
@@ -369,14 +363,21 @@ def scrape_fresh_intel(content_type: str = "both", max_results: int = 10) -> str
         scrapers = [
             ChineseScraper(target_per_source),
             RussianScraper(target_per_source),
-            EnglishScraper(target_per_source)
+            EnglishScraperWithVulners(target_per_source)  # Enhanced English scraper with Vulners integration
         ]
         
         articles = []
         with ThreadPoolExecutor(max_workers=6) as executor:
             futures = [executor.submit(scraper.scrape_all) for scraper in scrapers]
             for future in as_completed(futures):
-                articles.extend(future.result())
+                try:
+                    # Add timeout to prevent hanging scrapers
+                    result = future.result(timeout=60)  # 60 second timeout per scraper
+                    articles.extend(result)
+                except TimeoutError:
+                    print(f"⏰ Scraper timed out after 60s - skipping")
+                except Exception as e:
+                    print(f"❌ Scraper error: {e}")
         
         # Process unprocessed articles
         unprocessed_rows = get_unprocessed_articles()
@@ -397,11 +398,10 @@ def scrape_fresh_intel(content_type: str = "both", max_results: int = 10) -> str
                 classified_data = get_classified_article(art.url)
                 if classified_data:
                     already_classified_articles.append(classified_data)
-                    print(f"📋 Found already classified article: {art.url}")
         
         # Filter out already classified articles from processing pipeline
         articles_to_process = [art for art in articles if not is_article_classified(art.url)]
-        print(f"📊 Processing {len(articles_to_process)} new articles (skipping {len(articles) - len(articles_to_process)} already classified)")
+        print(f"📊 Processing {len(articles_to_process)} new articles (skipping {len(already_classified_articles)} already classified)")
         
         # Translate and truncate only new articles
         for art in articles_to_process:
@@ -410,6 +410,7 @@ def scrape_fresh_intel(content_type: str = "both", max_results: int = 10) -> str
         translated_articles = translate_articles_parallel(articles_to_process)
         
         # Store both new and already classified articles
+        agent = scrape_fresh_intel._agent_instance
         agent.current_session["scraped_articles"] = translated_articles
         agent.current_session["already_classified_articles"] = already_classified_articles
         
@@ -427,6 +428,8 @@ def scrape_fresh_intel(content_type: str = "both", max_results: int = 10) -> str
             "error": str(e),
             "articles_collected": 0
         })
+
+
 def should_classify_article(article, min_length=200):
     """Filter out articles that aren't worth classifying"""
     content = article.content_translated or article.content
@@ -471,29 +474,38 @@ def classify_intelligence(content_type: str = "both", severity: str = None, days
 
     recent_articles = []
     for art in articles:
+        # Debug: Print article filtering info
+        print(f"🔍 Filtering article: {art.source} - {art.title[:50]}...")
+        print(f"  Scraped at: {art.scraped_at}")
+        print(f"  Cutoff date: {cutoff_date}")
+        print(f"  Days old: {(datetime.now() - art.scraped_at).days}")
+        
         # Skip if outside date range
         if art.scraped_at < cutoff_date:
+            print(f"  ❌ Filtered out: Too old")
             continue
+            
         # Skip if too short (your logs show 81-99 char articles)
         content_to_check = art.content_translated or art.content
         if not content_to_check or len(content_to_check.strip()) < 200:
-            print(f"⚠️  Skipping short article: {len(content_to_check) if content_to_check else 0} chars")
+            print(f"  ❌ Filtered out: Too short ({len(content_to_check) if content_to_check else 0} chars)")
             continue
         
         # Early filtering: skip if no security keywords
         text = (art.title + " " + content_to_check).lower()
         security_keywords = ["cve", "vulnerability", "exploit", "security", "attack", "breach", "malware"]
         if not any(keyword in text for keyword in security_keywords):
-            print(f"⚠️  Skipping non-security article: {art.title[:50]}...")
+            print(f"  ❌ Filtered out: No security keywords")
             continue
             
+        print(f"  ✅ Passed all filters")
         recent_articles.append(art)
     
     print(f"📅 Filtered to {len(recent_articles)} recent articles (within {days_back} days, min 200 chars)")
     
     if not recent_articles:
         return json.dumps({"error": "No recent articles to process"})
-    max_to_process = min(len(recent_articles), max_results)  # Reduced from max_results * 2 to just max_results
+    max_to_process = min(len(recent_articles), max_results*2)  # Reduced from max_results * 2 to just max_results
     articles_to_process = recent_articles[:max_to_process]
     print(f"📊 Processing {len(articles_to_process)} articles (limited from {len(recent_articles)})")
 
@@ -989,7 +1001,7 @@ def present_results(output_format: str = "json") -> str:
         "total_results": len(cves) + len(news),
         "session_id": agent.current_session.get('session_id', 'Unknown'),
         "generated_at": datetime.now().isoformat(),
-        "status": "Data available in session"  # Key point - data is in session
+        "status": "Data available in session"
     }
     
     print(f"✅ Summary prepared: {len(cves)} CVEs, {len(news)} news items in session")

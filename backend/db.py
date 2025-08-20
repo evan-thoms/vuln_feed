@@ -76,13 +76,14 @@ def insert_newsitem( news):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT OR IGNORE INTO newsitems (title, title_translated, summary, published_date, source, url, intrigue)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT OR IGNORE INTO newsitems (title, title_translated, summary, published_date, original_language, source, url, intrigue)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         news.title,
         news.title_translated,
         news.summary,
         news.published_date,
+        news.original_language,
         news.source,
         news.url,
         news.intrigue
@@ -114,12 +115,12 @@ def get_cves_by_filters(severity_filter=None, after_date=None, limit=50):
         
         query += " ORDER BY (cvss_score * 0.6 + intrigue * 0.4) DESC LIMIT ?"
         params.append(limit)
-        # print("SQL QUERY:", query)
-        # print("PARAMS:", params)
+        print(f"🔍 DEBUG: SQL QUERY: {query}")
+        print(f"🔍 DEBUG: PARAMS: {params}")
         
         cursor.execute(query, params)
         rows = cursor.fetchall()
-        # print("DB rows fetched:", rows)
+        print(f"🔍 DEBUG: DB rows fetched: {len(rows)} rows")
         conn.close()
         
         # Convert to Vulnerability objects

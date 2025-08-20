@@ -101,16 +101,21 @@ class ChineseScraper:
          
             if not url.startswith("http"):
                 url = "https://" + url
-            r = requests.get(url)
             try:
-                # ESSENTIAL: Add timeout to prevent hanging
-                r = self.session.get(url, timeout=10)  # 10 second timeout
+                # ULTRA-FAST timeout to prevent hanging - 5 seconds max
+                r = self.session.get(url, timeout=5)  # Reduced from 10 to 5 seconds
                 if r.status_code == 404:
                     print(f"Skipping 404 URL: {url}")
                     return "404"
+            except requests.exceptions.Timeout:
+                print(f"⏰ Timeout (5s) for {url} - skipping")
+                return "TIMEOUT"
+            except requests.exceptions.ConnectionError:
+                print(f"🔌 Connection error for {url} - skipping")
+                return "CONNECTION_ERROR"
             except Exception as e:
-                print(f"Error fetching {url}: {e}")
-                return ""  # ESSENTIAL: Return empty instead of crashing
+                print(f"❌ Error fetching {url}: {e}")
+                return "ERROR"  # Return error code instead of empty string
             soup = BeautifulSoup(r.text, "html.parser")
             if site == "FreeBuf":
                 content_div = soup.find("div", class_="artical-body")
@@ -159,7 +164,8 @@ class ChineseScraper:
             print(f"Fetching: {article['title']} ({article['url']})")
             content = self.fetch_article_content(article['url'], "Anquanke")
             # ESSENTIAL: Skip failed articles instead of crashing
-            if not content or content == "404":
+            if not content or content in ["404", "TIMEOUT", "CONNECTION_ERROR", "ERROR"]:
+                print(f"⏭️ Skipping failed article: {content}")
                 continue
             print(f"Content preview:\n{content[:100]}...\n") 
             article = Article(
