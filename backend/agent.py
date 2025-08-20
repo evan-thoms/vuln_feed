@@ -35,6 +35,24 @@ api_key_name = "GROQ_API"
 # Get the value of the environment variable
 api_key = os.environ.get(api_key_name)
 
+# Import WebSocket manager for progress updates
+try:
+    from main import manager
+except ImportError:
+    # Fallback if main.py not available
+    manager = None
+
+async def send_progress_update(status: str, progress: int):
+    """Send progress update via WebSocket"""
+    if manager:
+        try:
+            await manager.broadcast(json.dumps({
+                "type": "progress",
+                "status": status,
+                "progress": progress
+            }))
+        except Exception as e:
+            print(f"⚠️ WebSocket update failed: {e}")
 
 class IntelligentCyberAgent:
     def __init__(self):
@@ -149,7 +167,6 @@ Return only the final JSON from present_results. No additional commentary."""),
                 'max_results': params['max_results']
             }
             
-            
             enhanced_input = f"""
             Execute cybersecurity intelligence workflow with these exact parameters:
                 - content_type: {params['content_type']}
@@ -159,7 +176,21 @@ Return only the final JSON from present_results. No additional commentary."""),
                             """
     
             print("input print", enhanced_input)
-            result = self.agent_executor.invoke({"input": enhanced_input})
+            
+            # Send progress updates during execution
+            import asyncio
+            try:
+                # Send initial progress
+                asyncio.create_task(send_progress_update("Analyzing data requirements...", 10))
+                
+                result = self.agent_executor.invoke({"input": enhanced_input})
+                
+                # Send completion progress
+                asyncio.create_task(send_progress_update("Complete!", 100))
+                
+            except Exception as e:
+                print(f"⚠️ Progress update failed: {e}")
+                result = self.agent_executor.invoke({"input": enhanced_input})
 
             return self._build_response_from_session()
         

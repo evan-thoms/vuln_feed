@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
@@ -15,6 +15,31 @@ app = FastAPI(title="Cybersecurity Intelligence API", version="1.0.0")
 
 # Initialize agent
 agent = IntelligentCyberAgent()
+
+# WebSocket connection manager
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: List[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+
+    async def send_personal_message(self, message: str, websocket: WebSocket):
+        await websocket.send_text(message)
+
+    async def broadcast(self, message: str):
+        for connection in self.active_connections:
+            try:
+                await connection.send_text(message)
+            except:
+                # Remove dead connections
+                self.active_connections.remove(connection)
+
+manager = ConnectionManager()
 
 # CORS middleware for React frontend
 app.add_middleware(
@@ -33,12 +58,29 @@ class SearchRequest(BaseModel):
     output_format: str = "json"
     email_address: Optional[str] = None
 
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            # Echo back for testing
+            await manager.send_personal_message(f"Message received: {data}", websocket)
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+
 @app.post("/search")
 async def search_intelligence(request: SearchRequest):
-    """Main endpoint that activates the agent"""
+    """Main endpoint that activates the agent with real-time progress updates"""
     start_time = datetime.now()
     
     try:
+        # Send initial status
+        await manager.broadcast(json.dumps({
+            "type": "progress",
+            "status": "Analyzing data requirements...",
+            "progress": 10
+        }))
 
         params = {
             'content_type': request.content_type,
@@ -47,8 +89,22 @@ async def search_intelligence(request: SearchRequest):
             'max_results': request.max_results
         }
         
+        # Send scraping status
+        await manager.broadcast(json.dumps({
+            "type": "progress", 
+            "status": "Scraping intelligence sources...",
+            "progress": 25
+        }))
+        
         # Run agent
         agent_response = agent.query(params)
+
+        # Send classification status
+        await manager.broadcast(json.dumps({
+            "type": "progress",
+            "status": "Classifying threats...", 
+            "progress": 75
+        }))
 
         # Add freshness information
         freshness_info = get_data_freshness_info()
@@ -82,11 +138,22 @@ async def search_intelligence(request: SearchRequest):
         agent_response["processing_time"] = (datetime.now() - start_time).total_seconds()
         agent_response["query_params"] = request.dict()
         
+        # Send completion status
+        await manager.broadcast(json.dumps({
+            "type": "progress",
+            "status": "Complete!",
+            "progress": 100
+        }))
+        
         return agent_response
 
-    
-        
     except Exception as e:
+        # Send error status
+        await manager.broadcast(json.dumps({
+            "type": "error",
+            "status": f"Error: {str(e)}",
+            "progress": 0
+        }))
         raise HTTPException(status_code=500, detail=f"Agent failed: {str(e)}")
 
 @app.get("/")
@@ -99,4 +166,4 @@ async def health_check():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run(app, host="0.0.0.0", port=8000)

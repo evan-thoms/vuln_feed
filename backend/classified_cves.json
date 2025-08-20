@@ -1,163 +1,92 @@
 [
   {
-    "cve_id": "CVE-2025-8901",
-    "title": "Microsoft Edge Chromium: CVE-2025-8901 Out of bounds write in ANGLE",
-    "title_translated": "Microsoft Edge Chromium: CVE-2025-8901 Out of bounds write in ANGLE",
-    "summary": "CVE-2025-8901 describes an out of bounds write vulnerability in ANGLE within Microsoft Edge Chromium. This flaw allows remote attackers to exploit memory access through specially crafted HTML pages, posing significant risks to affected users.",
-    "severity": "High",
-    "cvss_score": 9.0,
-    "published_date": "2025-08-19T19:16:10.524000+00:00",
-    "original_language": "en",
-    "source": "Rapid7",
-    "url": "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-8901",
-    "intrigue": 8.0,
+    "cve_id": "CVE-2025-20265",
+    "title": "思科披露重大RCE漏洞（CVE-2025-20265，CVSS 10）：未认证攻击者可劫持防火墙",
+    "title_translated": "Cisco disclosed a critical RCE vulnerability (CVE-2025-20265, CVSS 10): Unauthenticated attackers can hijack firewalls.",
+    "summary": "Cisco's Secure Firewall Management Center (FMC) software has a critical remote code execution vulnerability due to insufficient input validation in the RADIUS subsystem. Unauthenticated attackers can exploit this flaw to execute arbitrary commands with high privileges on affected devices. Only specific versions with RADIUS authentication enabled are vulnerable.",
+    "severity": "Critical",
+    "cvss_score": 10.0,
+    "published_date": "2025-08-15T17:05:18",
+    "original_language": "zh",
+    "source": "Anquanke",
+    "url": "https://www.anquanke.com/post/id/311204",
+    "intrigue": 9.0,
     "affected_products": [
-      "Microsoft Edge Chromium",
-      "Google Chrome"
+      "Cisco Secure Firewall Management Center"
     ]
   },
   {
-    "cve_id": "CVE-2025-8145",
-    "title": "CVE-2025-8145",
-    "title_translated": "CVE-2025-8145",
-    "summary": "The Redirection for Contact Form 7 plugin for WordPress is vulnerable to PHP Object Injection due to deserialization of untrusted input, allowing unauthenticated attackers to inject PHP Objects. This vulnerability can lead to arbitrary file deletion and, in certain configurations, Remote Code Execution.",
-    "severity": "High",
-    "cvss_score": 8.8,
-    "published_date": "2025-08-20T03:15:35",
-    "original_language": "en",
-    "source": "Vulners",
-    "url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2025-8145",
-    "intrigue": 8.0,
+    "cve_id": "CVE-2025-54336",
+    "title": "CVE-2025-54336（CVSS评分9.8）：Plesk Obsidian关键漏洞使服务器面临完全被控风险",
+    "title_translated": "CVE-2025-54336 (CVSS score 9.8): Critical vulnerability in Plesk Obsidian exposes servers to full control risk.",
+    "summary": "A high-severity vulnerability in Plesk Obsidian allows attackers to bypass admin login verification due to a flawed authentication logic. By exploiting loose comparison in the password validation process, attackers can gain full control of the server using specific numeric strings. This affects Plesk Obsidian version 18.0.70.",
+    "severity": "Critical",
+    "cvss_score": 9.8,
+    "published_date": "2025-08-20T17:51:00",
+    "original_language": "zh",
+    "source": "Anquanke",
+    "url": "https://www.anquanke.com/post/id/311338",
+    "intrigue": 9.0,
     "affected_products": [
-      "Redirection for Contact Form 7"
+      "Plesk Obsidian 18.0.70"
     ]
   },
   {
-    "cve_id": "CVE-2025-57790",
-    "title": "CVE-2025-57790",
-    "title_translated": "CVE-2025-57790",
-    "summary": "A vulnerability in Commvault before version 11.36.60 allows remote attackers to exploit a path traversal issue, leading to unauthorized file system access. This could potentially result in remote code execution on affected systems.",
-    "severity": "High",
-    "cvss_score": 8.7,
-    "published_date": "2025-08-20T04:16:04",
-    "original_language": "en",
-    "source": "Vulners",
-    "url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2025-57790",
-    "intrigue": 8.0,
+    "cve_id": "CVE-2025-7384",
+    "title": "WordPress 插件曝RCE高危漏洞（CVE-2025-7384，CVSS 9.8），逾 7 万网站面临数据泄露与破坏风险",
+    "title_translated": "WordPress plugin has a critical RCE vulnerability (CVE-2025-7384, CVSS 9.8), posing a risk of data leakage and damage to over 70,000 websites.",
+    "summary": "CVE-2025-7384 is a critical vulnerability affecting WordPress plugins like Contact Form 7, WPforms, and Elementor Forms, allowing attackers to exploit it without authentication. This can lead to denial of service or remote code execution, impacting over 70,000 active installations.",
+    "severity": "Critical",
+    "cvss_score": 9.8,
+    "published_date": "2025-08-15T17:22:15",
+    "original_language": "zh",
+    "source": "Anquanke",
+    "url": "https://www.anquanke.com/post/id/311249",
+    "intrigue": 9.0,
     "affected_products": [
-      "Commvault"
+      "Contact Form 7",
+      "WPforms",
+      "Elementor Forms"
     ]
   },
   {
-    "cve_id": "CVE-2025-54948",
-    "title": "Trend Micro Apex One OS Command Injection Vulnerability",
-    "title_translated": "Trend Micro Apex One OS Command Injection Vulnerability",
-    "summary": "Trend Micro Apex One Management Console has an OS command injection vulnerability that allows pre-authenticated remote attackers to upload malicious code and execute commands. This poses a significant risk to affected installations, necessitating immediate mitigations or discontinuation of the product.",
-    "severity": "High",
-    "cvss_score": 8.0,
-    "published_date": "2025-08-18T00:00:00",
-    "original_language": "en",
-    "source": "CISA KEV",
-    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-54948",
-    "intrigue": 8.0,
+    "cve_id": "CVE-2025-25256",
+    "title": "FortiSIEM CVE-2025-25256（CVSS 9.8）：远程未授权命令注入漏洞，野外已出现利用代码",
+    "title_translated": "FortiSIEM CVE-2025-25256 (CVSS 9.8): Remote unauthorized command injection vulnerability, exploit code already in the wild.",
+    "summary": "Fortinet has disclosed a critical remote command injection vulnerability in multiple versions of the FortiSIEM platform, allowing attackers to execute arbitrary commands without authentication. The flaw arises from improper handling of special characters, enabling remote exploitation through crafted CLI requests. Affected versions include 7.3.0-7.3.1, 7.2.0-7.2.5, and 7.1, with patches available in later releases.",
+    "severity": "Critical",
+    "cvss_score": 9.8,
+    "published_date": "2025-08-13T16:32:52",
+    "original_language": "zh",
+    "source": "Anquanke",
+    "url": "https://www.anquanke.com/post/id/311142",
+    "intrigue": 9.0,
     "affected_products": [
-      "Trend Micro Apex One Management Console"
+      "FortiSIEM 7.3.0",
+      "FortiSIEM 7.3.1",
+      "FortiSIEM 7.2.0",
+      "FortiSIEM 7.2.1",
+      "FortiSIEM 7.2.2",
+      "FortiSIEM 7.2.3",
+      "FortiSIEM 7.2.4",
+      "FortiSIEM 7.2.5",
+      "FortiSIEM 7.1"
     ]
   },
   {
-    "cve_id": "CVE-2025-55163",
-    "title": "Red Hat JBoss EAP: CVE-2025-55163: Allocation of Resources Without Limits or Throttling",
-    "title_translated": "Red Hat JBoss EAP: CVE-2025-55163: Allocation of Resources Without Limits or Throttling",
-    "summary": "Red Hat JBoss EAP is vulnerable to a logical flaw in the HTTP/2 protocol that allows for resource exhaustion through malformed control frames, leading to a potential DDoS attack. This vulnerability affects versions prior to 4.1.124.Final and 4.2.4.Final, which have been patched.",
-    "severity": "High",
-    "cvss_score": 8.0,
-    "published_date": "2025-08-19T19:17:15.391000+00:00",
-    "original_language": "en",
-    "source": "Rapid7",
-    "url": "https://access.redhat.com/security/cve/CVE-2025-55163",
-    "intrigue": 8.0,
+    "cve_id": "CVE-2025-54782",
+    "title": "NestJS DevTools 存在严重RCE漏洞（CVE-2025-54782）",
+    "title_translated": "NestJS DevTools has a critical RCE vulnerability (CVE-2025-54782).",
+    "summary": "A critical vulnerability in the @nestjs/devtools-integration package allows attackers to execute arbitrary code on a developer's local machine by tricking them into visiting a malicious website. The issue arises from improper sandbox isolation and the exposure of dangerous endpoints that accept and execute JSON input.",
+    "severity": "Critical",
+    "cvss_score": 9.4,
+    "published_date": "2025-08-04T17:19:45",
+    "original_language": "zh",
+    "source": "Anquanke",
+    "url": "https://www.anquanke.com/post/id/310849",
+    "intrigue": 9.0,
     "affected_products": [
-      "Red Hat JBoss EAP"
-    ]
-  },
-  {
-    "cve_id": "CVE-2025-29824",
-    "title": "PipeMagic вернулся: уязвимость Windows использована в кибератаках 2025 года",
-    "title_translated": "PipeMagic is back: Windows vulnerability exploited in cyberattacks in 2025.",
-    "summary": "The PipeMagic backdoor exploits the CVE-2025-29824 vulnerability in the clfs.sys driver, allowing attackers to gain local administrator privileges. This vulnerability was patched by Microsoft in April 2025, but the malware continues to target organizations in Saudi Arabia and Brazil.",
-    "severity": "High",
-    "cvss_score": 8.0,
-    "published_date": "2025-08-18T00:00:00",
-    "original_language": "ru",
-    "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-08-18-111332/47022",
-    "intrigue": 8.0,
-    "affected_products": [
-      "clfs.sys"
-    ]
-  },
-  {
-    "cve_id": "CVE-2025-8876",
-    "title": "N-able N-Central Command Injection Vulnerability",
-    "title_translated": "N-able N-Central Command Injection Vulnerability",
-    "summary": "N-able N-Central has a command injection vulnerability due to improper sanitization of user input, allowing attackers to execute arbitrary commands. Users are advised to apply mitigations as per vendor instructions or discontinue use if mitigations are unavailable.",
-    "severity": "High",
-    "cvss_score": 7.5,
-    "published_date": "2025-08-13T00:00:00",
-    "original_language": "en",
-    "source": "CISA KEV",
-    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-8876",
-    "intrigue": 8.0,
-    "affected_products": [
-      "N-able N-Central"
-    ]
-  },
-  {
-    "cve_id": "CVE-2025-8875",
-    "title": "N-able N-Central Insecure Deserialization Vulnerability",
-    "title_translated": "N-able N-Central Insecure Deserialization Vulnerability",
-    "summary": "N-able N-Central has an insecure deserialization vulnerability that may allow for command execution. Users are advised to apply mitigations as per vendor instructions or discontinue use if mitigations are not available.",
-    "severity": "High",
-    "cvss_score": 7.5,
-    "published_date": "2025-08-13T00:00:00",
-    "original_language": "en",
-    "source": "CISA KEV",
-    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-8875",
-    "intrigue": 8.0,
-    "affected_products": [
-      "N-able N-Central"
-    ]
-  },
-  {
-    "cve_id": "CVE-2025-8088",
-    "title": "RARLAB WinRAR Path Traversal Vulnerability",
-    "title_translated": "RARLAB WinRAR Path Traversal Vulnerability",
-    "summary": "RARLAB WinRAR has a path traversal vulnerability in its Windows version that allows attackers to execute arbitrary code through malicious archive files. Users are advised to apply vendor mitigations or discontinue use if fixes are unavailable.",
-    "severity": "High",
-    "cvss_score": 7.5,
-    "published_date": "2025-08-12T00:00:00",
-    "original_language": "en",
-    "source": "CISA KEV",
-    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-8088",
-    "intrigue": 8.0,
-    "affected_products": [
-      "WinRAR"
-    ]
-  },
-  {
-    "cve_id": "CVE-2025-38292",
-    "title": "Alma Linux: CVE-2025-38292: Moderate: kernel security update (ALSA-2025-13602)",
-    "title_translated": "Alma Linux: CVE-2025-38292: Moderate: kernel security update (ALSA-2025-13602)",
-    "summary": "A vulnerability in the Linux kernel's ath12k driver allows for a use-after-free error due to improper memory access after freeing a socket buffer. This could potentially lead to system instability or exploitation. The issue has been addressed in a security update.",
-    "severity": "High",
-    "cvss_score": 8.0,
-    "published_date": "2025-08-19T19:17:34.578000+00:00",
-    "original_language": "en",
-    "source": "Rapid7",
-    "url": "https://errata.almalinux.org/9/ALSA-2025-13602.html",
-    "intrigue": 6.0,
-    "affected_products": [
-      "Alma Linux"
+      "@nestjs/devtools-integration"
     ]
   }
 ]

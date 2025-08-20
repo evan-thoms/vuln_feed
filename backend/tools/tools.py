@@ -14,6 +14,25 @@ except Exception as e:
     print("⚠️ OpenAI API key not configured. Some features disabled.")
     openai_client = None
 
+# Import WebSocket manager for progress updates
+try:
+    from main import manager
+except ImportError:
+    # Fallback if main.py not available
+    manager = None
+
+async def send_progress_update(status: str, progress: int):
+    """Send progress update via WebSocket"""
+    if manager:
+        try:
+            await manager.broadcast(json.dumps({
+                "type": "progress",
+                "status": status,
+                "progress": progress
+            }))
+        except Exception as e:
+            print(f"⚠️ WebSocket update failed: {e}")
+
 
 # Import your existing functions
 from scrapers.chinese_scrape import ChineseScraper
@@ -341,25 +360,21 @@ def retrieve_existing_data(content_type: str = "both", severity = None, days_bac
 
 @tool
 def scrape_fresh_intel(content_type: str = "both", max_results: int = 10) -> str:
-    """Execute fresh intelligence collection from all sources."""
-    print(f"🌐 Initiating fresh intelligence collection...")
-    
-    articles = []
-    target_per_source = max(max_results // 2, 5)
-    
+    """Scrape fresh intelligence from multiple sources."""
     try:
-        # # Multi-source scraping
-        # print("🇨🇳 Scraping Chinese sources...")
-        # c_scraper = ChineseScraper(target_per_source)
-        # articles.extend(c_scraper.scrape_all())
+        # Send progress update
+        import asyncio
+        try:
+            asyncio.create_task(send_progress_update("Scraping intelligence sources...", 25))
+        except:
+            pass
         
-        # print("🇷🇺 Scraping Russian sources...")
-        # r_scraper = RussianScraper()
-        # articles.extend(r_scraper.scrape_all())
+        # Calculate target per source
+        target_per_source = max(max_results // 2, 5)
         
-        # print("🇺🇸 Scraping English sources...")
-        # e_scraper = EnglishScraper(target_per_source)
-        # articles.extend(e_scraper.scrape_all())
+        print(f"🌐 Initiating fresh intelligence collection...")
+        
+        # Initialize scrapers
         scrapers = [
             ChineseScraper(target_per_source),
             RussianScraper(target_per_source),
@@ -406,6 +421,12 @@ def scrape_fresh_intel(content_type: str = "both", max_results: int = 10) -> str
         # Translate and truncate only new articles
         for art in articles_to_process:
             art.content = truncate_text(art.content, art.language, max_length=1000)  # Reduced from 2000 to 1000
+        
+        # Send translation progress update
+        try:
+            asyncio.create_task(send_progress_update("Translating articles...", 50))
+        except:
+            pass
         
         translated_articles = translate_articles_parallel(articles_to_process)
         
@@ -456,8 +477,19 @@ def classify_intelligence(content_type: str = "both", severity: str = None, days
     agent = classify_intelligence._agent_instance
     print(f"🤖 Starting PARALLEL classification...")
     
+    # Send progress update
+    import asyncio
+    try:
+        asyncio.create_task(send_progress_update("Classifying threats...", 75))
+    except:
+        pass
+    
     if not agent.current_session["scraped_articles"]:
-        return json.dumps({"error": "No scraped articles to classify"})
+        return json.dumps({"error": "No articles to classify"})
+    
+    # Get severity from agent's current parameters if not provided
+    if severity is None and hasattr(agent, 'current_params'):
+        severity = agent.current_params.get('severity', [])
     
     articles = agent.current_session["scraped_articles"]
     if severity is None:
@@ -505,8 +537,8 @@ def classify_intelligence(content_type: str = "both", severity: str = None, days
     
     if not recent_articles:
         return json.dumps({"error": "No recent articles to process"})
-    max_to_process = min(len(recent_articles), max_results*2)  # Reduced from max_results * 2 to just max_results
-    articles_to_process = recent_articles[:max_to_process]
+    # Process ALL articles that passed filters - don't waste scraping effort
+    articles_to_process = recent_articles
     print(f"📊 Processing {len(articles_to_process)} articles (limited from {len(recent_articles)})")
 
     try:
@@ -556,10 +588,11 @@ def classify_intelligence(content_type: str = "both", severity: str = None, days
             # Process each classification result for this article
             for result in results:
                 try:
-                    print(f"🔍 Processing result: {result}")
+                    # print(f"🔍 Processing result: {result}")
                     if result["type"] == "CVE" and content_type in ["cve", "both"]:
                         print(f"🚨 Found CVE: {result['cve_id']}")
 
+                        # Apply severity filter to newly classified CVEs
                         if severity_list and result["severity"].upper() not in severity_list:
                             print(f"⚠️  CVE {result['cve_id']} severity '{result['severity']}' not in filter {severity_list}")
                             continue

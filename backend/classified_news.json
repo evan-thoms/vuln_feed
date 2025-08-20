@@ -1,1 +1,52 @@
-[]
+[
+  {
+    "title": "SNI5GECT: учёные показали новый вектор атак на 5G без фейковых вышек",
+    "title_translated": "SNI5GECT: Scientists have demonstrated a new vector of attacks on 5G without fake towers.",
+    "summary": "Researchers have developed SNI5GECT, a framework that allows for the interception of traffic and injection of malicious packets in 5G networks without the need for a fake base station. Tests indicate a high effectiveness in message interception and injection, posing significant risks to device security.",
+    "published_date": "2025-08-19T00:00:00",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-08-19-111332/47034",
+    "intrigue": 9.0
+  },
+  {
+    "title": "安装量超10万的\"合法\"Chrome VPN扩展暗中截屏窃取敏感数据",
+    "title_translated": "\"Legitimate\" Chrome VPN extension with over 100,000 installations secretly takes screenshots to steal sensitive data.",
+    "summary": "The FreeVPN.One Chrome extension, masquerading as a legitimate privacy tool, has been identified as advanced spyware that captures screenshots and steals sensitive data without user consent. Despite its Google certification, the extension has a backdoor feature that allows extensive monitoring of user activities, posing a significant threat to privacy and security.",
+    "published_date": "2025-08-20T08:04:58+08:00",
+    "original_language": "zh",
+    "source": "FreeBuf",
+    "url": "https://www.freebuf.com/articles/database/445104.html",
+    "intrigue": 9.0
+  },
+  {
+    "title": "Elastic EDR曝 0day漏洞：攻击者可绕过检测执行恶意程序并触发蓝屏崩溃",
+    "title_translated": "Elastic EDR exposed a 0day vulnerability: attackers can bypass detection to execute malicious programs and trigger a blue screen crash.",
+    "summary": "A zero-day vulnerability in Elastic's Endpoint Detection and Response solution allows attackers to bypass security mechanisms and execute malicious code, potentially leading to a system crash. The flaw exists in the kernel driver 'elastic-endpoint-driver.sys,' enabling a four-step attack chain for full system control.",
+    "published_date": "2025-08-18T17:30:19",
+    "original_language": "zh",
+    "source": "Anquanke",
+    "url": "https://www.anquanke.com/post/id/311323",
+    "intrigue": 9.0
+  },
+  {
+    "title": "ChatGPT连接器曝\"0-click\"漏洞，攻击者可窃取Google Drive数据",
+    "title_translated": "ChatGPT connector exposes \"0-click\" vulnerability, allowing attackers to steal Google Drive data.",
+    "summary": "A serious zero-click vulnerability named 'AgentFlayer' was discovered in OpenAI ChatGPT Connectors, allowing attackers to steal sensitive data from Google Drive accounts without any additional action after initial file sharing. This vulnerability was demonstrated at the Black Hat conference, highlighting the risks associated with AI enterprise tools that integrate with cloud storage services.",
+    "published_date": "2025-08-11T17:18:03",
+    "original_language": "zh",
+    "source": "Anquanke",
+    "url": "https://www.anquanke.com/post/id/311088",
+    "intrigue": 9.0
+  },
+  {
+    "title": "iPhone и Android: RCS-переписки станут защищёнными в iOS 26",
+    "title_translated": "iPhone and Android: RCS messaging will become secure in iOS 26.",
+    "summary": "Apple is set to enhance security in RCS chats on iPhone by introducing end-to-end encryption, which was previously missing. The implementation will utilize the MLS protocol as part of the GSMA Universal Profile standard, improving user privacy in communications between iPhone and Android users.",
+    "published_date": "2025-08-20T00:00:00",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-08-20-111332/47041",
+    "intrigue": 8.0
+  }
+]
