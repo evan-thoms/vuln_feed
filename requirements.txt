@@ -23,7 +23,7 @@ lxml==6.0.0
 argostranslate==1.9.6
 deep-translator==1.11.4
 
-# Task queue (production scheduling)
+# Task queue
 celery==5.3.4
 redis==4.4.4
 
