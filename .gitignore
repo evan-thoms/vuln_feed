@@ -5,3 +5,5 @@ __pycache__/
 scrapers/ex.py
 scrapers/scrape.py
 venv/
+.cursorrules
+

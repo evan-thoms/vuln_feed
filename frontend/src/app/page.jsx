@@ -1,8 +1,12 @@
 "use client";
-import React, { useState, useEffect } from 'react';
-import { Search, Shield, AlertTriangle, Globe, Calendar, TrendingUp, Loader, CheckCircle, XCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, Shield, AlertTriangle, Globe, Calendar, TrendingUp, Loader, CheckCircle, XCircle, AlertCircle} from 'lucide-react';
 
 const CyberSecurityApp = () => {
+  // Get API URL from environment variable or use localhost for development
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const WS_BASE_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000';
+  
   const [searchParams, setSearchParams] = useState({
     content_type: 'both',
     severity: [],
@@ -15,15 +19,108 @@ const CyberSecurityApp = () => {
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [searchStatus, setSearchStatus] = useState(null);
+  const [validationErrors, setValidationErrors] = useState([]);
+  const [showValidationErrors, setShowValidationErrors] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState('');
+  const [progress, setProgress] = useState(0);
+  
+  const wsRef = useRef(null);
+
+  // WebSocket connection for real-time progress updates
+  useEffect(() => {
+    const connectWebSocket = () => {
+      const ws = new WebSocket(`${WS_BASE_URL}/ws`);
+      
+      ws.onopen = () => {
+        console.log('WebSocket connected');
+      };
+      
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'progress') {
+            setCurrentStatus(data.status);
+            setProgress(data.progress);
+          } else if (data.type === 'error') {
+            setError(data.status);
+            setLoading(false);
+          }
+        } catch (e) {
+          console.log('WebSocket message:', event.data);
+        }
+      };
+      
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+      
+      ws.onclose = () => {
+        console.log('WebSocket disconnected');
+        // Reconnect after 5 seconds
+        setTimeout(connectWebSocket, 5000);
+      };
+      
+      wsRef.current = ws;
+    };
+    
+    connectWebSocket();
+    
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+    };
+  }, [WS_BASE_URL]);
+
+  const validateForm = () => {
+    const errors = [];
+    
+    if (searchParams.severity.length === 0) {
+      errors.push("Please select at least one severity level");
+    }
+    
+    if (searchParams.max_results > 30) {
+      errors.push("Maximum results cannot exceed 30");
+    }
+    
+    if (searchParams.max_results < 1) {
+      errors.push("Maximum results must be at least 1");
+    }
+    
+    if (searchParams.days_back < 1) {
+      errors.push("Days back must be at least 1");
+    }
+    
+    setValidationErrors(errors);
+    return errors.length === 0;
+  };
+
+  useEffect(() => {
+    if (showValidationErrors) {
+      const isValid = validateForm();
+      if (isValid) {
+        setShowValidationErrors(false);
+      }
+    }
+  }, [searchParams.severity, searchParams.max_results, searchParams.days_back, showValidationErrors]);
 
   const handleSearch = async () => {
+    const isValid = validateForm();
+
+    if (!isValid) {
+      setShowValidationErrors(true);
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     setResults(null);
+    setShowValidationErrors(false);
+    setProgress(0);
+    setCurrentStatus('Starting intelligence gathering...');
     
     try {
-      const response = await fetch('http://localhost:8000/search', {
+      const response = await fetch(`${API_BASE_URL}/search`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -34,13 +131,21 @@ const CyberSecurityApp = () => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       setResults(data);
+      setCurrentStatus('Complete!');
+      setProgress(100);
     } catch (err) {
       setError(err.message);
+      setCurrentStatus('');
+      setProgress(0);
     } finally {
       setLoading(false);
+      setTimeout(() => {
+        setCurrentStatus('');
+        setProgress(0);
+      }, 3000);
     }
   };
 
@@ -71,6 +176,34 @@ const CyberSecurityApp = () => {
     });
   };
 
+  const formatTimeAgo = (isoString) => {
+    if (!isoString) return 'Unknown';
+    const date = new Date(isoString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffHours / 24);
+    
+    if (diffDays > 0) {
+      return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    } else if (diffHours > 0) {
+      return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    } else {
+      return 'Less than an hour ago';
+    }
+  };
+
+  const getFreshnessColor = (isoString) => {
+    if (!isoString) return 'text-slate-400';
+    const date = new Date(isoString);
+    const now = new Date();
+    const diffHours = (now - date) / (1000 * 60 * 60);
+    
+    if (diffHours < 1) return 'text-green-400';
+    if (diffHours < 24) return 'text-yellow-400';
+    return 'text-red-400';
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Header */}
@@ -91,6 +224,40 @@ const CyberSecurityApp = () => {
             <Search className="h-6 w-6 mr-2 text-cyan-400" />
             Intelligence Query
           </h2>
+          {/* Validation Errors */}
+          {showValidationErrors && validationErrors.length > 0 && (
+            <div className="mb-6 bg-red-900/30 border border-red-700 rounded-lg p-4">
+              <div className="flex items-center mb-2">
+                <AlertCircle className="h-5 w-5 text-red-400 mr-2" />
+                <span className="text-red-300 font-medium">Please fix the following issues:</span>
+              </div>
+              <ul className="list-disc list-inside space-y-1">
+                {validationErrors.map((error, index) => (
+                  <li key={index} className="text-red-300 text-sm">{error}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Current Status with Progress Bar */}
+          {loading && currentStatus && (
+            <div className="mb-6 bg-blue-900/30 border border-blue-700 rounded-lg p-4">
+              <div className="flex items-center mb-3">
+                <Loader className="animate-spin h-5 w-5 text-blue-400 mr-2" />
+                <span className="text-blue-300 font-medium">{currentStatus}</span>
+              </div>
+              <div className="w-full bg-slate-700 rounded-full h-2">
+                <div 
+                  className="bg-gradient-to-r from-cyan-400 to-blue-500 h-2 rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${progress}%` }}
+                ></div>
+              </div>
+              <div className="flex justify-between text-xs text-slate-400 mt-1">
+                <span>Progress</span>
+                <span>{progress}%</span>
+              </div>
+            </div>
+          )}
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Content Type */}
@@ -107,18 +274,22 @@ const CyberSecurityApp = () => {
               </select>
             </div>
 
-            {/* Max Results */}
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Max Results</label>
+           {/* Max Results */}
+           <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Max Results 
+                <span className="text-xs text-slate-400 ml-1">(1-30)</span>
+              </label>
               <input
                 type="number"
                 value={searchParams.max_results}
-                onChange={(e) => setSearchParams({...searchParams, max_results: parseInt(e.target.value)})}
+                onChange={(e) => setSearchParams({...searchParams, max_results: parseInt(e.target.value) || 1})}
                 className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                 min="1"
-                max="50"
+                max="30"
               />
             </div>
+
 
             {/* Days Back */}
             <div>
@@ -136,7 +307,11 @@ const CyberSecurityApp = () => {
 
           {/* Severity Filter */}
           <div className="mt-6">
-            <label className="block text-sm font-medium text-slate-300 mb-3">Severity Filter</label>
+            <label className="block text-sm font-medium text-slate-300 mb-3">
+              Severity Filter 
+              <span className="text-red-400 ml-1">*</span>
+              <span className="text-xs text-slate-400 ml-1">(select at least one)</span>
+            </label>
             <div className="flex flex-wrap gap-2">
               {['low', 'medium', 'high', 'critical'].map(severity => (
                 <button
@@ -152,14 +327,21 @@ const CyberSecurityApp = () => {
                 </button>
               ))}
             </div>
+            {searchParams.severity.length === 0 && showValidationErrors && (
+              <p className="text-red-400 text-sm mt-2">Please select at least one severity level</p>
+            )}
           </div>
 
-          {/* Search Button */}
-          <div className="mt-8">
+         {/* Search Button */}
+         <div className="mt-8">
             <button
               onClick={handleSearch}
               disabled={loading}
-              className="w-full md:w-auto px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-lg hover:from-cyan-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center"
+              className={`w-full md:w-auto px-8 py-4 font-semibold rounded-lg transition-all flex items-center justify-center ${
+                loading
+                  ? 'bg-gray-600 text-gray-300 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:from-cyan-600 hover:to-blue-700'
+              }`}
             >
               {loading ? (
                 <>
@@ -222,6 +404,33 @@ const CyberSecurityApp = () => {
               </div>
             </div>
 
+            {/* Freshness Indicator */}
+            {results.freshness && (
+              <div className="bg-slate-800/30 backdrop-blur-sm rounded-lg border border-slate-600 p-4 mb-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center text-slate-300">
+                      <Calendar className="h-5 w-5 mr-2 text-cyan-400" />
+                      <span className="text-sm">
+                        Last updated: 
+                        <span className={`ml-1 font-medium ${getFreshnessColor(results.freshness.last_update)}`}>
+                          {formatTimeAgo(results.freshness.last_update)}
+                        </span>
+                      </span>
+                    </div>
+                    {results.freshness.total_articles > 0 && (
+                      <div className="text-slate-400 text-sm">
+                        {results.freshness.total_articles} total articles in database
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-slate-400 text-xs">
+                    Results may be the same because we show the highest-priority vulnerabilities
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* CVEs */}
             {results.cves && results.cves.length > 0 && (
               <div className="bg-slate-800/50 rounded-2xl border border-slate-700 p-6">
@@ -242,6 +451,10 @@ const CyberSecurityApp = () => {
                             <span>CVSS: {cve.cvss_score}</span>
                             <span>•</span>
                             <span>Intrigue: {cve.intrigue}/10</span>
+                            <span>•</span>
+                            <span className={`${getFreshnessColor(cve.published_date)}`}>
+                              {formatTimeAgo(cve.published_date)}
+                            </span>
                           </div>
                         </div>
                         <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getSeverityColor(cve.severity)}`}>
@@ -287,9 +500,14 @@ const CyberSecurityApp = () => {
                     <div key={index} className="bg-slate-700/50 rounded-lg border border-slate-600 p-6">
                       <div className="flex items-start justify-between mb-3">
                         <h4 className="text-lg font-medium text-white flex-1 mr-4">{news.title_translated}</h4>
-                        <span className="text-cyan-400 text-sm font-medium">
-                          Intrigue: {news.intrigue}/10
-                        </span>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-cyan-400 text-sm font-medium">
+                            Intrigue: {news.intrigue}/10
+                          </span>
+                          <span className={`text-sm ${getFreshnessColor(news.published_date)}`}>
+                            {formatTimeAgo(news.published_date)}
+                          </span>
+                        </div>
                       </div>
                       
                       <p className="text-slate-300 mb-4">{news.summary}</p>
