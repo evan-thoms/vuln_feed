@@ -164,6 +164,51 @@ async def root():
 async def health_check():
     return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 
+@app.get("/test-celery")
+async def test_celery():
+    """Test endpoint to manually trigger Celery tasks"""
+    try:
+        from celery.celery_tasks import weekly_intelligence_task
+        
+        # Trigger the task
+        result = weekly_intelligence_task.delay()
+        
+        return {
+            "success": True,
+            "task_id": result.id,
+            "message": "Celery task triggered successfully",
+            "status": "Check logs for task execution"
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to trigger Celery task"
+        }
+
+@app.get("/celery-status")
+async def celery_status():
+    """Check Celery worker and beat status"""
+    try:
+        from celery.celery_tasks import celery_app
+        
+        # Check if workers are available
+        inspect = celery_app.control.inspect()
+        active_workers = inspect.active()
+        
+        return {
+            "success": True,
+            "active_workers": active_workers,
+            "worker_count": len(active_workers) if active_workers else 0,
+            "message": "Celery status check completed"
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to check Celery status"
+        }
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
