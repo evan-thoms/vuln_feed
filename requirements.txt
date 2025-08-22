@@ -18,6 +18,7 @@ requests==2.31.0
 beautifulsoup4==4.9.3
 feedparser==6.0.11
 lxml==6.0.0
+vulners==1.4.0
 
 # Translation
 argostranslate==1.9.6
