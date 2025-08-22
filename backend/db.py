@@ -173,7 +173,7 @@ def insert_newsitem(news):
 def get_cves_by_filters(severity_filter=None, after_date=None, limit=50):
     """Get CVEs with filters for agent decision making"""
     try:
-        conn = sqlite3.connect(DB_PATH)
+        conn = get_connection()
         cursor = conn.cursor()
         
         query = "SELECT * FROM cves WHERE 1=1"
@@ -228,7 +228,7 @@ def get_cves_by_filters(severity_filter=None, after_date=None, limit=50):
 
 def get_news_by_filters(after_date=None, limit=50):
     """Get news items with filters"""
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_connection()
     cursor = conn.cursor()
     
     query = "SELECT * FROM newsitems WHERE 1=1"
@@ -264,7 +264,7 @@ def get_news_by_filters(after_date=None, limit=50):
 
 def get_last_scrape_time():
     """Get last scrape time by source for freshness calculation"""
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_connection()
     cursor = conn.cursor()
     
     # Get most recent scrape time by source
@@ -290,7 +290,7 @@ def get_last_scrape_time():
 
 def get_data_statistics():
     """Get overall database statistics for agent insights"""
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_connection()
     cursor = conn.cursor()
     
     stats = {}
@@ -322,7 +322,7 @@ def get_data_statistics():
 
 def record_scraping_session(sources_scraped, articles_found, triggered_by="agent"):
     """Record scraping session for agent learning"""
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_connection()
     cursor = conn.cursor()
     
     # Create scraping_sessions table if it doesn't exist
@@ -346,7 +346,7 @@ def record_scraping_session(sources_scraped, articles_found, triggered_by="agent
 
 def is_article_classified(url):
     """Check if an article has already been classified (exists in cves or newsitems)"""
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_connection()
     cursor = conn.cursor()
     
     # Check both cves and newsitems tables
@@ -361,7 +361,7 @@ def is_article_classified(url):
 
 def get_classified_article(url):
     """Get already classified article data by URL"""
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_connection()
     cursor = conn.cursor()
     
     # Check cves table first
@@ -413,7 +413,7 @@ def get_classified_article(url):
 
 def get_data_freshness_info():
     """Get information about data freshness for user feedback"""
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_connection()
     cursor = conn.cursor()
     
     # Get latest scrape times by source
@@ -477,7 +477,7 @@ def get_data_freshness_info():
 
 def get_all_classified_data_with_freshness(limit=50):
     """Get all classified data (CVEs and News) with freshness information for frontend"""
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_connection()
     cursor = conn.cursor()
     
     # Get CVEs

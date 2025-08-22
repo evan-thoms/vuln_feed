@@ -134,15 +134,13 @@ def manual_scrape_task(sources=None, max_results=20):
     
     return agent.query({"content_type": "both", "max_results": max_results, "days_back": 7})
 
-# Helper function for cleanup
+        # Helper function for cleanup
 def cleanup_old_articles(cutoff_date):
     """Remove old articles beyond retention policy"""
     try:
-        import sqlite3
-        from db import get_db_path
+        from db import get_connection
         
-        db_path = get_db_path()
-        conn = sqlite3.connect(db_path)
+        conn = get_connection()
         cursor = conn.cursor()
         
         # Delete old raw articles
