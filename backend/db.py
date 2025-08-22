@@ -2,59 +2,137 @@ import sqlite3
 from datetime import datetime, timedelta
 import json
 from models import Vulnerability, NewsItem
+import os
 
-DB_PATH = "articles.db"
+# Database configuration - supports both SQLite and PostgreSQL
+DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///articles.db')
+
+def get_db_path():
+    """Get the database path for use in Celery tasks"""
+    if DATABASE_URL.startswith('sqlite'):
+        return DATABASE_URL.replace('sqlite:///', '')
+    return DATABASE_URL
+
+def get_connection():
+    """Get database connection - SQLite for local, PostgreSQL for production"""
+    if DATABASE_URL.startswith('sqlite'):
+        return sqlite3.connect(get_db_path())
+    else:
+        # PostgreSQL connection
+        import psycopg2
+        return psycopg2.connect(DATABASE_URL)
 
 def init_db():
-    conn = sqlite3.connect(DB_PATH)
-    with open("schema.sql", "r") as f:
-        conn.executescript(f.read())
-    conn.commit()
-    conn.close()
+    """Initialize database with proper schema"""
+    if DATABASE_URL.startswith('sqlite'):
+        # SQLite initialization
+        conn = sqlite3.connect(get_db_path())
+        with open("schema.sql", "r") as f:
+            conn.executescript(f.read())
+        conn.commit()
+        conn.close()
+    else:
+        # PostgreSQL initialization
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        # Create tables for PostgreSQL
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS raw_articles (
+                id SERIAL PRIMARY KEY,
+                source VARCHAR(255),
+                url TEXT UNIQUE,
+                title TEXT,
+                title_translated TEXT,
+                content TEXT,
+                content_translated TEXT,
+                language VARCHAR(10),
+                scraped_at TIMESTAMP,
+                published_date TIMESTAMP,
+                processed BOOLEAN DEFAULT FALSE
+            )
+        """)
+        
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS cves (
+                id SERIAL PRIMARY KEY,
+                cve_id VARCHAR(50) UNIQUE,
+                title TEXT,
+                title_translated TEXT,
+                summary TEXT,
+                severity VARCHAR(20),
+                cvss_score DECIMAL(3,1),
+                published_date TIMESTAMP,
+                original_language VARCHAR(10),
+                source VARCHAR(255),
+                url TEXT,
+                intrigue DECIMAL(3,1),
+                affected_products TEXT
+            )
+        """)
+        
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS newsitems (
+                id SERIAL PRIMARY KEY,
+                title TEXT,
+                title_translated TEXT,
+                summary TEXT,
+                published_date TIMESTAMP,
+                original_language VARCHAR(10),
+                source VARCHAR(255),
+                url TEXT UNIQUE,
+                intrigue DECIMAL(3,1)
+            )
+        """)
+        
+        conn.commit()
+        conn.close()
 
 def is_article_scraped(link):
     print("Checking if ", link, " is scraped ")
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT 1 from raw_articles WHERE url = ?", (link,))
+    cursor.execute("SELECT 1 from raw_articles WHERE url = %s", (link,))
     result = cursor.fetchone()
     conn.close()
     return result is not None
 
 def insert_raw_article(article):
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_connection()
     cursor = conn.cursor()
     try:
         cursor.execute("""
-            INSERT OR IGNORE INTO raw_articles (source, url, title, title_translated, content, content_translated, language, scraped_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO raw_articles (source, url, title, title_translated, content, content_translated, language, scraped_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (url) DO NOTHING
         """, (article.source, article.url, article.title, article.title_translated, article.content, article.content_translated, article.language, article.scraped_at))
         conn.commit()
     finally:
         conn.close()
 
 def get_unprocessed_articles():
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM raw_articles WHERE processed = 0")
+    cursor.execute("SELECT * FROM raw_articles WHERE processed = FALSE")
     rows = cursor.fetchall()
     conn.close()
     return rows
 
 def mark_as_processed(raw_article_id):
     print("Marked as processed: ", raw_article_id)
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("UPDATE raw_articles SET processed = 1 WHERE url = ?", (raw_article_id,))
+    cursor.execute("UPDATE raw_articles SET processed = TRUE WHERE url = %s", (raw_article_id,))
     conn.commit()
     conn.close()
 
 def insert_cve(cve):
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT OR IGNORE INTO cves (cve_id, title, title_translated, summary, severity, cvss_score, published_date, original_language, source, url, intrigue, affected_products)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO cves (cve_id, title, title_translated, summary, severity, cvss_score, published_date, original_language, source, url, intrigue, affected_products)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        ON CONFLICT (cve_id) DO NOTHING
     """, (
         cve.cve_id,
         cve.title,
@@ -72,12 +150,13 @@ def insert_cve(cve):
     conn.commit()
     conn.close()
 
-def insert_newsitem( news):
-    conn = sqlite3.connect(DB_PATH)
+def insert_newsitem(news):
+    conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT OR IGNORE INTO newsitems (title, title_translated, summary, published_date, original_language, source, url, intrigue)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO newsitems (title, title_translated, summary, published_date, original_language, source, url, intrigue)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        ON CONFLICT (url) DO NOTHING
     """, (
         news.title,
         news.title_translated,

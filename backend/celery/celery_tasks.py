@@ -1,61 +1,102 @@
 from celery import Celery
 from agent import IntelligentCyberAgent
-from db import get_data_statistics, cleanup_old_articles, get_trend_analysis
+from db import cleanup_old_articles
 from models import QueryParams
 from datetime import datetime, timedelta
 import json
 import sqlite3
+import os
 
 # Initialize Celery
 celery_app = Celery('cyberintel')
 celery_app.config_from_object('celery_config')
 
 @celery_app.task
-def intelligent_scraping_task():
-    """Autonomous scraping based on agent intelligence"""
-    print("🤖 Starting intelligent autonomous scraping...")
-    
-    agent = IntelligentCyberAgent()
-    
-    # Agent decides what to scrape based on data analysis
-    query = """
-    Perform autonomous intelligence collection. Check current data status and:
-    1. Identify gaps in recent data (last 24 hours)
-    2. Scrape sources that are stale or missing data
-    3. Focus on high-priority content (critical/high severity CVEs)
-    4. Collect both CVEs and news for comprehensive coverage
-    """
+def weekly_intelligence_task():
+    """Weekly intelligence gathering with 15 results of all severities and both content types"""
+    print("🔄 Starting weekly intelligence gathering...")
     
     try:
-        result = agent.process_query_intelligent(query)
+        agent = IntelligentCyberAgent()
         
-        # Log the autonomous action
-        with open("autonomous_scraping.log", "a") as f:
-            log_entry = {
-                "timestamp": datetime.now().isoformat(),
-                "trigger": "scheduled",
-                "success": result["success"],
-                "summary": result.get("result", result.get("error"))[:200] + "..."
-            }
+        # Weekly parameters: 15 results, all severities, both content types, 7 days back
+        params = {
+            'content_type': 'both',
+            'severity': ['Critical', 'High', 'Medium', 'Low'],  # All severities
+            'days_back': 7,
+            'max_results': 15
+        }
+        
+        print(f"📊 Weekly task parameters: {params}")
+        
+        # Execute the intelligence gathering
+        result = agent.query(params)
+        
+        # Log the weekly execution
+        log_entry = {
+            "timestamp": datetime.now().isoformat(),
+            "task": "weekly_intelligence_gathering",
+            "success": result.get("success", False),
+            "cves_found": len(result.get("cves", [])),
+            "news_found": len(result.get("news", [])),
+            "total_results": result.get("total_results", 0),
+            "session_id": result.get("session_id", "unknown")
+        }
+        
+        # Save to log file
+        log_file = "weekly_intelligence.log"
+        with open(log_file, "a") as f:
             f.write(json.dumps(log_entry) + "\n")
         
-        return result
+        print(f"✅ Weekly intelligence gathering completed: {log_entry['cves_found']} CVEs, {log_entry['news_found']} news items")
+        
+        return {
+            "success": True,
+            "task": "weekly_intelligence_gathering",
+            "results": log_entry
+        }
         
     except Exception as e:
-        print(f"❌ Autonomous scraping failed: {e}")
+        error_msg = f"❌ Weekly intelligence gathering failed: {e}"
+        print(error_msg)
+        
+        # Log error
+        error_log = {
+            "timestamp": datetime.now().isoformat(),
+            "task": "weekly_intelligence_gathering",
+            "success": False,
+            "error": str(e)
+        }
+        
+        with open("weekly_intelligence.log", "a") as f:
+            f.write(json.dumps(error_log) + "\n")
+        
         return {"success": False, "error": str(e)}
 
 @celery_app.task
 def cleanup_old_data_task():
     """Clean up old data based on retention policy"""
-    print("🧹 Starting data cleanup task...")
+    print("🧹 Starting weekly data cleanup...")
     
     try:
         # Keep data for 30 days by default
         cutoff_date = datetime.now() - timedelta(days=30)
         
-        # This function needs to be added to db.py
         deleted_count = cleanup_old_articles(cutoff_date)
+        
+        log_entry = {
+            "timestamp": datetime.now().isoformat(),
+            "task": "data_cleanup",
+            "success": True,
+            "deleted_articles": deleted_count,
+            "cutoff_date": cutoff_date.isoformat()
+        }
+        
+        # Save to log file
+        with open("weekly_intelligence.log", "a") as f:
+            f.write(json.dumps(log_entry) + "\n")
+        
+        print(f"✅ Data cleanup completed: {deleted_count} articles deleted")
         
         return {
             "success": True,
@@ -64,34 +105,19 @@ def cleanup_old_data_task():
         }
         
     except Exception as e:
-        print(f"❌ Cleanup failed: {e}")
-        return {"success": False, "error": str(e)}
-
-@celery_app.task
-def trend_analysis_task():
-    """Analyze trends for agent learning"""
-    print("📊 Starting trend analysis...")
-    
-    try:
-        stats = get_data_statistics()
+        error_msg = f"❌ Data cleanup failed: {e}"
+        print(error_msg)
         
-        # Add trend analysis (you'll need to implement this in db.py)
-        trends = {
+        error_log = {
             "timestamp": datetime.now().isoformat(),
-            "data_stats": stats,
-            "growth_rate": calculate_growth_rate(),  # To be implemented
-            "top_sources": get_top_sources(),        # To be implemented
-            "severity_distribution": get_severity_distribution()  # To be implemented
+            "task": "data_cleanup",
+            "success": False,
+            "error": str(e)
         }
         
-        # Save trends for agent learning
-        with open("trend_analysis.json", "w") as f:
-            json.dump(trends, f, indent=2)
+        with open("weekly_intelligence.log", "a") as f:
+            f.write(json.dumps(error_log) + "\n")
         
-        return trends
-        
-    except Exception as e:
-        print(f"❌ Trend analysis failed: {e}")
         return {"success": False, "error": str(e)}
 
 @celery_app.task
@@ -106,33 +132,27 @@ def manual_scrape_task(sources=None, max_results=20):
     else:
         query = f"Perform full scraping of all sources. Get {max_results} items from each source."
     
-    return agent.process_query_intelligent(query)
+    return agent.query({"content_type": "both", "max_results": max_results, "days_back": 7})
 
-# Additional helper functions to add to db.py
+# Helper function for cleanup
 def cleanup_old_articles(cutoff_date):
     """Remove old articles beyond retention policy"""
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    
-    # Delete old raw articles
-    cursor.execute("DELETE FROM raw_articles WHERE scraped_at < ?", (cutoff_date.isoformat(),))
-    deleted = cursor.rowcount
-    
-    conn.commit()
-    conn.close()
-    return deleted
-
-def calculate_growth_rate():
-    """Calculate data growth rate for trend analysis"""
-    # Implementation depends on your specific needs
-    return {"daily_growth": 0, "weekly_growth": 0}
-
-def get_top_sources():
-    """Get most productive sources"""
-    # Implementation depends on your specific needs
-    return {"chinese": 0, "russian": 0, "english": 0}
-
-def get_severity_distribution():
-    """Get distribution of CVE severities"""
-    # Implementation depends on your specific needs
-    return {"critical": 0, "high": 0, "medium": 0, "low": 0}
+    try:
+        import sqlite3
+        from db import get_db_path
+        
+        db_path = get_db_path()
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        # Delete old raw articles
+        cursor.execute("DELETE FROM raw_articles WHERE scraped_at < ?", (cutoff_date.isoformat(),))
+        deleted = cursor.rowcount
+        
+        conn.commit()
+        conn.close()
+        return deleted
+        
+    except Exception as e:
+        print(f"⚠️ Cleanup error: {e}")
+        return 0
