@@ -8,7 +8,7 @@ pydantic==2.11.7
 psycopg2-binary==2.9.9
 
 # AI/ML
-openai==1.3.7
+openai>=1.40.0
 langchain==0.3.26
 langchain-openai==0.2.0
 langchain-core==0.3.68
