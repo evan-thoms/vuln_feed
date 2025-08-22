@@ -36,14 +36,14 @@ async def send_progress_update(status: str, progress: int):
 
 # Import your existing functions
 from scrapers.chinese_scrape import ChineseScraper
-from scrapers.english_scrape_with_vulners import EnglishScraperWithVulners
 from scrapers.russian_scrape import RussianScraper
+from scrapers.english_scrape_with_vulners import EnglishScraperWithVulners
 from classify import classify_article, classify_articles_parallel
 from db import (
-    init_db, insert_raw_article, is_article_scraped, mark_as_processed, 
-    get_unprocessed_articles, insert_cve, insert_newsitem,
-    get_cves_by_filters, get_news_by_filters, get_last_scrape_time, get_data_statistics,
-    is_article_classified, get_classified_article
+    init_db, insert_raw_article, is_article_scraped, mark_as_processed,
+    get_unprocessed_articles, insert_cve, insert_newsitem, get_cves_by_filters, 
+    get_news_by_filters, get_last_scrape_time, get_data_statistics,
+    get_classified_article, is_article_classified
 )
 
 # _current_session = {
@@ -946,7 +946,7 @@ def intensive_rescrape(content_type: str = "both", max_results: int = 10) -> str
             articles.extend(r_scraper.scrape_all())
         
         print("🇺🇸 Intensive English scraping...")
-        e_scraper = EnglishScraper(intensive_target)
+        e_scraper = EnglishScraperWithVulners(intensive_target) # Changed to EnglishScraperWithVulners
         articles.extend(e_scraper.scrape_all())
         
         # Remove duplicates

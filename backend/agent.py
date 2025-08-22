@@ -18,7 +18,7 @@ from tools.tools import (
 )
 # Import your existing functions
 from scrapers.chinese_scrape import ChineseScraper
-from scrapers.english_scrape import EnglishScraper
+from scrapers.english_scrape_with_vulners import EnglishScraperWithVulners
 from scrapers.russian_scrape import RussianScraper
 from classify import classify_article
 

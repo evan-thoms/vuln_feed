@@ -1,12 +1,12 @@
-from langchain_ollama import ChatOllama
-from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import time
-
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import JsonOutputParser
+from langchain_core.pydantic_v1 import BaseModel, Field
+from typing import List, Dict, Optional
 import json
-import re
 import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime
 
 llm = ChatOpenAI(
     model="gpt-4o-mini",  # Much cheaper than GPT-4, great for classification
