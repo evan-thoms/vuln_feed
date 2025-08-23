@@ -34,12 +34,13 @@ api_key_name = "GROQ_API"
 # Get the value of the environment variable
 api_key = os.environ.get(api_key_name)
 
-# Import WebSocket manager for progress updates
-try:
-    from main import manager
-except ImportError:
-    # Fallback if main.py not available
-    manager = None
+# WebSocket manager will be set by main.py after import
+manager = None
+
+def set_websocket_manager(ws_manager):
+    """Set the WebSocket manager from main.py"""
+    global manager
+    manager = ws_manager
 
 async def send_progress_update(status: str, progress: int):
     """Send progress update via WebSocket"""

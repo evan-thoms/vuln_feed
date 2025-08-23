@@ -7,14 +7,11 @@ from datetime import datetime
 import json
 
 # Import your agent
-from agent import IntelligentCyberAgent
+from agent import IntelligentCyberAgent, set_websocket_manager
 from models import QueryParams
 from db import get_data_freshness_info
 
 app = FastAPI(title="Cybersecurity Intelligence API", version="1.0.0")
-
-# Initialize agent
-agent = IntelligentCyberAgent()
 
 # WebSocket connection manager
 class ConnectionManager:
@@ -40,6 +37,10 @@ class ConnectionManager:
                 self.active_connections.remove(connection)
 
 manager = ConnectionManager()
+
+# Initialize agent and set WebSocket manager
+agent = IntelligentCyberAgent()
+set_websocket_manager(manager)
 
 # CORS middleware for React frontend
 app.add_middleware(
