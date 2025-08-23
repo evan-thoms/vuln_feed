@@ -21,11 +21,16 @@ def get_db_path():
 
 def get_connection():
     """Get database connection - using SQLite for now to avoid compatibility issues"""
-    return sqlite3.connect(get_db_path())
+    try:
+        return sqlite3.connect(get_db_path())
+    except sqlite3.OperationalError:
+        # If file-based database fails, fall back to in-memory
+        print("⚠️ File-based database failed, using in-memory database")
+        return sqlite3.connect(':memory:')
 
 def init_db():
     """Initialize database with proper schema"""
-    conn = sqlite3.connect(get_db_path())
+    conn = get_connection()
     
     # Create tables directly instead of reading from schema.sql
     conn.executescript("""
