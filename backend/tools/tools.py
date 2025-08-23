@@ -3,8 +3,7 @@ from typing import List, Dict, Optional
 from models import QueryParams, Article, Vulnerability, NewsItem
 from datetime import datetime, timedelta
 import json
-import argostranslate.package
-import argostranslate.translate
+# Translation handled by OpenAI
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import os
 from openai import OpenAI
@@ -184,8 +183,9 @@ def chunk_text(text, max_length=5000):
     return chunks
 
 def translate_argos(text: str, source_lang: str, target_lang: str = "en") -> str:
-    """Your existing argos translate function"""
-    return argostranslate.translate.translate(text, source_lang, target_lang)
+    """Translation handled by OpenAI - placeholder for compatibility"""
+    # This function is no longer used since we use OpenAI for translation
+    return text
 
 def truncate_text(text, language,max_length=2000):
     """Your existing truncate function"""

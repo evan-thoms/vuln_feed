@@ -1,20 +1,9 @@
 from db import init_db
-import argostranslate.package
-import argostranslate.translate
+# Translation handled by OpenAI
 
 def setup_argos():
-    argostranslate.package.update_package_index()
-    available_packages = argostranslate.package.get_available_packages()
-    
-    zh_en_package = next(
-        filter(lambda x: x.from_code == "zh" and x.to_code == "en", available_packages)
-    )
-    argostranslate.package.install_from_path(zh_en_package.download())
-    
-    ru_en_package = next(
-        filter(lambda x: x.from_code == "ru" and x.to_code == "en", available_packages)
-    )
-    argostranslate.package.install_from_path(ru_en_package.download())
+    # Translation handled by OpenAI - no setup needed
+    pass
 
 def run_setup():
     print("🛠️ Initializing database...")

@@ -4,9 +4,6 @@ uvicorn[standard]==0.24.0
 websockets==12.0
 pydantic==2.11.7
 
-# Database
-# Using SQLite for now to avoid psycopg2 compatibility issues
-
 # AI/ML
 openai>=1.40.0
 langchain==0.3.26
@@ -20,9 +17,7 @@ feedparser==6.0.11
 lxml==6.0.0
 vulners==1.4.0
 
-# Translation
-argostranslate==1.9.6
-deep-translator==1.11.4
+# Translation handled by OpenAI
 
 # Task queue
 celery==5.3.4

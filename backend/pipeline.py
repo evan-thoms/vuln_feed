@@ -6,8 +6,7 @@ from models import NewsItem, Vulnerability
 
 from classify import classify_article
 import json
-import argostranslate.package
-import argostranslate.translate
+# Translation handled by OpenAI
 from models import Article
 import datetime
 from db import (
@@ -24,18 +23,8 @@ def truncate_text(text, max_length=3000):
     return text[:max_length]
 
 def setup_argos():
-    argostranslate.package.update_package_index()
-    available_packages = argostranslate.package.get_available_packages()
-    
-    zh_en_package = next(
-        filter(lambda x: x.from_code == "zh" and x.to_code == "en", available_packages)
-    )
-    argostranslate.package.install_from_path(zh_en_package.download())
-    
-    ru_en_package = next(
-        filter(lambda x: x.from_code == "ru" and x.to_code == "en", available_packages)
-    )
-    argostranslate.package.install_from_path(ru_en_package.download())
+    # Translation handled by OpenAI - no setup needed
+    pass
 
 def translate_articles(articles):
     for i, art in enumerate(articles):
@@ -62,7 +51,8 @@ def chunk_text(text, max_length=5000):
 
 
 def translate_argos(text: str, source_lang: str, target_lang: str = "en") -> str:
-    return argostranslate.translate.translate(text, source_lang, target_lang)
+    # Translation handled by OpenAI - placeholder for compatibility
+    return text
 
 def translate(text: str, source_lang, target_lang="en") -> str:
     if source_lang == "en":
