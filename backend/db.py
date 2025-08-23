@@ -19,57 +19,64 @@ def get_db_path():
         return os.path.join(os.getcwd(), db_name)
     return DATABASE_URL
 
-def get_connection():
-    """Get database connection - using SQLite for now to avoid compatibility issues"""
-    try:
-        return sqlite3.connect(get_db_path())
-    except sqlite3.OperationalError:
-        # If file-based database fails, fall back to in-memory
-        print("⚠️ File-based database failed, using in-memory database")
-        return sqlite3.connect(':memory:')
-
-def init_db():
-    """Initialize database with proper schema"""
-    conn = get_connection()
+def _create_tables(conn):
+    """Create database tables using schema.sql"""
+    import os
     
-    # Create tables directly instead of reading from schema.sql
+    # Find schema.sql file - check both current directory and backend directory
+    schema_paths = [
+        "schema.sql",
+        "backend/schema.sql",
+        os.path.join(os.path.dirname(__file__), "schema.sql"),
+        os.path.join(os.path.dirname(__file__), "..", "schema.sql")
+    ]
+    
+    for schema_path in schema_paths:
+        if os.path.exists(schema_path):
+            with open(schema_path, "r") as f:
+                conn.executescript(f.read())
+            conn.commit()
+            return
+    
+    # Fallback if schema.sql not found
+    print("⚠️ schema.sql not found, using inline table creation")
     conn.executescript("""
         CREATE TABLE IF NOT EXISTS raw_articles (
-            id INTEGER PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             source TEXT,
-            url TEXT UNIQUE,
             title TEXT,
             title_translated TEXT,
+            url TEXT UNIQUE,
             content TEXT,
             content_translated TEXT,
             language TEXT,
-            scraped_at TEXT,
-            published_date TEXT,
+            scraped_at DATETIME,
+            published_date DATETIME,
             processed INTEGER DEFAULT 0
         );
         
         CREATE TABLE IF NOT EXISTS cves (
-            id INTEGER PRIMARY KEY,
-            cve_id TEXT UNIQUE,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            cve_id TEXT,
             title TEXT,
             title_translated TEXT,
             summary TEXT,
             severity TEXT,
             cvss_score REAL,
-            published_date TEXT,
+            published_date DATETIME,
             original_language TEXT,
             source TEXT,
-            url TEXT,
+            url TEXT UNIQUE,
             intrigue REAL,
             affected_products TEXT
         );
         
         CREATE TABLE IF NOT EXISTS newsitems (
-            id INTEGER PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT,
             title_translated TEXT,
             summary TEXT,
-            published_date TEXT,
+            published_date DATETIME,
             original_language TEXT,
             source TEXT,
             url TEXT UNIQUE,
@@ -77,6 +84,28 @@ def init_db():
         );
     """)
     conn.commit()
+
+def get_connection():
+    """Get database connection - using SQLite for now to avoid compatibility issues"""
+    try:
+        conn = sqlite3.connect(get_db_path())
+        # Check if tables exist, if not create them
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='raw_articles'")
+        if not cursor.fetchone():
+            _create_tables(conn)
+        return conn
+    except sqlite3.OperationalError:
+        # If file-based database fails, fall back to in-memory
+        print("⚠️ File-based database failed, using in-memory database")
+        conn = sqlite3.connect(':memory:')
+        _create_tables(conn)
+        return conn
+
+def init_db():
+    """Initialize database with proper schema"""
+    # Tables are now created automatically by get_connection()
+    conn = get_connection()
     conn.close()
 
 def is_article_scraped(link):
