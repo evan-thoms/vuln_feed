@@ -66,6 +66,16 @@ class SearchRequest(BaseModel):
     output_format: str = "json"
     email_address: Optional[str] = None
 
+@app.get("/health")
+async def health_check():
+    """Simple health check endpoint"""
+    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
+
+@app.get("/")
+async def root():
+    """Root endpoint"""
+    return {"message": "Cybersecurity Intelligence API", "status": "online"}
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
