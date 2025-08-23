@@ -25,8 +25,51 @@ def get_connection():
 def init_db():
     """Initialize database with proper schema"""
     conn = sqlite3.connect(get_db_path())
-    with open("schema.sql", "r") as f:
-        conn.executescript(f.read())
+    
+    # Create tables directly instead of reading from schema.sql
+    conn.executescript("""
+        CREATE TABLE IF NOT EXISTS raw_articles (
+            id INTEGER PRIMARY KEY,
+            source TEXT,
+            url TEXT UNIQUE,
+            title TEXT,
+            title_translated TEXT,
+            content TEXT,
+            content_translated TEXT,
+            language TEXT,
+            scraped_at TEXT,
+            published_date TEXT,
+            processed INTEGER DEFAULT 0
+        );
+        
+        CREATE TABLE IF NOT EXISTS cves (
+            id INTEGER PRIMARY KEY,
+            cve_id TEXT UNIQUE,
+            title TEXT,
+            title_translated TEXT,
+            summary TEXT,
+            severity TEXT,
+            cvss_score REAL,
+            published_date TEXT,
+            original_language TEXT,
+            source TEXT,
+            url TEXT,
+            intrigue REAL,
+            affected_products TEXT
+        );
+        
+        CREATE TABLE IF NOT EXISTS newsitems (
+            id INTEGER PRIMARY KEY,
+            title TEXT,
+            title_translated TEXT,
+            summary TEXT,
+            published_date TEXT,
+            original_language TEXT,
+            source TEXT,
+            url TEXT UNIQUE,
+            intrigue REAL
+        );
+    """)
     conn.commit()
     conn.close()
 
