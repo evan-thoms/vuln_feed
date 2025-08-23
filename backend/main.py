@@ -9,7 +9,7 @@ import json
 # Import your agent
 from agent import IntelligentCyberAgent, set_websocket_manager
 from models import QueryParams
-from db import get_data_freshness_info, init_db
+from db import get_data_freshness_info
 
 app = FastAPI(title="Cybersecurity Intelligence API", version="1.0.0")
 
@@ -37,9 +37,6 @@ class ConnectionManager:
                 self.active_connections.remove(connection)
 
 manager = ConnectionManager()
-
-# Initialize database
-init_db()
 
 # Initialize agent and set WebSocket manager
 agent = IntelligentCyberAgent()
