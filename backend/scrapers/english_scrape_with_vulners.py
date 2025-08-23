@@ -18,7 +18,11 @@ class EnglishScraperWithVulners:
         self.FORCE = False
         self.max_arts = num_articles
         # Initialize Vulners API
-        self.vulners_api = vulners.VulnersApi(api_key="9DZAW2NZ8L5502PAVQURU0VRCL7WLXNO61JEX3A4MCF1T0SNRS4THDSVMITCHUHM")
+        try:
+            self.vulners_api = vulners.Vulners(api_key="9DZAW2NZ8L5502PAVQURU0VRCL7WLXNO61JEX3A4MCF1T0SNRS4THDSVMITCHUHM")
+        except AttributeError:
+            # Fallback for different vulners package versions
+            self.vulners_api = vulners.VulnersApi(api_key="9DZAW2NZ8L5502PAVQURU0VRCL7WLXNO61JEX3A4MCF1T0SNRS4THDSVMITCHUHM")
 
     def normalize_date(self, date_str):
         return parser.parse(date_str)
