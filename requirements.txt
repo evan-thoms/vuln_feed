@@ -5,7 +5,7 @@ websockets==12.0
 pydantic==2.11.7
 
 # Database
-psycopg2-binary==2.9.5
+# Using SQLite for now to avoid psycopg2 compatibility issues
 
 # AI/ML
 openai>=1.40.0

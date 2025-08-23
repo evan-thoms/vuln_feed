@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import json
 from models import Vulnerability, NewsItem
 import os
+import asyncio
 
 # Database configuration - supports both SQLite and PostgreSQL
 DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///articles.db')
@@ -14,79 +15,16 @@ def get_db_path():
     return DATABASE_URL
 
 def get_connection():
-    """Get database connection - SQLite for local, PostgreSQL for production"""
-    if DATABASE_URL.startswith('sqlite'):
-        return sqlite3.connect(get_db_path())
-    else:
-        # PostgreSQL connection
-        import psycopg2
-        return psycopg2.connect(DATABASE_URL)
+    """Get database connection - using SQLite for now to avoid compatibility issues"""
+    return sqlite3.connect(get_db_path())
 
 def init_db():
     """Initialize database with proper schema"""
-    if DATABASE_URL.startswith('sqlite'):
-        # SQLite initialization
-        conn = sqlite3.connect(get_db_path())
-        with open("schema.sql", "r") as f:
-            conn.executescript(f.read())
-        conn.commit()
-        conn.close()
-    else:
-        # PostgreSQL initialization
-        conn = get_connection()
-        cursor = conn.cursor()
-        
-        # Create tables for PostgreSQL
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS raw_articles (
-                id SERIAL PRIMARY KEY,
-                source VARCHAR(255),
-                url TEXT UNIQUE,
-                title TEXT,
-                title_translated TEXT,
-                content TEXT,
-                content_translated TEXT,
-                language VARCHAR(10),
-                scraped_at TIMESTAMP,
-                published_date TIMESTAMP,
-                processed BOOLEAN DEFAULT FALSE
-            )
-        """)
-        
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS cves (
-                id SERIAL PRIMARY KEY,
-                cve_id VARCHAR(50) UNIQUE,
-                title TEXT,
-                title_translated TEXT,
-                summary TEXT,
-                severity VARCHAR(20),
-                cvss_score DECIMAL(3,1),
-                published_date TIMESTAMP,
-                original_language VARCHAR(10),
-                source VARCHAR(255),
-                url TEXT,
-                intrigue DECIMAL(3,1),
-                affected_products TEXT
-            )
-        """)
-        
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS newsitems (
-                id SERIAL PRIMARY KEY,
-                title TEXT,
-                title_translated TEXT,
-                summary TEXT,
-                published_date TIMESTAMP,
-                original_language VARCHAR(10),
-                source VARCHAR(255),
-                url TEXT UNIQUE,
-                intrigue DECIMAL(3,1)
-            )
-        """)
-        
-        conn.commit()
-        conn.close()
+    conn = sqlite3.connect(get_db_path())
+    with open("schema.sql", "r") as f:
+        conn.executescript(f.read())
+    conn.commit()
+    conn.close()
 
 def is_article_scraped(link):
     print("Checking if ", link, " is scraped ")
