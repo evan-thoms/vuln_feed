@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Build script for Render deployment
 
 echo "Installing Python dependencies..."
