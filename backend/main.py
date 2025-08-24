@@ -373,7 +373,12 @@ async def test_supabase_connection():
             # Try to import psycopg2 and test connection
             try:
                 import psycopg2
-                conn = psycopg2.connect(DATABASE_URL)
+                # Add connection parameters for better compatibility with hosting services
+                connection_url = DATABASE_URL
+                if "?" not in connection_url:
+                    connection_url += "?sslmode=require&application_name=render_app"
+                
+                conn = psycopg2.connect(connection_url)
                 cursor = conn.cursor()
                 cursor.execute("SELECT 1")
                 result = cursor.fetchone()
