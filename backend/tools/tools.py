@@ -384,15 +384,16 @@ def scrape_fresh_intel(content_type: str = "both", max_results: int = 10) -> str
         articles = []
         with ThreadPoolExecutor(max_workers=6) as executor:
             futures = [executor.submit(scraper.scrape_all) for scraper in scrapers]
-            for future in as_completed(futures):
+            for i, future in enumerate(as_completed(futures)):
                 try:
                     # Add timeout to prevent hanging scrapers
                     result = future.result(timeout=60)  # 60 second timeout per scraper
+                    print(f"✅ Scraper {i+1} completed: {len(result)} articles")
                     articles.extend(result)
                 except TimeoutError:
-                    print(f"⏰ Scraper timed out after 60s - skipping")
+                    print(f"⏰ Scraper {i+1} timed out after 60s - skipping")
                 except Exception as e:
-                    print(f"❌ Scraper error: {e}")
+                    print(f"❌ Scraper {i+1} error: {e}")
         
         # Process unprocessed articles
         unprocessed_rows = get_unprocessed_articles()
@@ -436,6 +437,19 @@ def scrape_fresh_intel(content_type: str = "both", max_results: int = 10) -> str
         agent.current_session["already_classified_articles"] = already_classified_articles
         
         print(f"✅ Fresh intel collected: {len(translated_articles)} articles")
+        print(f"📊 Detailed breakdown:")
+        print(f"  - Total raw articles collected: {len(articles)}")
+        print(f"  - Articles to process: {len(articles_to_process)}")
+        print(f"  - Already classified: {len(already_classified_articles)}")
+        print(f"  - Final translated articles: {len(translated_articles)}")
+        
+        # Debug the first few articles for troubleshooting
+        if translated_articles:
+            print(f"🔍 Sample articles:")
+            for i, art in enumerate(translated_articles[:3]):
+                print(f"  {i+1}. {art.source}: {art.title[:50]}... ({art.language})")
+        else:
+            print("⚠️ No articles were collected - debugging needed")
         
         return json.dumps({
             "success": True,
