@@ -6,6 +6,7 @@ import asyncio
 from datetime import datetime
 import json
 import time
+import os
 
 # Import your agent
 from agent import IntelligentCyberAgent, set_websocket_manager
@@ -94,6 +95,83 @@ async def search_intelligence(request: SearchRequest):
     start_time = datetime.now()
     
     try:
+        # Check if we're on Render (production) and use cache-first approach
+        is_production = os.getenv('RENDER') is not None
+        
+        if is_production:
+            # Production: Try cache first, fallback to scraping
+            await manager.broadcast(json.dumps({
+                "type": "progress",
+                "status": "Checking cached data...",
+                "progress": 10
+            }))
+            
+            # Try to get existing data first
+            from db import get_cached_intelligence
+            cached_data = get_cached_intelligence(
+                content_type=request.content_type,
+                severity=request.severity,
+                days_back=request.days_back,
+                max_results=request.max_results
+            )
+            
+            if cached_data['total_found'] >= request.max_results * 0.5:  # 50% of requested results
+                await manager.broadcast(json.dumps({
+                    "type": "progress",
+                    "status": "Using cached data...",
+                    "progress": 50
+                }))
+                
+                # Format cached data for response
+                response = {
+                    "success": True,
+                    "cves": [],
+                    "news": [],
+                    "total_results": cached_data['total_found'],
+                    "session_id": datetime.now().strftime("%Y%m%d_%H%M%S"),
+                    "generated_at": datetime.now().isoformat(),
+                    "source": "cache"
+                }
+                
+                # Convert cached data to proper format
+                for cve in cached_data['cves']:
+                    response["cves"].append({
+                        "cve_id": cve[1],  # Assuming cve_id is at index 1
+                        "title": cve[2],
+                        "title_translated": cve[3],
+                        "summary": cve[4],
+                        "severity": cve[5],
+                        "cvss_score": float(cve[6]),
+                        "intrigue": float(cve[7]),
+                        "published_date": cve[8],
+                        "original_language": cve[9],
+                        "source": cve[10],
+                        "url": cve[11]
+                    })
+                
+                for news in cached_data['news']:
+                    response["news"].append({
+                        "title": news[1],
+                        "title_translated": news[2],
+                        "summary": news[3],
+                        "intrigue": float(news[4]),
+                        "published_date": news[5],
+                        "original_language": news[6],
+                        "source": news[7],
+                        "url": news[8]
+                    })
+                
+                response["processing_time"] = (datetime.now() - start_time).total_seconds()
+                response["query_params"] = request.model_dump()
+                
+                await manager.broadcast(json.dumps({
+                    "type": "progress",
+                    "status": "Complete! (cached)",
+                    "progress": 100
+                }))
+                
+                return response
+        
         # Send initial status
         await manager.broadcast(json.dumps({
             "type": "progress",
