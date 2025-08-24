@@ -13,8 +13,26 @@ def get_db_path():
     if DATABASE_URL.startswith('sqlite'):
         # Use persistent directory on Render
         if os.getenv('RENDER'):
-            # Use /tmp directory which is persistent on Render
-            return '/tmp/articles.db'
+            # Try multiple writable directories on Render
+            possible_paths = [
+                '/tmp/articles.db',
+                '/opt/render/project/src/articles.db',
+                os.path.join(os.getcwd(), 'articles.db')
+            ]
+            for path in possible_paths:
+                try:
+                    # Test if we can write to this directory
+                    test_path = path.replace('articles.db', 'test.db')
+                    test_conn = sqlite3.connect(test_path)
+                    test_conn.close()
+                    os.remove(test_path)  # Clean up test file
+                    print(f"✅ Using database path: {path}")
+                    return path
+                except (sqlite3.OperationalError, PermissionError, OSError):
+                    continue
+            # If all fail, fall back to in-memory
+            print("⚠️ All file paths failed, using in-memory database")
+            return ':memory:'
         db_name = DATABASE_URL.replace('sqlite:///', '')
         return os.path.join(os.getcwd(), db_name)
     return DATABASE_URL

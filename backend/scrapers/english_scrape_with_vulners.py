@@ -36,15 +36,27 @@ class EnglishScraperWithVulners:
             # Get recent high-severity CVEs
             query = "type:cve"
             
-            search_result = self.vulners_api.find(
-                query,
-                limit=self.max_arts * 2,  # Get more Vulners results since they're high quality
-                fields=[
-                    "id", "title", "description", "short_description",
-                    "type", "bulletinFamily", "cvss", "published", 
-                    "modified", "href", "cvelist", "references"
-                ]
-            )
+            # Try different API methods based on vulners package version
+            try:
+                search_result = self.vulners_api.find(
+                    query,
+                    limit=self.max_arts * 2,  # Get more Vulners results since they're high quality
+                    fields=[
+                        "id", "title", "description", "short_description",
+                        "type", "bulletinFamily", "cvss", "published", 
+                        "modified", "href", "cvelist", "references"
+                    ]
+                )
+            except AttributeError:
+                # Fallback for different API structure
+                try:
+                    search_result = self.vulners_api.search(
+                        query,
+                        limit=self.max_arts * 2
+                    )
+                except AttributeError:
+                    print("❌ Vulners API methods not available")
+                    return []
             
             # Debug: Print Vulners API response
             print(f"🔍 Vulners API Debug:")

@@ -887,9 +887,17 @@ def intensive_rescrape(content_type: str = "both", max_results: int = 10) -> str
             "articles_collected": 0
         })
 @tool
-def scrape_fresh_intel(content_type: str = "both", max_results: int = 10) -> str:
+def scrape_fresh_intel(content_type: str = "both", max_results: int = None) -> str:
     """Scrape fresh intelligence from multiple sources."""
     try:
+        # Get max_results from agent's current parameters if not provided
+        if max_results is None:
+            agent = scrape_fresh_intel._agent_instance
+            if hasattr(agent, 'current_params'):
+                max_results = agent.current_params.get('max_results', 10)
+            else:
+                max_results = 10
+        
         # Send progress update
         import asyncio
         try:
