@@ -335,6 +335,36 @@ async def celery_status():
             "message": "Failed to check Celery status"
         }
 
+@app.get("/cache")
+async def get_cached_data():
+    """Simple cache-only endpoint for production"""
+    try:
+        from db import get_cached_intelligence
+        
+        # Get any available cached data
+        cached_data = get_cached_intelligence(
+            content_type="both",
+            severity=None,
+            days_back=7,
+            max_results=10
+        )
+        
+        return {
+            "success": True,
+            "cves": cached_data['cves'],
+            "news": cached_data['news'],
+            "total_results": cached_data['total_found'],
+            "source": "cache_only"
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "cves": [],
+            "news": [],
+            "total_results": 0
+        }
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
