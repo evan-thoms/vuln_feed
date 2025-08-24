@@ -386,14 +386,32 @@ async def test_supabase_connection():
                     "test_query": "SELECT 1 = OK",
                     "timestamp": datetime.now().isoformat()
                 }
-            except ImportError:
-                return {
-                    "success": False,
-                    "database_type": "PostgreSQL (Supabase)",
-                    "connection": "Failed - psycopg2 not installed",
-                    "error": "Missing psycopg2-binary package",
-                    "timestamp": datetime.now().isoformat()
-                }
+            except ImportError as e:
+                # If psycopg2 fails, try to use current database connection as fallback
+                try:
+                    from db import get_connection
+                    conn = get_connection()
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT 1")
+                    result = cursor.fetchone()
+                    conn.close()
+                    
+                    return {
+                        "success": True,
+                        "database_type": "PostgreSQL (Supabase) - using fallback connection",
+                        "connection": "Working via fallback",
+                        "test_query": "SELECT 1 = OK",
+                        "note": f"psycopg2 import failed: {str(e)}",
+                        "timestamp": datetime.now().isoformat()
+                    }
+                except Exception as fallback_error:
+                    return {
+                        "success": False,
+                        "database_type": "PostgreSQL (Supabase)",
+                        "connection": "Failed - psycopg2 not available and fallback failed",
+                        "error": f"psycopg2: {str(e)}, fallback: {str(fallback_error)}",
+                        "timestamp": datetime.now().isoformat()
+                    }
             except Exception as e:
                 return {
                     "success": False,
