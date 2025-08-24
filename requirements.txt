@@ -24,7 +24,8 @@ celery==5.3.4
 redis==4.4.4
 
 # Database (for Supabase PostgreSQL)
-psycopg2-binary==2.9.9
+psycopg2-binary==2.9.7
+asyncpg==0.29.0
 
 # Utilities
 python-dotenv==1.1.1
