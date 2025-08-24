@@ -26,9 +26,6 @@ redis==4.4.4
 # Database (for Supabase PostgreSQL)
 psycopg2-binary==2.9.9
 
-# Database
-psycopg2-binary==2.9.9
-
 # Utilities
 python-dotenv==1.1.1
 python-dateutil==2.9.0.post0
