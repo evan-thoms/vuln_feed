@@ -360,6 +360,64 @@ async def test_endpoint():
         "render": os.getenv('RENDER') is not None
     }
 
+@app.get("/test-supabase")
+async def test_supabase_connection():
+    """Simple test to verify Supabase connection"""
+    try:
+        from db import DATABASE_URL
+        
+        # Check if DATABASE_URL is set to Supabase
+        is_supabase = DATABASE_URL.startswith('postgresql')
+        
+        if is_supabase:
+            # Try to import psycopg2 and test connection
+            try:
+                import psycopg2
+                conn = psycopg2.connect(DATABASE_URL)
+                cursor = conn.cursor()
+                cursor.execute("SELECT 1")
+                result = cursor.fetchone()
+                conn.close()
+                
+                return {
+                    "success": True,
+                    "database_type": "PostgreSQL (Supabase)",
+                    "connection": "Working",
+                    "test_query": "SELECT 1 = OK",
+                    "timestamp": datetime.now().isoformat()
+                }
+            except ImportError:
+                return {
+                    "success": False,
+                    "database_type": "PostgreSQL (Supabase)",
+                    "connection": "Failed - psycopg2 not installed",
+                    "error": "Missing psycopg2-binary package",
+                    "timestamp": datetime.now().isoformat()
+                }
+            except Exception as e:
+                return {
+                    "success": False,
+                    "database_type": "PostgreSQL (Supabase)",
+                    "connection": "Failed",
+                    "error": str(e),
+                    "timestamp": datetime.now().isoformat()
+                }
+        else:
+            return {
+                "success": False,
+                "database_type": "SQLite (not Supabase)",
+                "connection": "Not using Supabase",
+                "current_url": DATABASE_URL[:50] + "..." if len(DATABASE_URL) > 50 else DATABASE_URL,
+                "timestamp": datetime.now().isoformat()
+            }
+            
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

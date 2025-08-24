@@ -8,6 +8,17 @@ import asyncio
 # Database configuration - supports both SQLite and PostgreSQL
 DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///articles.db')
 
+def get_placeholder():
+    """Get the correct SQL placeholder based on database type"""
+    return "%s" if DATABASE_URL.startswith('postgresql') else "?"
+
+def get_ignore_clause():
+    """Get the correct INSERT IGNORE clause based on database type"""
+    if DATABASE_URL.startswith('postgresql'):
+        return "ON CONFLICT (url) DO NOTHING"
+    else:
+        return "OR IGNORE"
+
 def get_db_path():
     """Get the database path for use in Celery tasks"""
     if DATABASE_URL.startswith('sqlite'):
@@ -104,7 +115,54 @@ def _create_tables(conn):
     conn.commit()
 
 def get_connection():
-    """Get database connection - using SQLite for now to avoid compatibility issues"""
+    """Get database connection - supports both SQLite and PostgreSQL"""
+    if DATABASE_URL.startswith('postgresql'):
+        # PostgreSQL connection (Supabase)
+        try:
+            import psycopg2
+            from psycopg2.extras import RealDictCursor
+            
+            print(f"🔗 Connecting to PostgreSQL: {DATABASE_URL.split('@')[1] if '@' in DATABASE_URL else 'Supabase'}")
+            
+            conn = psycopg2.connect(DATABASE_URL)
+            conn.autocommit = True
+            
+            # Test the connection
+            cursor = conn.cursor()
+            cursor.execute("SELECT version();")
+            version = cursor.fetchone()
+            print(f"✅ PostgreSQL connected successfully: {version[0] if version else 'Unknown version'}")
+            
+            # Check if tables exist
+            cursor.execute("""
+                SELECT table_name 
+                FROM information_schema.tables 
+                WHERE table_schema = 'public' 
+                AND table_name IN ('raw_articles', 'cves', 'newsitems')
+            """)
+            existing_tables = [row[0] for row in cursor.fetchall()]
+            print(f"📊 Existing tables: {existing_tables}")
+            
+            # Create tables if they don't exist
+            if not existing_tables:
+                print("🔨 Creating PostgreSQL tables...")
+                _create_postgresql_tables(conn)
+            
+            return conn
+            
+        except ImportError:
+            print("❌ psycopg2 not installed, falling back to SQLite")
+            return _get_sqlite_connection()
+        except Exception as e:
+            print(f"❌ PostgreSQL connection failed: {e}")
+            print("⚠️ Falling back to SQLite")
+            return _get_sqlite_connection()
+    else:
+        # SQLite connection (fallback)
+        return _get_sqlite_connection()
+
+def _get_sqlite_connection():
+    """Get SQLite connection with fallback logic"""
     try:
         conn = sqlite3.connect(get_db_path())
         # Check if tables exist, if not create them
@@ -120,6 +178,64 @@ def get_connection():
         _create_tables(conn)
         return conn
 
+def _create_postgresql_tables(conn):
+    """Create PostgreSQL tables for Supabase"""
+    cursor = conn.cursor()
+    
+    # Create raw_articles table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS raw_articles (
+            id SERIAL PRIMARY KEY,
+            source TEXT,
+            title TEXT,
+            title_translated TEXT,
+            url TEXT UNIQUE,
+            content TEXT,
+            content_translated TEXT,
+            language TEXT,
+            scraped_at TIMESTAMP,
+            published_date TIMESTAMP,
+            processed INTEGER DEFAULT 0
+        );
+    """)
+    
+    # Create cves table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS cves (
+            id SERIAL PRIMARY KEY,
+            cve_id TEXT,
+            title TEXT,
+            title_translated TEXT,
+            summary TEXT,
+            severity TEXT,
+            cvss_score REAL,
+            published_date TIMESTAMP,
+            original_language TEXT,
+            source TEXT,
+            url TEXT UNIQUE,
+            intrigue REAL,
+            affected_products TEXT
+        );
+    """)
+    
+    # Create newsitems table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS newsitems (
+            id SERIAL PRIMARY KEY,
+            title TEXT,
+            title_translated TEXT,
+            summary TEXT,
+            published_date TIMESTAMP,
+            original_language TEXT,
+            source TEXT,
+            url TEXT UNIQUE,
+            intrigue REAL
+        );
+    """)
+    
+    conn.commit()
+    print("✅ PostgreSQL tables created successfully")
+
 def init_db():
     """Initialize database with proper schema"""
     # Tables are now created automatically by get_connection()
@@ -130,7 +246,8 @@ def is_article_scraped(link):
     print("Checking if ", link, " is scraped ")
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT 1 from raw_articles WHERE url = ?", (link,))
+    placeholder = get_placeholder()
+    cursor.execute(f"SELECT 1 from raw_articles WHERE url = {placeholder}", (link,))
     result = cursor.fetchone()
     conn.close()
     return result is not None
@@ -139,9 +256,11 @@ def insert_raw_article(article):
     conn = get_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("""
-            INSERT OR IGNORE INTO raw_articles (source, url, title, title_translated, content, content_translated, language, scraped_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        placeholder = get_placeholder()
+        ignore_clause = get_ignore_clause()
+        cursor.execute(f"""
+            INSERT {ignore_clause} INTO raw_articles (source, url, title, title_translated, content, content_translated, language, scraped_at)
+            VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder})
         """, (article.source, article.url, article.title, article.title_translated, article.content, article.content_translated, article.language, article.scraped_at))
         conn.commit()
     finally:
