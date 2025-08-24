@@ -42,10 +42,15 @@ class ConnectionManager:
 # Initialize WebSocket manager
 manager = ConnectionManager()
 
-# Initialize agent (without database init)
-agent = IntelligentCyberAgent()
+# Initialize database and agent
+try:
+    init_db()
+    print("✅ Database initialized successfully")
+except Exception as e:
+    print(f"⚠️ Database initialization warning: {e}")
 
-# Set the WebSocket manager for the agent
+# Initialize agent and set WebSocket manager
+agent = IntelligentCyberAgent()
 set_websocket_manager(manager)
 
 # Add CORS middleware
@@ -187,6 +192,80 @@ async def search_intelligence(request: SearchRequest):
         except:
             pass  # Ignore WebSocket errors
         raise HTTPException(status_code=500, detail=f"Agent failed: {str(e)}")
+
+@app.post("/search-minimal")
+async def search_intelligence_minimal(request: SearchRequest):
+    """Minimal search endpoint that just returns existing data without scraping"""
+    try:
+        # Initialize database only when needed
+        from db import init_db, get_cves_by_filters, get_news_by_filters
+        init_db()
+        
+        # Get existing data
+        cves = get_cves_by_filters(
+            content_type=request.content_type,
+            severity=request.severity,
+            days_back=request.days_back,
+            max_results=request.max_results
+        )
+        
+        news = get_news_by_filters(
+            content_type=request.content_type,
+            days_back=request.days_back,
+            max_results=request.max_results
+        )
+        
+        # Format response
+        response = {
+            "success": True,
+            "cves": [],
+            "news": [],
+            "total_results": len(cves) + len(news),
+            "session_id": datetime.now().strftime("%Y%m%d_%H%M%S"),
+            "generated_at": datetime.now().isoformat(),
+            "source": "existing_data"
+        }
+        
+        # Convert CVEs to proper format
+        for cve in cves:
+            response["cves"].append({
+                "cve_id": cve.cve_id,
+                "title": cve.title,
+                "title_translated": cve.title_translated,
+                "summary": cve.summary,
+                "severity": cve.severity,
+                "cvss_score": float(cve.cvss_score),
+                "intrigue": float(cve.intrigue),
+                "published_date": cve.published_date.isoformat() if hasattr(cve.published_date, 'isoformat') else str(cve.published_date),
+                "original_language": cve.original_language,
+                "source": cve.source,
+                "url": cve.url,
+                "affected_products": getattr(cve, 'affected_products', [])
+            })
+        
+        # Convert news to proper format
+        for news_item in news:
+            response["news"].append({
+                "title": news_item.title,
+                "title_translated": news_item.title_translated,
+                "summary": news_item.summary,
+                "intrigue": float(news_item.intrigue),
+                "published_date": news_item.published_date.isoformat() if hasattr(news_item.published_date, 'isoformat') else str(news_item.published_date),
+                "original_language": news_item.original_language,
+                "source": news_item.source,
+                "url": news_item.url
+            })
+        
+        return response
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "cves": [],
+            "news": [],
+            "total_results": 0
+        }
 
 @app.get("/")
 async def root():

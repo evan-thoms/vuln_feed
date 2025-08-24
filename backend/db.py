@@ -11,10 +11,10 @@ DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///articles.db')
 def get_db_path():
     """Get the database path for use in Celery tasks"""
     if DATABASE_URL.startswith('sqlite'):
-        # Use in-memory database for Render to avoid file permission issues
-        import os
+        # Use persistent directory on Render
         if os.getenv('RENDER'):
-            return ':memory:'
+            # Use /tmp directory which is persistent on Render
+            return '/tmp/articles.db'
         db_name = DATABASE_URL.replace('sqlite:///', '')
         return os.path.join(os.getcwd(), db_name)
     return DATABASE_URL
