@@ -112,7 +112,7 @@ def is_article_scraped(link):
     print("Checking if ", link, " is scraped ")
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT 1 from raw_articles WHERE url = %s", (link,))
+    cursor.execute("SELECT 1 from raw_articles WHERE url = ?", (link,))
     result = cursor.fetchone()
     conn.close()
     return result is not None
@@ -122,9 +122,8 @@ def insert_raw_article(article):
     cursor = conn.cursor()
     try:
         cursor.execute("""
-            INSERT INTO raw_articles (source, url, title, title_translated, content, content_translated, language, scraped_at)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            ON CONFLICT (url) DO NOTHING
+            INSERT OR IGNORE INTO raw_articles (source, url, title, title_translated, content, content_translated, language, scraped_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (article.source, article.url, article.title, article.title_translated, article.content, article.content_translated, article.language, article.scraped_at))
         conn.commit()
     finally:
@@ -142,7 +141,7 @@ def mark_as_processed(raw_article_id):
     print("Marked as processed: ", raw_article_id)
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("UPDATE raw_articles SET processed = TRUE WHERE url = %s", (raw_article_id,))
+    cursor.execute("UPDATE raw_articles SET processed = ? WHERE url = ?", (1, raw_article_id,))
     conn.commit()
     conn.close()
 
@@ -150,9 +149,8 @@ def insert_cve(cve):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO cves (cve_id, title, title_translated, summary, severity, cvss_score, published_date, original_language, source, url, intrigue, affected_products)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        ON CONFLICT (cve_id) DO NOTHING
+        INSERT OR IGNORE INTO cves (cve_id, title, title_translated, summary, severity, cvss_score, published_date, original_language, source, url, intrigue, affected_products)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         cve.cve_id,
         cve.title,
@@ -174,9 +172,8 @@ def insert_newsitem(news):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO newsitems (title, title_translated, summary, published_date, original_language, source, url, intrigue)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        ON CONFLICT (url) DO NOTHING
+        INSERT OR IGNORE INTO newsitems (title, title_translated, summary, published_date, original_language, source, url, intrigue)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         news.title,
         news.title_translated,
