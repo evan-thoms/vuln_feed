@@ -369,8 +369,8 @@ def scrape_fresh_intel(content_type: str = "both", max_results: int = 10) -> str
         except:
             pass
         
-        # Calculate target per source
-        target_per_source = max(max_results // 2, 5)
+        # Calculate target per source - reduced for Render performance
+        target_per_source = max(max_results // 3, 2)  # Much smaller targets
         
         print(f"🌐 Initiating fresh intelligence collection...")
         
@@ -386,12 +386,12 @@ def scrape_fresh_intel(content_type: str = "both", max_results: int = 10) -> str
             futures = [executor.submit(scraper.scrape_all) for scraper in scrapers]
             for i, future in enumerate(as_completed(futures)):
                 try:
-                    # Add timeout to prevent hanging scrapers
-                    result = future.result(timeout=60)  # 60 second timeout per scraper
+                    # Much shorter timeout for Render
+                    result = future.result(timeout=20)  # 20 second timeout per scraper
                     print(f"✅ Scraper {i+1} completed: {len(result)} articles")
                     articles.extend(result)
                 except TimeoutError:
-                    print(f"⏰ Scraper {i+1} timed out after 60s - skipping")
+                    print(f"⏰ Scraper {i+1} timed out after 20s - skipping")
                 except Exception as e:
                     print(f"❌ Scraper {i+1} error: {e}")
         
