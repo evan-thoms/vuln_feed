@@ -13,7 +13,8 @@ from agent import IntelligentCyberAgent, set_websocket_manager
 from models import QueryParams
 from db import get_data_freshness_info, init_db
 
-app = FastAPI(title="Cybersecurity Intelligence API", version="1.0.0")
+# Initialize FastAPI app
+app = FastAPI()
 
 # WebSocket connection manager
 class ConnectionManager:
@@ -38,23 +39,19 @@ class ConnectionManager:
                 # Remove dead connections
                 self.active_connections.remove(connection)
 
+# Initialize WebSocket manager
 manager = ConnectionManager()
 
-# Initialize database and agent
-try:
-    init_db()
-    print("✅ Database initialized successfully")
-except Exception as e:
-    print(f"⚠️ Database initialization warning: {e}")
-
-# Initialize agent and set WebSocket manager
+# Initialize agent (without database init)
 agent = IntelligentCyberAgent()
+
+# Set the WebSocket manager for the agent
 set_websocket_manager(manager)
 
-# CORS middleware for React frontend
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
