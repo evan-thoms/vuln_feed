@@ -5,6 +5,7 @@ from typing import List, Optional, Dict, Any
 import asyncio
 from datetime import datetime
 import json
+import time
 
 # Import your agent
 from agent import IntelligentCyberAgent, set_websocket_manager
@@ -154,7 +155,7 @@ async def search_intelligence(request: SearchRequest):
         
         agent_response["freshness"] = formatted_freshness
         agent_response["processing_time"] = (datetime.now() - start_time).total_seconds()
-        agent_response["query_params"] = request.dict()
+        agent_response["query_params"] = request.model_dump()
         
         # Send completion status
         await manager.broadcast(json.dumps({

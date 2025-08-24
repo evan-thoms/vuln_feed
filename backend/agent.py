@@ -56,28 +56,20 @@ async def send_progress_update(status: str, progress: int):
 
 class IntelligentCyberAgent:
     def __init__(self):
-        # self.llm = ChatGroq(
-        #     model="llama-3.3-70b-versatile",
-        #     groq_api_key=api_key,
-        #     temperature=0,
-        # )
-        try:
-            self.llm = ChatOpenAI(
-                model="gpt-4o-mini",
-                openai_api_key=os.environ.get("OPENAI_API_KEY"),
-                temperature=0,
-                max_retries=3
-            )
-        except Exception as e:
-            print(f"⚠️ Failed to initialize OpenAI client: {e}")
-            self.llm = None
-            
-        self.current_session = {
-            "scraped_articles": [],
-            "classified_cves": [],
-            "classified_news": [],
-            "session_id": None
-        }
+        self.llm = ChatOpenAI(
+            model="gpt-4o-mini",
+            temperature=0,
+            openai_api_key=os.getenv("OPENAI_API_KEY")
+        )
+        
+        # Import tools here to avoid circular imports
+        from tools.tools import (
+            analyze_data_needs, retrieve_existing_data, scrape_fresh_intel,
+            classify_intelligence, evaluate_intel_sufficiency, intensive_rescrape,
+            present_results, get_intelligence_smart, trigger_background_scrape, manage_cache_cleanup
+        )
+        
+        # Keep existing tools for now, add new ones
         self.tools = [
             analyze_data_needs,
             retrieve_existing_data,
@@ -85,11 +77,25 @@ class IntelligentCyberAgent:
             classify_intelligence,
             evaluate_intel_sufficiency,
             intensive_rescrape,
-            present_results
+            present_results,
+            # Add new smart tools
+            get_intelligence_smart,
+            trigger_background_scrape,
+            manage_cache_cleanup
         ]
+        
+        # Set agent instance for tools
         for tool in self.tools:
             tool._agent_instance = self
         
+        self.current_session = {
+            "scraped_articles": [],
+            "classified_cves": [],
+            "classified_news": [],
+            "session_id": None
+        }
+        
+        # Keep existing prompt for now
         prompt = ChatPromptTemplate.from_messages([
             ("system", """You are a cybersecurity intelligence agent. Follow this workflow:
 
@@ -114,39 +120,6 @@ Return only the final JSON from present_results. No additional commentary."""),
             early_stopping_method="generate"
         )
     
-    def parse_query(self, query: str) -> QueryParams:
-        """Parse user query into structured parameters"""
-        params = QueryParams()
-        query_lower = query.lower()
-        
-        # Content type detection
-        if any(word in query_lower for word in ["cve", "vulnerability"]):
-            params.content_type = "cve" if "news" not in query_lower else "both"
-        elif "news" in query_lower:
-            params.content_type = "news"
-        else:
-            params.content_type = "both"
-        
-        # Severity extraction
-        severities = []
-        for severity in ["critical", "high", "medium", "low"]:
-            if severity in query_lower:
-                severities.append(severity)
-        params.severity = severities if severities else None
-        
-        # Extract numbers for time/results
-        import re
-        numbers = re.findall(r'\b(\d+)\b', query)
-        for num in numbers:
-            num_int = int(num)
-            if any(word in query_lower for word in ["day", "days"]):
-                params.days_back = num_int
-            elif any(word in query_lower for word in ["week", "weeks"]):
-                params.days_back = num_int * 7
-            elif any(word in query_lower for word in ["result", "results"]):
-                params.max_results = min(num_int, 50)
-        
-        return params
     def new_session(self):
         self.current_session = {
             "scraped_articles": [],
@@ -154,15 +127,16 @@ Return only the final JSON from present_results. No additional commentary."""),
             "classified_news": [],
             "session_id": datetime.now().strftime("%Y%m%d_%H%M%S")
         }
+    
     def query(self, params: dict) -> dict:
-        """Main query interface"""
+        """Main query interface - keep existing logic"""
         try:
             # Start new session
             self.new_session()
 
             self.current_params = {
                 'content_type': params['content_type'],
-                'severity': params.get('severity'),  # Keep as list
+                'severity': params.get('severity'),
                 'days_back': params['days_back'],
                 'max_results': params['max_results']
             }
@@ -194,11 +168,11 @@ Return only the final JSON from present_results. No additional commentary."""),
 
             return self._build_response_from_session()
         
-
         except Exception as e:
             return {"success": False, "error": str(e), "cves": [], "news": []}
+    
     def _build_response_from_session(self) -> dict:
-        """Build response from session data - more reliable than parsing agent output"""
+        """Build response from session data - keep existing logic"""
         cves_data = []
         for cve in self.current_session.get("classified_cves", []):
             cves_data.append({

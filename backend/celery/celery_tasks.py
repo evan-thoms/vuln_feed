@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import json
 import sqlite3
 import os
+from celery.schedules import crontab
 
 # Initialize Celery
 celery_app = Celery('cyberintel')
@@ -133,6 +134,67 @@ def manual_scrape_task(sources=None, max_results=20):
         query = f"Perform full scraping of all sources. Get {max_results} items from each source."
     
     return agent.query({"content_type": "both", "max_results": max_results, "days_back": 7})
+
+@celery_app.task
+def scheduled_intelligence_gathering():
+    """Scheduled task to gather intelligence and update cache."""
+    print("🔄 Starting scheduled intelligence gathering...")
+    
+    try:
+        # Import here to avoid circular imports
+        from tools.tools import trigger_background_scrape
+        from db import get_cache_freshness, is_data_fresh
+        
+        # Check if cache is fresh
+        cache_info = get_cache_freshness()
+        
+        if is_data_fresh(cache_info['last_scrape'], max_age_hours=12):
+            print("✅ Cache is fresh, skipping scheduled scrape")
+            return {"status": "skipped", "reason": "cache_fresh"}
+        
+        # Trigger background scrape
+        result = trigger_background_scrape(content_type="both", max_results=50)
+        print(f"✅ Scheduled scrape completed: {result}")
+        
+        return {"status": "completed", "result": result}
+        
+    except Exception as e:
+        print(f"❌ Scheduled intelligence gathering failed: {e}")
+        return {"status": "failed", "error": str(e)}
+
+@celery_app.task
+def scheduled_cache_cleanup():
+    """Scheduled task to clean up old data."""
+    print("🧹 Starting scheduled cache cleanup...")
+    
+    try:
+        from tools.tools import manage_cache_cleanup
+        
+        result = manage_cache_cleanup(weeks_old=3)
+        print(f"✅ Scheduled cleanup completed: {result}")
+        
+        return {"status": "completed", "result": result}
+        
+    except Exception as e:
+        print(f"❌ Scheduled cache cleanup failed: {e}")
+        return {"status": "failed", "error": str(e)}
+
+# Schedule tasks
+@celery_app.on_after_configure.connect
+def setup_periodic_tasks(sender, **kwargs):
+    # Scrape every 12 hours
+    sender.add_periodic_task(
+        crontab(hour='*/12'),  # Every 12 hours
+        scheduled_intelligence_gathering.s(),
+        name='intelligence-gathering'
+    )
+    
+    # Cleanup every day at 2 AM
+    sender.add_periodic_task(
+        crontab(hour=2, minute=0),  # Daily at 2 AM
+        scheduled_cache_cleanup.s(),
+        name='cache-cleanup'
+    )
 
         # Helper function for cleanup
 def cleanup_old_articles(cutoff_date):

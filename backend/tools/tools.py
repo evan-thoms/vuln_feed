@@ -42,7 +42,7 @@ from db import (
     init_db, insert_raw_article, is_article_scraped, mark_as_processed,
     get_unprocessed_articles, insert_cve, insert_newsitem, get_cves_by_filters, 
     get_news_by_filters, get_last_scrape_time, get_data_statistics,
-    get_classified_article, is_article_classified
+    get_classified_article, is_article_classified, get_cache_freshness, get_cached_intelligence, is_data_fresh
 )
 
 # _current_session = {
@@ -993,6 +993,88 @@ def intensive_rescrape(content_type: str = "both", max_results: int = 10) -> str
             "error": str(e),
             "articles_collected": 0
         })
+@tool
+def get_intelligence_smart(content_type: str = "both", severity: str = None, days_back: int = 7, max_results: int = 10) -> str:
+    """Smart intelligence gathering: check cache first, scrape only if needed."""
+    print(f"🧠 Smart intelligence gathering...")
+    
+    # Check cache freshness
+    
+    cache_info = get_cache_freshness()
+    print(f"📊 Cache status: {cache_info['cve_count']} CVEs, {cache_info['news_count']} news items")
+    print(f"🕒 Last scrape: {cache_info['last_scrape']}")
+    print(f"✅ Data fresh: {cache_info['is_fresh']}")
+    
+    # If data is fresh, return from cache
+    if cache_info['is_fresh']:
+        print(f"⚡ Using cached data (fresh)")
+        cached_data = get_cached_intelligence(content_type, severity, days_back, max_results)
+        
+        if cached_data['total_found'] >= max_results * 0.7:  # 70% of requested results
+            print(f"✅ Cache has sufficient results: {cached_data['total_found']}/{max_results}")
+            
+            # Convert to proper format for agent
+            agent = get_intelligence_smart._agent_instance
+            agent.current_session["classified_cves"] = cached_data['cves']
+            agent.current_session["classified_news"] = cached_data['news']
+            
+            return json.dumps({
+                "success": True,
+                "source": "cache",
+                "cves_found": len(cached_data['cves']),
+                "news_found": len(cached_data['news']),
+                "total_found": cached_data['total_found'],
+                "cache_age_hours": round((datetime.now() - datetime.fromisoformat(cache_info['last_scrape'].replace('Z', '+00:00'))).total_seconds() / 3600, 1) if cache_info['last_scrape'] else None
+            })
+    
+    # Data is stale or insufficient - need to scrape
+    print(f"🔄 Cache stale or insufficient, triggering fresh scrape...")
+    
+    # Use existing scraping logic but with optimized settings
+    return scrape_fresh_intel(content_type, max_results)
+
+@tool  
+def trigger_background_scrape(content_type: str = "both", max_results: int = 50) -> str:
+    """Trigger a background scraping job for cache refresh."""
+    print(f"🔄 Triggering background scrape for cache refresh...")
+    
+    # This would ideally use Celery, but for now we'll do it synchronously
+    # In production, this would be a Celery task
+    try:
+        result = scrape_fresh_intel(content_type, max_results)
+        print(f"✅ Background scrape completed")
+        return result
+    except Exception as e:
+        print(f"❌ Background scrape failed: {e}")
+        return json.dumps({
+            "success": False,
+            "error": str(e),
+            "source": "background_scrape"
+        })
+
+@tool
+def manage_cache_cleanup(weeks_old: int = 3) -> str:
+    """Clean up old data from cache."""
+    print(f"🧹 Cleaning up data older than {weeks_old} weeks...")
+    
+    from db import cleanup_old_data
+    
+    try:
+        cleanup_result = cleanup_old_data(weeks_old)
+        print(f"✅ Cleanup completed: {cleanup_result}")
+        
+        return json.dumps({
+            "success": True,
+            "cleanup_result": cleanup_result,
+            "message": f"Cleaned up data older than {weeks_old} weeks"
+        })
+    except Exception as e:
+        print(f"❌ Cleanup failed: {e}")
+        return json.dumps({
+            "success": False,
+            "error": str(e)
+        })
+
 @tool
 def present_results(output_format: str = "json") -> str:
     """Return final intelligence data as JSON for frontend consumption."""

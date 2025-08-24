@@ -604,6 +604,135 @@ def get_all_classified_data_with_freshness(limit=50):
         "freshness": freshness
     }
 
+def get_cache_freshness():
+    """Check how fresh the cached data is"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    # Get the most recent scrape time
+    cursor.execute("""
+        SELECT MAX(scraped_at) as last_scrape 
+        FROM raw_articles 
+        WHERE scraped_at IS NOT NULL
+    """)
+    result = cursor.fetchone()
+    last_scrape = result[0] if result and result[0] else None
+    
+    # Get total counts
+    cursor.execute("SELECT COUNT(*) FROM cves")
+    cve_count = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT COUNT(*) FROM newsitems") 
+    news_count = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT COUNT(*) FROM raw_articles")
+    total_articles = cursor.fetchone()[0]
+    
+    conn.close()
+    
+    return {
+        "last_scrape": last_scrape,
+        "cve_count": cve_count,
+        "news_count": news_count,
+        "total_articles": total_articles,
+        "is_fresh": is_data_fresh(last_scrape)
+    }
+
+def is_data_fresh(last_scrape, max_age_hours=12):
+    """Check if data is fresh enough (within max_age_hours)"""
+    if not last_scrape:
+        return False
+    
+    if isinstance(last_scrape, str):
+        last_scrape = datetime.fromisoformat(last_scrape.replace('Z', '+00:00'))
+    
+    age_hours = (datetime.now() - last_scrape).total_seconds() / 3600
+    return age_hours < max_age_hours
+
+def cleanup_old_data(weeks_old=3):
+    """Delete data older than specified weeks"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    cutoff_date = datetime.now() - timedelta(weeks=weeks_old)
+    
+    # Delete old CVEs
+    cursor.execute("DELETE FROM cves WHERE published_date < ?", (cutoff_date,))
+    cves_deleted = cursor.rowcount
+    
+    # Delete old news
+    cursor.execute("DELETE FROM newsitems WHERE published_date < ?", (cutoff_date,))
+    news_deleted = cursor.rowcount
+    
+    # Delete old raw articles
+    cursor.execute("DELETE FROM raw_articles WHERE scraped_at < ?", (cutoff_date,))
+    articles_deleted = cursor.rowcount
+    
+    conn.commit()
+    conn.close()
+    
+    return {
+        "cves_deleted": cves_deleted,
+        "news_deleted": news_deleted,
+        "articles_deleted": articles_deleted
+    }
+
+def get_cached_intelligence(content_type="both", severity=None, days_back=7, max_results=10):
+    """Get intelligence from cache with smart filtering"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    if severity is None:
+        severity_list = None
+    elif isinstance(severity, str):
+        severity_list = [severity.upper()]
+    elif isinstance(severity, list):
+        severity_list = [s.upper() for s in severity] if severity else None
+    
+    cutoff_date = datetime.now() - timedelta(days=days_back)
+    
+    cves = []
+    news = []
+    
+    if content_type in ["cve", "both"]:
+        if severity_list:
+            placeholders = ','.join(['?' for _ in severity_list])
+            cursor.execute(f"""
+                SELECT * FROM cves 
+                WHERE published_date >= ? 
+                AND UPPER(severity) IN ({placeholders})
+                ORDER BY (cvss_score * 0.6 + intrigue * 0.4) DESC 
+                LIMIT ?
+            """, [cutoff_date] + severity_list + [max_results])
+        else:
+            cursor.execute("""
+                SELECT * FROM cves 
+                WHERE published_date >= ? 
+                ORDER BY (cvss_score * 0.6 + intrigue * 0.4) DESC 
+                LIMIT ?
+            """, (cutoff_date, max_results))
+        
+        cves = cursor.fetchall()
+    
+    if content_type in ["news", "both"]:
+        news_limit = max_results - len(cves) if content_type == "both" else max_results
+        cursor.execute("""
+            SELECT * FROM newsitems 
+            WHERE published_date >= ? 
+            ORDER BY intrigue DESC 
+            LIMIT ?
+        """, (cutoff_date, news_limit))
+        
+        news = cursor.fetchall()
+    
+    conn.close()
+    
+    return {
+        "cves": cves,
+        "news": news,
+        "total_found": len(cves) + len(news)
+    }
+
 if __name__ == "__main__":
     # Initialize DB first if needed
     init_db()
