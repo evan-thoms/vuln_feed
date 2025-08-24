@@ -274,6 +274,16 @@ async def get_cached_data():
             "total_results": 0
         }
 
+@app.get("/test")
+async def test_endpoint():
+    """Simple test endpoint that doesn't use database or scraping"""
+    return {
+        "success": True,
+        "message": "Basic endpoint working",
+        "timestamp": datetime.now().isoformat(),
+        "render": os.getenv('RENDER') is not None
+    }
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
