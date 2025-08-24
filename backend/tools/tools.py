@@ -360,108 +360,66 @@ def retrieve_existing_data(content_type: str = "both", severity = None, days_bac
 
 @tool
 def scrape_fresh_intel(content_type: str = "both", max_results: int = 10) -> str:
-    """Scrape fresh intelligence from multiple sources."""
+    """Scrape fresh intelligence from all sources"""
+    print(f"🔄 Starting fresh intelligence scraping...")
+    
+    # Check if we're on Render (production) and reduce intensity
+    is_production = os.getenv('RENDER') is not None
+    
+    if is_production:
+        # Render: Use minimal scraping to avoid timeouts
+        target_per_source = 1  # Just 1 article per source
+        max_workers = 2  # Only 2 concurrent workers
+        timeout = 10  # 10 second timeout
+        print(f"🔧 Production mode: {target_per_source} per source, {max_workers} workers, {timeout}s timeout")
+    else:
+        # Local: Use normal settings
+        target_per_source = max(max_results // 3, 2)
+        max_workers = 5
+        timeout = 20
+        print(f"🔧 Local mode: {target_per_source} per source, {max_workers} workers, {timeout}s timeout")
+    
     try:
-        # Send progress update
-        import asyncio
-        try:
-            asyncio.create_task(send_progress_update("Scraping intelligence sources...", 25))
-        except:
-            pass
-        
-        # Calculate target per source - reduced for Render performance
-        target_per_source = max(max_results // 3, 2)  # Much smaller targets
-        
-        print(f"🌐 Initiating fresh intelligence collection...")
-        
-        # Initialize scrapers
+        # Initialize scrapers with reduced intensity for production
         scrapers = [
-            ChineseScraper(target_per_source),
-            RussianScraper(target_per_source),
-            EnglishScraperWithVulners(target_per_source)  # Enhanced English scraper with Vulners integration
+            ChineseScraper(target_per_source=target_per_source, timeout=timeout),
+            RussianScraper(target_per_source=target_per_source, timeout=timeout),
+            EnglishScraperWithVulners(target_per_source=target_per_source, timeout=timeout)
         ]
         
-        articles = []
-        with ThreadPoolExecutor(max_workers=6) as executor:
-            futures = [executor.submit(scraper.scrape_all) for scraper in scrapers]
-            for i, future in enumerate(as_completed(futures)):
+        # Scrape with limited concurrency
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = [executor.submit(scraper.scrape) for scraper in scrapers]
+            results = []
+            
+            for future in as_completed(futures, timeout=60):  # 60 second total timeout
                 try:
-                    # Much shorter timeout for Render
-                    result = future.result(timeout=20)  # 20 second timeout per scraper
-                    print(f"✅ Scraper {i+1} completed: {len(result)} articles")
-                    articles.extend(result)
-                except TimeoutError:
-                    print(f"⏰ Scraper {i+1} timed out after 20s - skipping")
+                    result = future.result()
+                    results.extend(result)
                 except Exception as e:
-                    print(f"❌ Scraper {i+1} error: {e}")
+                    print(f"❌ Scraper error: {e}")
+                    continue
         
-        # Process unprocessed articles
-        unprocessed_rows = get_unprocessed_articles()
-        if unprocessed_rows:
-            print(f"📥 Processing {len(unprocessed_rows)} backlog articles...")
-            for row in unprocessed_rows:
-                article = Article(
-                    id=row[0], source=row[1], title=row[2], title_translated=row[3],
-                    url=row[4], content=row[5], content_translated=row[6],
-                    language=row[7], scraped_at=row[8], published_date=row[9] if len(row) > 9 else row[8]
-                )
-                articles.append(article)
+        # Process results
+        processed_count = 0
+        for article in results:
+            if not is_article_scraped(article['url']):
+                insert_raw_article(article)
+                processed_count += 1
         
-        # Check for already classified articles and add them to output
-        already_classified_articles = []
-        for art in articles:
-            if is_article_classified(art.url):
-                classified_data = get_classified_article(art.url)
-                if classified_data:
-                    already_classified_articles.append(classified_data)
-        
-        # Filter out already classified articles from processing pipeline
-        articles_to_process = [art for art in articles if not is_article_classified(art.url)]
-        print(f"📊 Processing {len(articles_to_process)} new articles (skipping {len(already_classified_articles)} already classified)")
-        
-        # Translate and truncate only new articles
-        for art in articles_to_process:
-            art.content = truncate_text(art.content, art.language, max_length=1000)  # Reduced from 2000 to 1000
-        
-        # Send translation progress update
-        try:
-            asyncio.create_task(send_progress_update("Translating articles...", 50))
-        except:
-            pass
-        
-        translated_articles = translate_articles_parallel(articles_to_process)
-        
-        # Store both new and already classified articles
-        agent = scrape_fresh_intel._agent_instance
-        agent.current_session["scraped_articles"] = translated_articles
-        agent.current_session["already_classified_articles"] = already_classified_articles
-        
-        print(f"✅ Fresh intel collected: {len(translated_articles)} articles")
-        print(f"📊 Detailed breakdown:")
-        print(f"  - Total raw articles collected: {len(articles)}")
-        print(f"  - Articles to process: {len(articles_to_process)}")
-        print(f"  - Already classified: {len(already_classified_articles)}")
-        print(f"  - Final translated articles: {len(translated_articles)}")
-        
-        # Debug the first few articles for troubleshooting
-        if translated_articles:
-            print(f"🔍 Sample articles:")
-            for i, art in enumerate(translated_articles[:3]):
-                print(f"  {i+1}. {art.source}: {art.title[:50]}... ({art.language})")
-        else:
-            print("⚠️ No articles were collected - debugging needed")
-        
+        print(f"✅ Fresh intel collected: {processed_count} articles")
         return json.dumps({
             "success": True,
-            "articles_collected": len(translated_articles),
+            "articles_collected": processed_count,
             "status": "ready_for_classification"
         })
         
     except Exception as e:
+        print(f"❌ Scraping failed: {e}")
         return json.dumps({
             "success": False,
             "error": str(e),
-            "articles_collected": 0
+            "status": "failed"
         })
 
 
