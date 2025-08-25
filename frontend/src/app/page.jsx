@@ -25,6 +25,7 @@ const CyberSecurityApp = () => {
   const [progress, setProgress] = useState(0);
   const [isWakingUp, setIsWakingUp] = useState(false);
   const [serviceReady, setServiceReady] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   
   const wsRef = useRef(null);
 
@@ -36,9 +37,12 @@ const CyberSecurityApp = () => {
       
       try {
         // Try basic health check first
+        const healthController = new AbortController();
+        setTimeout(() => healthController.abort(), 10000); // 10 second timeout
+        
         const healthResponse = await fetch(`${API_BASE_URL}/health`, {
           method: 'GET',
-          timeout: 10000, // 10 second timeout
+          signal: healthController.signal,
         });
         
         if (healthResponse.ok) {
@@ -59,9 +63,12 @@ const CyberSecurityApp = () => {
         const attemptWakeUp = async () => {
           attempt++;
           try {
+            const testController = new AbortController();
+            setTimeout(() => testController.abort(), 15000); // 15 second timeout
+            
             const response = await fetch(`${API_BASE_URL}/test`, {
               method: 'GET',
-              timeout: 15000,
+              signal: testController.signal,
             });
             
             if (response.ok) {
@@ -91,6 +98,11 @@ const CyberSecurityApp = () => {
     
     wakeUpService();
   }, [API_BASE_URL]);
+
+  // Prevent hydration mismatch by only rendering on client
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // WebSocket connection for real-time progress updates
   useEffect(() => {
@@ -292,6 +304,18 @@ const CyberSecurityApp = () => {
     if (diffHours < 24) return 'text-yellow-400';
     return 'text-red-400';
   };
+
+  // Show loading screen during SSR to prevent hydration mismatch
+  if (!isClient) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="flex items-center space-x-3">
+          <Loader className="animate-spin h-8 w-8 text-cyan-400" />
+          <div className="text-white text-xl">Loading Sentinel...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
