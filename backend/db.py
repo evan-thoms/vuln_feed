@@ -278,16 +278,19 @@ def mark_as_processed(raw_article_id):
     print("Marked as processed: ", raw_article_id)
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("UPDATE raw_articles SET processed = ? WHERE url = ?", (1, raw_article_id,))
+    placeholder = get_placeholder()
+    cursor.execute(f"UPDATE raw_articles SET processed = {placeholder} WHERE url = {placeholder}", (1, raw_article_id,))
     conn.commit()
     conn.close()
 
 def insert_cve(cve):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("""
-        INSERT OR IGNORE INTO cves (cve_id, title, title_translated, summary, severity, cvss_score, published_date, original_language, source, url, intrigue, affected_products)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    placeholder = get_placeholder()
+    ignore_clause = get_ignore_clause()
+    cursor.execute(f"""
+        INSERT {ignore_clause} INTO cves (cve_id, title, title_translated, summary, severity, cvss_score, published_date, original_language, source, url, intrigue, affected_products)
+        VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder})
     """, (
         cve.cve_id,
         cve.title,
@@ -308,9 +311,11 @@ def insert_cve(cve):
 def insert_newsitem(news):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("""
-        INSERT OR IGNORE INTO newsitems (title, title_translated, summary, published_date, original_language, source, url, intrigue)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    placeholder = get_placeholder()
+    ignore_clause = get_ignore_clause()
+    cursor.execute(f"""
+        INSERT {ignore_clause} INTO newsitems (title, title_translated, summary, published_date, original_language, source, url, intrigue)
+        VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder})
     """, (
         news.title,
         news.title_translated,
@@ -333,20 +338,22 @@ def get_cves_by_filters(severity_filter=None, after_date=None, limit=50):
         query = "SELECT * FROM cves WHERE 1=1"
         params = []
         
+        placeholder = get_placeholder()
+        
         if severity_filter:
             if isinstance(severity_filter, list):
-                placeholders = ",".join("?" * len(severity_filter))
+                placeholders = ",".join(placeholder * len(severity_filter))
                 query += f" AND UPPER(severity) IN ({placeholders})"
                 params.extend([s.upper() for s in severity_filter])
             else:
-                query += " AND UPPER(severity) = ?"
+                query += f" AND UPPER(severity) = {placeholder}"
                 params.append(severity_filter.upper())
         
         if after_date:
-            query += " AND published_date >= ?"
+            query += f" AND published_date >= {placeholder}"
             params.append(after_date.isoformat())
         
-        query += " ORDER BY (cvss_score * 0.6 + intrigue * 0.4) DESC LIMIT ?"
+        query += f" ORDER BY (cvss_score * 0.6 + intrigue * 0.4) DESC LIMIT {placeholder}"
         params.append(limit)
         print(f"🔍 DEBUG: SQL QUERY: {query}")
         print(f"🔍 DEBUG: PARAMS: {params}")
@@ -387,12 +394,13 @@ def get_news_by_filters(after_date=None, limit=50):
     
     query = "SELECT * FROM newsitems WHERE 1=1"
     params = []
+    placeholder = get_placeholder()
     
     if after_date:
-        query += " AND published_date >= ?"
+        query += f" AND published_date >= {placeholder}"
         params.append(after_date.isoformat())
     
-    query += " ORDER BY intrigue DESC LIMIT ?"
+    query += f" ORDER BY intrigue DESC LIMIT {placeholder}"
     params.append(limit)
     
     cursor.execute(query, params)
