@@ -23,8 +23,74 @@ const CyberSecurityApp = () => {
   const [showValidationErrors, setShowValidationErrors] = useState(false);
   const [currentStatus, setCurrentStatus] = useState('');
   const [progress, setProgress] = useState(0);
+  const [isWakingUp, setIsWakingUp] = useState(false);
+  const [serviceReady, setServiceReady] = useState(false);
   
   const wsRef = useRef(null);
+
+  // Smart service wake-up and health check
+  useEffect(() => {
+    const wakeUpService = async () => {
+      setIsWakingUp(true);
+      setCurrentStatus('Waking up service...');
+      
+      try {
+        // Try basic health check first
+        const healthResponse = await fetch(`${API_BASE_URL}/health`, {
+          method: 'GET',
+          timeout: 10000, // 10 second timeout
+        });
+        
+        if (healthResponse.ok) {
+          setServiceReady(true);
+          setCurrentStatus('Service ready!');
+          setTimeout(() => setCurrentStatus(''), 2000);
+        } else {
+          throw new Error('Health check failed');
+        }
+      } catch (error) {
+        // Service is probably sleeping, try to wake it up
+        setCurrentStatus('Service starting up... This may take 30-60 seconds on first load');
+        
+        // Retry with exponential backoff
+        const retryAttempts = 6;
+        let attempt = 0;
+        
+        const attemptWakeUp = async () => {
+          attempt++;
+          try {
+            const response = await fetch(`${API_BASE_URL}/test`, {
+              method: 'GET',
+              timeout: 15000,
+            });
+            
+            if (response.ok) {
+              setServiceReady(true);
+              setCurrentStatus('Service ready!');
+              setTimeout(() => setCurrentStatus(''), 2000);
+              return true;
+            }
+          } catch (err) {
+            if (attempt < retryAttempts) {
+              setCurrentStatus(`Waking up service... Attempt ${attempt}/${retryAttempts} (${Math.pow(2, attempt) * 2}s)`);
+              setTimeout(attemptWakeUp, Math.pow(2, attempt) * 2000); // Exponential backoff
+              return false;
+            } else {
+              setCurrentStatus('Service might be temporarily unavailable. Please try again in a few minutes.');
+              setError('Unable to connect to service. The service may be starting up or temporarily unavailable.');
+            }
+          }
+          return false;
+        };
+        
+        await attemptWakeUp();
+      } finally {
+        setIsWakingUp(false);
+      }
+    };
+    
+    wakeUpService();
+  }, [API_BASE_URL]);
 
   // WebSocket connection for real-time progress updates
   useEffect(() => {
@@ -111,6 +177,12 @@ const CyberSecurityApp = () => {
       setShowValidationErrors(true);
       return;
     }
+
+    // Check if service is ready
+    if (!serviceReady && !isWakingUp) {
+      setError('Service is not ready. Please wait for the service to wake up.');
+      return;
+    }
     
     setLoading(true);
     setError(null);
@@ -120,15 +192,24 @@ const CyberSecurityApp = () => {
     setCurrentStatus('Starting intelligence gathering...');
     
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
+      
       const response = await fetch(`${API_BASE_URL}/search`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(searchParams)
+        body: JSON.stringify(searchParams),
+        signal: controller.signal
       });
       
+      clearTimeout(timeoutId);
+      
       if (!response.ok) {
+        if (response.status === 502 || response.status === 503) {
+          throw new Error('Service is starting up. Please wait a moment and try again.');
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -137,7 +218,15 @@ const CyberSecurityApp = () => {
       setCurrentStatus('Complete!');
       setProgress(100);
     } catch (err) {
-      setError(err.message);
+      if (err.name === 'AbortError') {
+        setError('Request timed out. The service might be processing a large request. Please try again.');
+      } else if (err.message.includes('502') || err.message.includes('503') || err.message.includes('starting up')) {
+        setError('Service is starting up. Please wait 30-60 seconds and try again.');
+        // Try to wake up service again
+        setServiceReady(false);
+      } else {
+        setError(err.message);
+      }
       setCurrentStatus('');
       setProgress(0);
     } finally {
@@ -239,23 +328,43 @@ const CyberSecurityApp = () => {
             </div>
           )}
 
-          {/* Current Status with Progress Bar */}
-          {loading && currentStatus && (
-            <div className="mb-6 bg-blue-900/30 border border-blue-700 rounded-lg p-4">
+          {/* Service Status Indicator */}
+          {(isWakingUp || currentStatus) && (
+            <div className={`mb-6 rounded-lg p-4 ${
+              isWakingUp ? 'bg-yellow-900/30 border border-yellow-700' : 
+              serviceReady ? 'bg-green-900/30 border border-green-700' :
+              'bg-blue-900/30 border border-blue-700'
+            }`}>
               <div className="flex items-center mb-3">
-                <Loader className="animate-spin h-5 w-5 text-blue-400 mr-2" />
-                <span className="text-blue-300 font-medium">{currentStatus}</span>
+                {isWakingUp ? (
+                  <Loader className="animate-spin h-5 w-5 text-yellow-400 mr-2" />
+                ) : serviceReady ? (
+                  <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
+                ) : loading ? (
+                  <Loader className="animate-spin h-5 w-5 text-blue-400 mr-2" />
+                ) : null}
+                <span className={`font-medium ${
+                  isWakingUp ? 'text-yellow-300' : 
+                  serviceReady ? 'text-green-300' :
+                  'text-blue-300'
+                }`}>
+                  {currentStatus}
+                </span>
               </div>
-              <div className="w-full bg-slate-700 rounded-full h-2">
-                <div 
-                  className="bg-gradient-to-r from-cyan-400 to-blue-500 h-2 rounded-full transition-all duration-500 ease-out"
-                  style={{ width: `${progress}%` }}
-                ></div>
-              </div>
-              <div className="flex justify-between text-xs text-slate-400 mt-1">
-                <span>Progress</span>
-                <span>{progress}%</span>
-              </div>
+              {loading && progress > 0 && (
+                <>
+                  <div className="w-full bg-slate-700 rounded-full h-2">
+                    <div 
+                      className="bg-gradient-to-r from-cyan-400 to-blue-500 h-2 rounded-full transition-all duration-500 ease-out"
+                      style={{ width: `${progress}%` }}
+                    ></div>
+                  </div>
+                  <div className="flex justify-between text-xs text-slate-400 mt-1">
+                    <span>Progress</span>
+                    <span>{progress}%</span>
+                  </div>
+                </>
+              )}
             </div>
           )}
           
@@ -336,9 +445,9 @@ const CyberSecurityApp = () => {
          <div className="mt-8">
             <button
               onClick={handleSearch}
-              disabled={loading}
+              disabled={loading || isWakingUp || !serviceReady}
               className={`w-full md:w-auto px-8 py-4 font-semibold rounded-lg transition-all flex items-center justify-center ${
-                loading
+                loading || isWakingUp || !serviceReady
                   ? 'bg-gray-600 text-gray-300 cursor-not-allowed'
                   : 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:from-cyan-600 hover:to-blue-700'
               }`}
@@ -347,6 +456,16 @@ const CyberSecurityApp = () => {
                 <>
                   <Loader className="animate-spin h-5 w-5 mr-2" />
                   Processing Intelligence...
+                </>
+              ) : isWakingUp ? (
+                <>
+                  <Loader className="animate-spin h-5 w-5 mr-2" />
+                  Waking Up Service...
+                </>
+              ) : !serviceReady ? (
+                <>
+                  <XCircle className="h-5 w-5 mr-2" />
+                  Service Not Ready
                 </>
               ) : (
                 <>
