@@ -42,23 +42,16 @@ class ConnectionManager:
 # Initialize WebSocket manager
 manager = ConnectionManager()
 
-# Simplified startup for debugging
+# Initialize database and agent
 try:
-    print("🚀 Starting application...")
-    # Skip database init temporarily to test basic startup
-    # init_db()
-    print("✅ Basic startup successful")
+    init_db()
+    print("✅ Database initialized successfully")
 except Exception as e:
-    print(f"❌ Startup error: {e}")
+    print(f"⚠️ Database initialization warning: {e}")
 
 # Initialize agent and set WebSocket manager
-try:
-    agent = IntelligentCyberAgent()
-    set_websocket_manager(manager)
-    print("✅ Agent initialized successfully")
-except Exception as e:
-    print(f"⚠️ Agent initialization warning: {e}")
-    agent = None
+agent = IntelligentCyberAgent()
+set_websocket_manager(manager)
 
 # Add CORS middleware
 app.add_middleware(
