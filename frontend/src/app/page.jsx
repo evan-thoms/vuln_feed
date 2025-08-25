@@ -211,7 +211,7 @@ const CyberSecurityApp = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center space-x-3">
             <Shield className="h-8 w-8 text-cyan-400" />
-            <h1 className="text-3xl font-bold text-white">CyberIntel</h1>
+            <h1 className="text-3xl font-bold text-white">Sentinel</h1>
             <span className="text-slate-400 text-sm">Threat Intelligence Platform</span>
           </div>
         </div>
