@@ -379,7 +379,7 @@ def should_classify_article(article, min_length=200):
     return True
 
 @tool
-def classify_intelligence(content_type: str = "both", severity: str = None, days_back: int = 7, max_results: int = 10, max_workers: int = 10) -> str:
+def classify_intelligence(content_type: str = "both", severity: Optional[str] = None, days_back: int = 7, max_results: int = 10, max_workers: int = 10) -> str:
     """Process and classify raw intelligence into CVEs and news items using parallel processing."""
     agent = classify_intelligence._agent_instance
     print(f"🤖 Starting PARALLEL classification...")

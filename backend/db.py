@@ -250,10 +250,15 @@ def is_article_scraped(link):
     print("Checking if ", link, " is scraped ")
     conn = get_connection()
     cursor = conn.cursor()
-    # Fix: Use proper placeholder for PostgreSQL
-    if DATABASE_URL.startswith('postgresql'):
+    
+    # Debug: Check what type of connection we actually have
+    connection_type = "PostgreSQL" if hasattr(conn, 'server_version') else "SQLite"
+    print(f"🔍 DEBUG: Using {connection_type} connection")
+    
+    # Fix: Use proper placeholder based on actual connection type, not DATABASE_URL
+    if hasattr(conn, 'server_version'):  # PostgreSQL connection
         cursor.execute("SELECT 1 FROM cves WHERE url = %s", (link,))
-    else:
+    else:  # SQLite connection
         cursor.execute("SELECT 1 FROM cves WHERE url = ?", (link,))
     result = cursor.fetchone()
     conn.close()
@@ -281,10 +286,15 @@ def insert_raw_article(article):
 def get_unprocessed_articles():
     conn = get_connection()
     cursor = conn.cursor()
+    
+    # Debug: Check what type of connection we actually have
+    connection_type = "PostgreSQL" if hasattr(conn, 'server_version') else "SQLite"
+    print(f"🔍 DEBUG: get_unprocessed_articles using {connection_type} connection")
+    
     # Fix for PostgreSQL: use integer comparison instead of boolean
-    if DATABASE_URL.startswith('postgresql'):
+    if hasattr(conn, 'server_version'):  # PostgreSQL connection
         cursor.execute("SELECT * FROM raw_articles WHERE processed = 0")
-    else:
+    else:  # SQLite connection
         cursor.execute("SELECT * FROM raw_articles WHERE processed = FALSE")
     rows = cursor.fetchall()
     conn.close()
@@ -385,35 +395,39 @@ def get_cves_by_filters(severity_filter=None, after_date=None, limit=50):
         conn = get_connection()
         cursor = conn.cursor()
         
+        # Debug: Check what type of connection we actually have
+        connection_type = "PostgreSQL" if hasattr(conn, 'server_version') else "SQLite"
+        print(f"🔍 DEBUG: get_cves_by_filters using {connection_type} connection")
+        
         query = "SELECT * FROM cves WHERE 1=1"
         params = []
         
         if severity_filter:
             if isinstance(severity_filter, list):
-                # Fix: Use proper placeholder formatting for PostgreSQL
-                if DATABASE_URL.startswith('postgresql'):
+                # Fix: Use proper placeholder formatting based on actual connection type
+                if hasattr(conn, 'server_version'):  # PostgreSQL connection
                     placeholders = ",".join(["%s"] * len(severity_filter))
-                else:
+                else:  # SQLite connection
                     placeholders = ",".join(["?"] * len(severity_filter))
                 query += f" AND UPPER(severity) IN ({placeholders})"
                 params.extend([s.upper() for s in severity_filter])
             else:
-                if DATABASE_URL.startswith('postgresql'):
+                if hasattr(conn, 'server_version'):  # PostgreSQL connection
                     query += " AND UPPER(severity) = %s"
-                else:
+                else:  # SQLite connection
                     query += " AND UPPER(severity) = ?"
                 params.append(severity_filter.upper())
         
         if after_date:
-            if DATABASE_URL.startswith('postgresql'):
+            if hasattr(conn, 'server_version'):  # PostgreSQL connection
                 query += " AND published_date >= %s"
-            else:
+            else:  # SQLite connection
                 query += " AND published_date >= ?"
             params.append(after_date.isoformat())
         
-        if DATABASE_URL.startswith('postgresql'):
+        if hasattr(conn, 'server_version'):  # PostgreSQL connection
             query += " ORDER BY (cvss_score * 0.6 + intrigue * 0.4) DESC LIMIT %s"
-        else:
+        else:  # SQLite connection
             query += " ORDER BY (cvss_score * 0.6 + intrigue * 0.4) DESC LIMIT ?"
         params.append(limit)
         print(f"🔍 DEBUG: SQL QUERY: {query}")
@@ -453,19 +467,23 @@ def get_news_by_filters(after_date=None, limit=50):
     conn = get_connection()
     cursor = conn.cursor()
     
+    # Debug: Check what type of connection we actually have
+    connection_type = "PostgreSQL" if hasattr(conn, 'server_version') else "SQLite"
+    print(f"🔍 DEBUG: get_news_by_filters using {connection_type} connection")
+    
     query = "SELECT * FROM newsitems WHERE 1=1"
     params = []
     
     if after_date:
-        if DATABASE_URL.startswith('postgresql'):
+        if hasattr(conn, 'server_version'):  # PostgreSQL connection
             query += " AND published_date >= %s"
-        else:
+        else:  # SQLite connection
             query += " AND published_date >= ?"
         params.append(after_date.isoformat())
     
-    if DATABASE_URL.startswith('postgresql'):
+    if hasattr(conn, 'server_version'):  # PostgreSQL connection
         query += " ORDER BY intrigue DESC LIMIT %s"
-    else:
+    else:  # SQLite connection
         query += " ORDER BY intrigue DESC LIMIT ?"
     params.append(limit)
     
