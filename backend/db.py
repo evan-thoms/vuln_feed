@@ -4,6 +4,7 @@ import json
 from models import Vulnerability, NewsItem
 import os
 import asyncio
+from utils.date_utils import parse_date_safe, format_date_for_db
 
 # Database configuration - supports both SQLite and PostgreSQL
 DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///articles.db')
@@ -15,7 +16,7 @@ def get_placeholder():
 def get_ignore_clause():
     """Get the correct INSERT IGNORE clause based on database type"""
     if DATABASE_URL.startswith('postgresql'):
-        return "ON CONFLICT (url) DO NOTHING"
+        return ""  # PostgreSQL will handle conflicts differently
     else:
         return "OR IGNORE"
 
@@ -317,80 +318,94 @@ def mark_as_processed(raw_article_id):
 def insert_cve(cve):
     conn = get_connection()
     cursor = conn.cursor()
-    ignore_clause = get_ignore_clause()
-    if DATABASE_URL.startswith('postgresql'):
-        cursor.execute(f"""
-            INSERT {ignore_clause} INTO cves (cve_id, title, title_translated, summary, severity, cvss_score, published_date, original_language, source, url, intrigue, affected_products)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (
-            cve.cve_id,
-            cve.title,
-            cve.title_translated,
-            cve.summary,
-            cve.severity,
-            cve.cvss_score,
-            cve.published_date,
-            cve.original_language,
-            cve.source,
-            cve.url,
-            cve.intrigue,
-            ",".join(cve.affected_products)
-        ))
-    else:
-        cursor.execute(f"""
-            INSERT {ignore_clause} INTO cves (cve_id, title, title_translated, summary, severity, cvss_score, published_date, original_language, source, url, intrigue, affected_products)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            cve.cve_id,
-            cve.title,
-            cve.title_translated,
-            cve.summary,
-            cve.severity,
-            cve.cvss_score,
-            cve.published_date,
-            cve.original_language,
-            cve.source,
-            cve.url,
-            cve.intrigue,
-            ",".join(cve.affected_products)
-        ))
-    conn.commit()
-    conn.close()
+    try:
+        if hasattr(conn, 'server_version'):  # PostgreSQL connection
+            # Use proper PostgreSQL conflict handling
+            cursor.execute("""
+                INSERT INTO cves (cve_id, title, title_translated, summary, severity, cvss_score, published_date, original_language, source, url, intrigue, affected_products)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (url) DO NOTHING
+            """, (
+                cve.cve_id,
+                cve.title,
+                cve.title_translated,
+                cve.summary,
+                cve.severity,
+                cve.cvss_score,
+                cve.published_date,
+                cve.original_language,
+                cve.source,
+                cve.url,
+                cve.intrigue,
+                ",".join(cve.affected_products)
+            ))
+        else:  # SQLite connection
+            ignore_clause = get_ignore_clause()
+            cursor.execute(f"""
+                INSERT {ignore_clause} INTO cves (cve_id, title, title_translated, summary, severity, cvss_score, published_date, original_language, source, url, intrigue, affected_products)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                cve.cve_id,
+                cve.title,
+                cve.title_translated,
+                cve.summary,
+                cve.severity,
+                cve.cvss_score,
+                cve.published_date,
+                cve.original_language,
+                cve.source,
+                cve.url,
+                cve.intrigue,
+                ",".join(cve.affected_products)
+            ))
+        conn.commit()
+    except Exception as e:
+        print(f"⚠️ Error inserting CVE: {e}")
+        conn.rollback()
+    finally:
+        conn.close()
 
 def insert_newsitem(news):
     conn = get_connection()
     cursor = conn.cursor()
-    ignore_clause = get_ignore_clause()
-    if DATABASE_URL.startswith('postgresql'):
-        cursor.execute(f"""
-            INSERT {ignore_clause} INTO newsitems (title, title_translated, summary, published_date, original_language, source, url, intrigue)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        """, (
-            news.title,
-            news.title_translated,
-            news.summary,
-            news.published_date,
-            news.original_language,
-            news.source,
-            news.url,
-            news.intrigue
-        ))
-    else:
-        cursor.execute(f"""
-            INSERT {ignore_clause} INTO newsitems (title, title_translated, summary, published_date, original_language, source, url, intrigue)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            news.title,
-            news.title_translated,
-            news.summary,
-            news.published_date,
-            news.original_language,
-            news.source,
-            news.url,
-            news.intrigue
-        ))
-    conn.commit()
-    conn.close()
+    try:
+        if hasattr(conn, 'server_version'):  # PostgreSQL connection
+            # Use proper PostgreSQL conflict handling
+            cursor.execute("""
+                INSERT INTO newsitems (title, title_translated, summary, published_date, original_language, source, url, intrigue)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (url) DO NOTHING
+            """, (
+                news.title,
+                news.title_translated,
+                news.summary,
+                news.published_date,
+                news.original_language,
+                news.source,
+                news.url,
+                news.intrigue
+            ))
+        else:  # SQLite connection
+            ignore_clause = get_ignore_clause()
+            cursor.execute(f"""
+                INSERT {ignore_clause} INTO newsitems (title, title_translated, summary, published_date, original_language, source, url, intrigue)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                news.title,
+                news.title_translated,
+                news.summary,
+                news.published_date,
+                news.original_language,
+                news.source,
+                news.url,
+                news.intrigue
+            ))
+        conn.commit()
+    except Exception as e:
+        print(f"⚠️ Error inserting news item: {e}")
+        conn.rollback()
+    finally:
+        conn.close()
 
 def get_cves_by_filters(severity_filter=None, after_date=None, limit=50):
     """Get CVEs with filters for agent decision making"""
@@ -444,6 +459,9 @@ def get_cves_by_filters(severity_filter=None, after_date=None, limit=50):
         # Convert to Vulnerability objects
         vulnerabilities = []
         for row in rows:
+            # Use safe date parsing
+            published_date = parse_date_safe(row[7]) or datetime.now()
+            
             vuln = Vulnerability(
                 cve_id=row[1],
                 title=row[2], 
@@ -451,7 +469,7 @@ def get_cves_by_filters(severity_filter=None, after_date=None, limit=50):
                 summary=row[4],
                 severity=row[5],
                 cvss_score=float(row[6]),
-                published_date=datetime.fromisoformat(row[7]),
+                published_date=published_date,
                 original_language=row[8],
                 source=row[9],
                 url=row[10],
@@ -497,11 +515,14 @@ def get_news_by_filters(after_date=None, limit=50):
     # Convert to NewsItem objects
     news_items = []
     for row in rows:
+        # Use safe date parsing
+        published_date = parse_date_safe(row[4]) or datetime.now()
+        
         news = NewsItem(
             title=row[1],
             title_translated=row[2], 
             summary=row[3],
-            published_date=datetime.fromisoformat(row[4]),
+            published_date=published_date,
             original_language=row[5],
             source=row[6],
             url=row[7],
@@ -530,10 +551,8 @@ def get_last_scrape_time():
     last_scrapes = {}
     for source, last_scrape_str in rows:
         if last_scrape_str:
-            try:
-                last_scrapes[source.lower()] = datetime.fromisoformat(last_scrape_str)
-            except ValueError:
-                last_scrapes[source.lower()] = None
+            parsed_date = parse_date_safe(last_scrape_str)
+            last_scrapes[source.lower()] = parsed_date
     
     return last_scrapes
 
@@ -652,7 +671,7 @@ def get_classified_article(url):
                 "summary": cve_row[4],
                 "severity": cve_row[5],
                 "cvss_score": float(cve_row[6]),
-                "published_date": datetime.fromisoformat(cve_row[7]),
+                "published_date": parse_date_safe(cve_row[7]) or datetime.now(),
                 "original_language": cve_row[8],
                 "source": cve_row[9],
                 "url": cve_row[10],
@@ -676,7 +695,7 @@ def get_classified_article(url):
                 "title": news_row[1],
                 "title_translated": news_row[2],
                 "summary": news_row[3],
-                "published_date": datetime.fromisoformat(news_row[4]),
+                "published_date": parse_date_safe(news_row[4]) or datetime.now(),
                 "original_language": news_row[5],
                 "source": news_row[6],
                 "url": news_row[7],
@@ -719,35 +738,25 @@ def get_data_freshness_info():
     
     for source, last_scrape, total in scrape_stats:
         if last_scrape:
-            try:
-                last_scrape_dt = datetime.fromisoformat(last_scrape)
-                # Handle timezone-aware datetimes
-                if last_scrape_dt.tzinfo is not None:
-                    last_scrape_dt = last_scrape_dt.replace(tzinfo=None)
+            last_scrape_dt = parse_date_safe(last_scrape)
+            if last_scrape_dt:
                 hours_ago = (datetime.now() - last_scrape_dt).total_seconds() / 3600
                 freshness_info["scraping"][source] = {
                     "last_scrape": last_scrape_dt,
                     "hours_ago": round(hours_ago, 1),
                     "total_articles": total
                 }
-            except ValueError:
-                pass
     
     for type_name, last_classified, total in classification_stats:
         if last_classified:
-            try:
-                last_classified_dt = datetime.fromisoformat(last_classified)
-                # Handle timezone-aware datetimes
-                if last_classified_dt.tzinfo is not None:
-                    last_classified_dt = last_classified_dt.replace(tzinfo=None)
+            last_classified_dt = parse_date_safe(last_classified)
+            if last_classified_dt:
                 hours_ago = (datetime.now() - last_classified_dt).total_seconds() / 3600
                 freshness_info["classification"][type_name] = {
                     "last_classified": last_classified_dt,
                     "hours_ago": round(hours_ago, 1),
                     "total_items": total
                 }
-            except ValueError:
-                pass
     
     return freshness_info
 
@@ -803,7 +812,7 @@ def get_all_classified_data_with_freshness(limit=50):
             summary=row[4],
             severity=row[5],
             cvss_score=float(row[6]),
-            published_date=datetime.fromisoformat(row[7]),
+            published_date=parse_date_safe(row[7]) or datetime.now(),
             original_language=row[8],
             source=row[9],
             url=row[10],
@@ -818,7 +827,7 @@ def get_all_classified_data_with_freshness(limit=50):
             title=row[1],
             title_translated=row[2], 
             summary=row[3],
-            published_date=datetime.fromisoformat(row[4]),
+            published_date=parse_date_safe(row[4]) or datetime.now(),
             original_language=row[5],
             source=row[6],
             url=row[7],
@@ -838,21 +847,21 @@ def get_all_classified_data_with_freshness(limit=50):
     
     if scrape_info[0]:
         try:
-            freshness["last_scrape"] = datetime.fromisoformat(scrape_info[0])
+            freshness["last_scrape"] = parse_date_safe(scrape_info[0])
             freshness["total_articles"] = scrape_info[1]
         except ValueError:
             pass
     
     if cve_info[0]:
         try:
-            freshness["last_cve"] = datetime.fromisoformat(cve_info[0])
+            freshness["last_cve"] = parse_date_safe(cve_info[0])
             freshness["total_cves"] = cve_info[1]
         except ValueError:
             pass
     
     if news_info[0]:
         try:
-            freshness["last_news"] = datetime.fromisoformat(news_info[0])
+            freshness["last_news"] = parse_date_safe(news_info[0])
             freshness["total_news"] = news_info[1]
         except ValueError:
             pass
@@ -903,7 +912,7 @@ def is_data_fresh(last_scrape, max_age_hours=12):
         return False
     
     if isinstance(last_scrape, str):
-        last_scrape = datetime.fromisoformat(last_scrape.replace('Z', '+00:00'))
+        last_scrape = parse_date_safe(last_scrape)
     
     age_hours = (datetime.now() - last_scrape).total_seconds() / 3600
     return age_hours < max_age_hours

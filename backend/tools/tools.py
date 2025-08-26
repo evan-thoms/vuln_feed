@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import json
 # Translation handled by OpenAI
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from utils.date_utils import parse_date_safe, normalize_date_for_article
 import os
 from openai import OpenAI
 try:
@@ -205,8 +206,8 @@ def row_to_article(row):
         content=row[5],
         content_translated=row[6],
         language=row[7],
-        scraped_at=row[8],
-        published_date=row[9] if len(row) > 9 else row[8]
+        scraped_at=parse_date_safe(row[8]) or datetime.now(),
+        published_date=parse_date_safe(row[9] if len(row) > 9 else row[8]) or datetime.now()
     )
 
 def save_to_json(items: list, filename: str) -> None:
@@ -416,6 +417,11 @@ def classify_intelligence(content_type: str = "both", severity: Optional[str] = 
     else:
         severity_list = []
     
+    # Debug: Print the actual severity parameter being used
+    print(f"🔍 DEBUG: Original severity parameter: {severity}")
+    print(f"🔍 DEBUG: Agent current_params severity: {getattr(agent, 'current_params', {}).get('severity', 'Not found')}")
+    print(f"🔍 DEBUG: Final severity_list: {severity_list}")
+    
     print(f"🎯 Severity filter: {severity_list}")  # Debug line
     cutoff_date = datetime.now() - timedelta(days=days_back)
 
@@ -622,7 +628,7 @@ def classify_intelligence(content_type: str = "both", severity: Optional[str] = 
                     summary=data["summary"],
                     severity=data["severity"],
                     cvss_score=data["cvss_score"],
-                    published_date=data["published_date"],
+                    published_date=parse_date_safe(data["published_date"]) or datetime.now(),
                     original_language=data["original_language"],
                     source=data["source"],
                     url=data["url"],
@@ -638,7 +644,7 @@ def classify_intelligence(content_type: str = "both", severity: Optional[str] = 
                     title=data["title"],
                     title_translated=data["title_translated"],
                     summary=data["summary"],
-                    published_date=data["published_date"],
+                    published_date=parse_date_safe(data["published_date"]) or datetime.now(),
                     original_language=data["original_language"],
                     source=data["source"],
                     url=data["url"],
@@ -1019,10 +1025,13 @@ def present_results(output_format: str = "json") -> str:
     
     if not cves and not news:
         return json.dumps({
-            "success": False,
-            "error": "No intelligence data available",
-            "cves": [],
-            "news": []
+            "success": True,
+            "cves_count": 0,
+            "news_count": 0,
+            "total_results": 0,
+            "session_id": agent.current_session.get('session_id', 'Unknown'),
+            "generated_at": datetime.now().isoformat(),
+            "status": "No data found"
         })
     
     # Convert to JSON-serializable format

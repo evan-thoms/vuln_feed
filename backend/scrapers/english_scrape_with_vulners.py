@@ -9,6 +9,7 @@ from dateutil import parser
 import vulners
 import sys
 import os
+from utils.date_utils import parse_date_safe, normalize_date_for_article
 
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -84,15 +85,14 @@ class EnglishScraperWithVulners:
                     # Parse publication date and check if it's recent (last 7 days)
                     published_str = doc.get('published', '')
                     if published_str:
-                        try:
-                            published_date = datetime.fromisoformat(published_str.replace('Z', '+00:00'))
-                            published_date = published_date.replace(tzinfo=None)
+                        published_date = parse_date_safe(published_str)
+                        if published_date:
                             days_old = (datetime.now() - published_date).days
                             
                             if days_old > 7:
                                 print(f"  Skipping old CVE {cve_id}: {days_old} days old")
                                 continue
-                        except:
+                        else:
                             print(f"  Skipping CVE {cve_id}: Invalid date format")
                             continue
                     
@@ -110,13 +110,7 @@ class EnglishScraperWithVulners:
                     
                     # Parse publication date
                     published_str = doc.get('published', '')
-                    published_date = datetime.now()
-                    if published_str:
-                        try:
-                            published_date = datetime.fromisoformat(published_str.replace('Z', '+00:00'))
-                            published_date = published_date.replace(tzinfo=None)
-                        except:
-                            pass
+                    published_date = normalize_date_for_article(published_str)
                     
                     # Get CVSS score for severity info
                     cvss_score = doc.get('cvss', {}).get('score', 0)
