@@ -116,8 +116,7 @@ Return only the final JSON from present_results. No additional commentary."""),
             verbose=True,
             max_iterations=4,
             handle_parsing_errors=True,
-            return_intermediate_steps=True,
-            early_stopping_method="generate"
+            return_intermediate_steps=True
         )
     
     def new_session(self):
@@ -151,20 +150,19 @@ Return only the final JSON from present_results. No additional commentary."""),
     
             print("input print", enhanced_input)
             
-            # Send progress updates during execution
-            import asyncio
+            # Execute the agent
+            result = self.agent_executor.invoke({"input": enhanced_input})
+            
+            # Send progress updates (non-blocking)
             try:
+                import asyncio
                 # Send initial progress
                 asyncio.create_task(send_progress_update("Analyzing data requirements...", 10))
-                
-                result = self.agent_executor.invoke({"input": enhanced_input})
-                
                 # Send completion progress
                 asyncio.create_task(send_progress_update("Complete!", 100))
-                
             except Exception as e:
                 print(f"⚠️ Progress update failed: {e}")
-                result = self.agent_executor.invoke({"input": enhanced_input})
+                # Continue execution even if WebSocket fails
 
             return self._build_response_from_session()
         

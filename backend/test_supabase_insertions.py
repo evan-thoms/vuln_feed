@@ -160,10 +160,10 @@ def insert_test_data():
         
         # Test connection type
         conn = get_connection()
-        if hasattr(conn, 'server_version'):
-            print(f"   ✅ Using PostgreSQL connection (version: {conn.server_version})")
-        else:
-            print(f"   ✅ Using SQLite connection")
+        # if hasattr(conn, 'server_version'):
+        #     print(f"   ✅ Using PostgreSQL connection (version: {conn.server_version})")
+        # else:
+        #     print(f"   ✅ Using SQLite connection")
         conn.close()
         
         print("\n✅ All test data inserted successfully!")
