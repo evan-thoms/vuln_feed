@@ -28,8 +28,19 @@ class ChineseScraper:
     def scrape_freebuf(self, days_back: int = 7):
         print("[FreeBuf] Starting RSS scrape...")
         feed_url = "https://www.freebuf.com/feed"
-        feed = feedparser.parse(feed_url)
-        print(f"Found {len(feed.entries)} articles in the RSS feed.")
+        
+        try:
+            feed = feedparser.parse(feed_url)
+            print(f"Found {len(feed.entries)} articles in the RSS feed.")
+            
+            # If RSS feed is empty, try alternative method
+            if not feed.entries:
+                print("⚠️ RSS feed empty, trying alternative FreeBuf scraping...")
+                return self.scrape_freebuf_vuls()
+                
+        except Exception as e:
+            print(f"❌ RSS feed error: {e}, trying alternative method...")
+            return self.scrape_freebuf_vuls()
 
         articles = []
 

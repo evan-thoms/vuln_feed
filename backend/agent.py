@@ -13,7 +13,6 @@ from tools.tools import (
             scrape_fresh_intel,
             classify_intelligence,
             evaluate_intel_sufficiency,
-            intensive_rescrape,
             present_results
 )
 # Import your existing functions
@@ -65,7 +64,7 @@ class IntelligentCyberAgent:
         # Import tools here to avoid circular imports
         from tools.tools import (
             analyze_data_needs, retrieve_existing_data, scrape_fresh_intel,
-            classify_intelligence, evaluate_intel_sufficiency, intensive_rescrape,
+            classify_intelligence, evaluate_intel_sufficiency,
             present_results, get_intelligence_smart, trigger_background_scrape, manage_cache_cleanup
         )
         
@@ -76,7 +75,6 @@ class IntelligentCyberAgent:
             scrape_fresh_intel,
             classify_intelligence,
             evaluate_intel_sufficiency,
-            intensive_rescrape,
             present_results,
             # Add new smart tools
             get_intelligence_smart,

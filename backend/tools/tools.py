@@ -815,9 +815,10 @@ def evaluate_intel_sufficiency(content_type: str = "both", max_results: int = 10
         reasoning = f"Sufficient quantity ({total_found} items) despite lower quality"
         sufficient = True
     else:
-        recommendation = "intensive_rescrape"
-        reasoning = f"Insufficient intel: only {total_found}/{max_results} items, {high_quality_items} high-quality"
-        sufficient = False
+        # Simplified: instead of intensive_rescrape, just proceed with what we have
+        recommendation = "proceed"
+        reasoning = f"Limited results ({total_found} items) but proceeding to avoid infinite loops"
+        sufficient = True
     
     print(f"🎯 Sufficiency: {recommendation} - {reasoning}")
     
@@ -830,62 +831,7 @@ def evaluate_intel_sufficiency(content_type: str = "both", max_results: int = 10
     })
 
 
-@tool
-def intensive_rescrape(content_type: str = "both", max_results: int = 10) -> str:
-    """Execute intensive re-scraping with increased targets."""
-    agent = intensive_rescrape._agent_instance
-    print(f"🔥 Initiating INTENSIVE intelligence collection...")
-    
-    articles = agent.current_session["scraped_articles"]
-    intensive_target = max(max_results, 10)
-    
-    try:
-        print("🎯 INTENSIVE MODE: Expanding source coverage...")
-        
-        print("🇨🇳 Intensive Chinese scraping...")
-        c_scraper = ChineseScraper(intensive_target)
-        articles.extend(c_scraper.scrape_all())
-        
-        print("🇷🇺 Intensive Russian scraping...")
-        r_scraper = RussianScraper()
-        for round_num in range(2):
-            print(f"  Round {round_num + 1}/2...")
-            articles.extend(r_scraper.scrape_all())
-        
-        print("🇺🇸 Intensive English scraping...")
-        e_scraper = EnglishScraperWithVulners(intensive_target) # Changed to EnglishScraperWithVulners
-        articles.extend(e_scraper.scrape_all())
-        
-        # Remove duplicates
-        unique_articles = []
-        seen_urls = set()
-        for art in articles:
-            if art.url not in seen_urls:
-                unique_articles.append(art)
-                seen_urls.add(art.url)
-        
-        # Process articles
-        for art in unique_articles:
-            art.content = truncate_text(art.content, max_length=3000)
-        
-        translated_articles = translate_articles(unique_articles)
-        agent.current_session["scraped_articles"] = translated_articles
-        
-        print(f"🔥 INTENSIVE collection complete: {len(translated_articles)} unique articles")
-        
-        return json.dumps({
-            "success": True,
-            "articles_collected": len(translated_articles),
-            "intensive_mode": True,
-            "status": "ready_for_classification"
-        })
-        
-    except Exception as e:
-        return json.dumps({
-            "success": False,
-            "error": str(e),
-            "articles_collected": 0
-        })
+# Removed intensive_rescrape function to prevent infinite loops and improve performance
 @tool
 def scrape_fresh_intel(content_type: str = "both", max_results: int = None) -> str:
     """Scrape fresh intelligence from multiple sources."""

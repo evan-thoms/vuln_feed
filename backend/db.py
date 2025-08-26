@@ -122,7 +122,7 @@ def get_connection():
             import psycopg2
             from psycopg2.extras import RealDictCursor
             
-            print(f"🔗 Connecting to PostgreSQL: {DATABASE_URL.split('@')[1] if '@' in DATABASE_URL else 'Supabase'}")
+            # print(f"🔗 Connecting to PostgreSQL: {DATABASE_URL.split('@')[1] if '@' in DATABASE_URL else 'Supabase'}")
             
             conn = psycopg2.connect(DATABASE_URL)
             conn.autocommit = True
@@ -131,7 +131,7 @@ def get_connection():
             cursor = conn.cursor()
             cursor.execute("SELECT version();")
             version = cursor.fetchone()
-            print(f"✅ PostgreSQL connected successfully: {version[0] if version else 'Unknown version'}")
+            # print(f"✅ PostgreSQL connected successfully: {version[0] if version else 'Unknown version'}")
             
             # Check if tables exist
             cursor.execute("""
@@ -141,7 +141,7 @@ def get_connection():
                 AND table_name IN ('raw_articles', 'cves', 'newsitems')
             """)
             existing_tables = [row[0] for row in cursor.fetchall()]
-            print(f"📊 Existing tables: {existing_tables}")
+            # print(f"📊 Existing tables: {existing_tables}")
             
             # Create tables if they don't exist
             if not existing_tables:
@@ -269,7 +269,11 @@ def insert_raw_article(article):
 def get_unprocessed_articles():
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM raw_articles WHERE processed = FALSE")
+    # Fix for PostgreSQL: use integer comparison instead of boolean
+    if DATABASE_URL.startswith('postgresql'):
+        cursor.execute("SELECT * FROM raw_articles WHERE processed = 0")
+    else:
+        cursor.execute("SELECT * FROM raw_articles WHERE processed = FALSE")
     rows = cursor.fetchall()
     conn.close()
     return rows
@@ -342,7 +346,11 @@ def get_cves_by_filters(severity_filter=None, after_date=None, limit=50):
         
         if severity_filter:
             if isinstance(severity_filter, list):
-                placeholders = ",".join(placeholder * len(severity_filter))
+                # Fix: Use proper placeholder formatting for PostgreSQL
+                if DATABASE_URL.startswith('postgresql'):
+                    placeholders = ",".join(["%s"] * len(severity_filter))
+                else:
+                    placeholders = ",".join(["?"] * len(severity_filter))
                 query += f" AND UPPER(severity) IN ({placeholders})"
                 params.extend([s.upper() for s in severity_filter])
             else:
