@@ -157,15 +157,15 @@ const CyberSecurityApp = () => {
       errors.push("Please select at least one severity level");
     }
     
+    if (searchParams.max_results === '' || searchParams.max_results < 1) {
+      errors.push("Maximum results must be at least 1");
+    }
+    
     if (searchParams.max_results > 30) {
       errors.push("Maximum results cannot exceed 30");
     }
     
-    if (searchParams.max_results < 1) {
-      errors.push("Maximum results must be at least 1");
-    }
-    
-    if (searchParams.days_back < 1) {
+    if (searchParams.days_back === '' || searchParams.days_back < 1) {
       errors.push("Days back must be at least 1");
     }
     
@@ -399,7 +399,7 @@ const CyberSecurityApp = () => {
               <select
                 value={searchParams.content_type}
                 onChange={(e) => setSearchParams({...searchParams, content_type: e.target.value})}
-                className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent appearance-none"
               >
                 <option value="both">Both CVEs & News</option>
                 <option value="cve">CVEs Only</option>
@@ -414,12 +414,23 @@ const CyberSecurityApp = () => {
                 <span className="text-xs text-slate-400 ml-1">(1-30)</span>
               </label>
               <input
-                type="number"
+                type="text"
                 value={searchParams.max_results}
-                onChange={(e) => setSearchParams({...searchParams, max_results: parseInt(e.target.value) || 1})}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || /^\d+$/.test(value)) {
+                    if (value === '') {
+                      setSearchParams({...searchParams, max_results: ''});
+                    } else {
+                      const numValue = parseInt(value);
+                      if (numValue >= 1 && numValue <= 30) {
+                        setSearchParams({...searchParams, max_results: numValue});
+                      }
+                    }
+                  }
+                }}
                 className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-                min="1"
-                max="30"
+                placeholder="1-30"
               />
             </div>
 
@@ -428,12 +439,23 @@ const CyberSecurityApp = () => {
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">Days Back</label>
               <input
-                type="number"
+                type="text"
                 value={searchParams.days_back}
-                onChange={(e) => setSearchParams({...searchParams, days_back: parseInt(e.target.value)})}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || /^\d+$/.test(value)) {
+                    if (value === '') {
+                      setSearchParams({...searchParams, days_back: ''});
+                    } else {
+                      const numValue = parseInt(value);
+                      if (numValue >= 1 && numValue <= 30) {
+                        setSearchParams({...searchParams, days_back: numValue});
+                      }
+                    }
+                  }
+                }}
                 className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-                min="1"
-                max="30"
+                placeholder="1-30"
               />
             </div>
           </div>
