@@ -116,6 +116,8 @@ def _create_tables(conn):
 
 def get_connection():
     """Get database connection - supports both SQLite and PostgreSQL"""
+    global DATABASE_URL  # Make sure we're using the current value
+    
     if DATABASE_URL.startswith('postgresql'):
         # PostgreSQL connection (Supabase)
         try:
@@ -152,10 +154,12 @@ def get_connection():
             
         except ImportError:
             print("❌ psycopg2 not installed, falling back to SQLite")
+            DATABASE_URL = 'sqlite:///articles.db'  # Update the global variable
             return _get_sqlite_connection()
         except Exception as e:
             print(f"❌ PostgreSQL connection failed: {e}")
             print("⚠️ Falling back to SQLite")
+            DATABASE_URL = 'sqlite:///articles.db'  # Update the global variable
             return _get_sqlite_connection()
     else:
         # SQLite connection (fallback)
@@ -246,8 +250,11 @@ def is_article_scraped(link):
     print("Checking if ", link, " is scraped ")
     conn = get_connection()
     cursor = conn.cursor()
-    placeholder = get_placeholder()
-    cursor.execute(f"SELECT 1 from raw_articles WHERE url = {placeholder}", (link,))
+    # Fix: Use proper placeholder for PostgreSQL
+    if DATABASE_URL.startswith('postgresql'):
+        cursor.execute("SELECT 1 FROM cves WHERE url = %s", (link,))
+    else:
+        cursor.execute("SELECT 1 FROM cves WHERE url = ?", (link,))
     result = cursor.fetchone()
     conn.close()
     return result is not None
@@ -256,12 +263,17 @@ def insert_raw_article(article):
     conn = get_connection()
     cursor = conn.cursor()
     try:
-        placeholder = get_placeholder()
         ignore_clause = get_ignore_clause()
-        cursor.execute(f"""
-            INSERT {ignore_clause} INTO raw_articles (source, url, title, title_translated, content, content_translated, language, scraped_at)
-            VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder})
-        """, (article.source, article.url, article.title, article.title_translated, article.content, article.content_translated, article.language, article.scraped_at))
+        if DATABASE_URL.startswith('postgresql'):
+            cursor.execute(f"""
+                INSERT {ignore_clause} INTO raw_articles (source, url, title, title_translated, content, content_translated, language, scraped_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """, (article.source, article.url, article.title, article.title_translated, article.content, article.content_translated, article.language, article.scraped_at))
+        else:
+            cursor.execute(f"""
+                INSERT {ignore_clause} INTO raw_articles (source, url, title, title_translated, content, content_translated, language, scraped_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (article.source, article.url, article.title, article.title_translated, article.content, article.content_translated, article.language, article.scraped_at))
         conn.commit()
     finally:
         conn.close()
@@ -282,54 +294,88 @@ def mark_as_processed(raw_article_id):
     print("Marked as processed: ", raw_article_id)
     conn = get_connection()
     cursor = conn.cursor()
-    placeholder = get_placeholder()
-    cursor.execute(f"UPDATE raw_articles SET processed = {placeholder} WHERE url = {placeholder}", (1, raw_article_id,))
+    if DATABASE_URL.startswith('postgresql'):
+        cursor.execute("UPDATE raw_articles SET processed = %s WHERE url = %s", (1, raw_article_id,))
+    else:
+        cursor.execute("UPDATE raw_articles SET processed = ? WHERE url = ?", (1, raw_article_id,))
     conn.commit()
     conn.close()
 
 def insert_cve(cve):
     conn = get_connection()
     cursor = conn.cursor()
-    placeholder = get_placeholder()
     ignore_clause = get_ignore_clause()
-    cursor.execute(f"""
-        INSERT {ignore_clause} INTO cves (cve_id, title, title_translated, summary, severity, cvss_score, published_date, original_language, source, url, intrigue, affected_products)
-        VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder})
-    """, (
-        cve.cve_id,
-        cve.title,
-        cve.title_translated,
-        cve.summary,
-        cve.severity,
-        cve.cvss_score,
-        cve.published_date,
-        cve.original_language,
-        cve.source,
-        cve.url,
-        cve.intrigue,
-        ",".join(cve.affected_products)
-    ))
+    if DATABASE_URL.startswith('postgresql'):
+        cursor.execute(f"""
+            INSERT {ignore_clause} INTO cves (cve_id, title, title_translated, summary, severity, cvss_score, published_date, original_language, source, url, intrigue, affected_products)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            cve.cve_id,
+            cve.title,
+            cve.title_translated,
+            cve.summary,
+            cve.severity,
+            cve.cvss_score,
+            cve.published_date,
+            cve.original_language,
+            cve.source,
+            cve.url,
+            cve.intrigue,
+            ",".join(cve.affected_products)
+        ))
+    else:
+        cursor.execute(f"""
+            INSERT {ignore_clause} INTO cves (cve_id, title, title_translated, summary, severity, cvss_score, published_date, original_language, source, url, intrigue, affected_products)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            cve.cve_id,
+            cve.title,
+            cve.title_translated,
+            cve.summary,
+            cve.severity,
+            cve.cvss_score,
+            cve.published_date,
+            cve.original_language,
+            cve.source,
+            cve.url,
+            cve.intrigue,
+            ",".join(cve.affected_products)
+        ))
     conn.commit()
     conn.close()
 
 def insert_newsitem(news):
     conn = get_connection()
     cursor = conn.cursor()
-    placeholder = get_placeholder()
     ignore_clause = get_ignore_clause()
-    cursor.execute(f"""
-        INSERT {ignore_clause} INTO newsitems (title, title_translated, summary, published_date, original_language, source, url, intrigue)
-        VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder})
-    """, (
-        news.title,
-        news.title_translated,
-        news.summary,
-        news.published_date,
-        news.original_language,
-        news.source,
-        news.url,
-        news.intrigue
-    ))
+    if DATABASE_URL.startswith('postgresql'):
+        cursor.execute(f"""
+            INSERT {ignore_clause} INTO newsitems (title, title_translated, summary, published_date, original_language, source, url, intrigue)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            news.title,
+            news.title_translated,
+            news.summary,
+            news.published_date,
+            news.original_language,
+            news.source,
+            news.url,
+            news.intrigue
+        ))
+    else:
+        cursor.execute(f"""
+            INSERT {ignore_clause} INTO newsitems (title, title_translated, summary, published_date, original_language, source, url, intrigue)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            news.title,
+            news.title_translated,
+            news.summary,
+            news.published_date,
+            news.original_language,
+            news.source,
+            news.url,
+            news.intrigue
+        ))
     conn.commit()
     conn.close()
 
@@ -342,8 +388,6 @@ def get_cves_by_filters(severity_filter=None, after_date=None, limit=50):
         query = "SELECT * FROM cves WHERE 1=1"
         params = []
         
-        placeholder = get_placeholder()
-        
         if severity_filter:
             if isinstance(severity_filter, list):
                 # Fix: Use proper placeholder formatting for PostgreSQL
@@ -354,14 +398,23 @@ def get_cves_by_filters(severity_filter=None, after_date=None, limit=50):
                 query += f" AND UPPER(severity) IN ({placeholders})"
                 params.extend([s.upper() for s in severity_filter])
             else:
-                query += f" AND UPPER(severity) = {placeholder}"
+                if DATABASE_URL.startswith('postgresql'):
+                    query += " AND UPPER(severity) = %s"
+                else:
+                    query += " AND UPPER(severity) = ?"
                 params.append(severity_filter.upper())
         
         if after_date:
-            query += f" AND published_date >= {placeholder}"
+            if DATABASE_URL.startswith('postgresql'):
+                query += " AND published_date >= %s"
+            else:
+                query += " AND published_date >= ?"
             params.append(after_date.isoformat())
         
-        query += f" ORDER BY (cvss_score * 0.6 + intrigue * 0.4) DESC LIMIT {placeholder}"
+        if DATABASE_URL.startswith('postgresql'):
+            query += " ORDER BY (cvss_score * 0.6 + intrigue * 0.4) DESC LIMIT %s"
+        else:
+            query += " ORDER BY (cvss_score * 0.6 + intrigue * 0.4) DESC LIMIT ?"
         params.append(limit)
         print(f"🔍 DEBUG: SQL QUERY: {query}")
         print(f"🔍 DEBUG: PARAMS: {params}")
@@ -402,13 +455,18 @@ def get_news_by_filters(after_date=None, limit=50):
     
     query = "SELECT * FROM newsitems WHERE 1=1"
     params = []
-    placeholder = get_placeholder()
     
     if after_date:
-        query += f" AND published_date >= {placeholder}"
+        if DATABASE_URL.startswith('postgresql'):
+            query += " AND published_date >= %s"
+        else:
+            query += " AND published_date >= ?"
         params.append(after_date.isoformat())
     
-    query += f" ORDER BY intrigue DESC LIMIT {placeholder}"
+    if DATABASE_URL.startswith('postgresql'):
+        query += " ORDER BY intrigue DESC LIMIT %s"
+    else:
+        query += " ORDER BY intrigue DESC LIMIT ?"
     params.append(limit)
     
     cursor.execute(query, params)

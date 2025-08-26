@@ -131,6 +131,6 @@ if __name__ == "__main__":
         print(f"Link: {art.url}")
         print(f"Language: {art.language}")
         print(f"Scraped at: {art.scraped_at}")
-        print(f"Content preview:\n{art.content[:300]}") 
+        # print(f"Content preview:\n{art.content[:300]}") 
         print(f"date: {art.published_date}"  ) # first 300 chars
         print("-" * 40)

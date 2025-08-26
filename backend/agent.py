@@ -65,7 +65,7 @@ class IntelligentCyberAgent:
         from tools.tools import (
             analyze_data_needs, retrieve_existing_data, scrape_fresh_intel,
             classify_intelligence, evaluate_intel_sufficiency,
-            present_results, get_intelligence_smart, trigger_background_scrape, manage_cache_cleanup
+            present_results
         )
         
         # Keep existing tools for now, add new ones
@@ -75,11 +75,7 @@ class IntelligentCyberAgent:
             scrape_fresh_intel,
             classify_intelligence,
             evaluate_intel_sufficiency,
-            present_results,
-            # Add new smart tools
-            get_intelligence_smart,
-            trigger_background_scrape,
-            manage_cache_cleanup
+            present_results
         ]
         
         # Set agent instance for tools
@@ -95,12 +91,18 @@ class IntelligentCyberAgent:
         
         # Keep existing prompt for now
         prompt = ChatPromptTemplate.from_messages([
-            ("system", """You are a cybersecurity intelligence agent. Follow this workflow:
+            ("system", """You are a cybersecurity intelligence agent. Follow this EXACT workflow:
 
 1. analyze_data_needs - Check existing data
 2. Based on JSON "recommendation":
    - "sufficient" → retrieve_existing_data → present_results → STOP
    - "urgent_scrape" → scrape_fresh_intel → classify_intelligence → present_results → STOP
+
+IMPORTANT: 
+- Call each function ONLY ONCE
+- Do NOT repeat steps
+- Do NOT call scrape_fresh_intel multiple times
+- Return only the final JSON from present_results
 
 Return only the final JSON from present_results. No additional commentary."""),
             ("user", "{input}"),
@@ -112,7 +114,7 @@ Return only the final JSON from present_results. No additional commentary."""),
             agent=agent,
             tools=self.tools,
             verbose=True,
-            max_iterations=8,
+            max_iterations=4,
             handle_parsing_errors=True,
             return_intermediate_steps=True,
             early_stopping_method="generate"
