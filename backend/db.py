@@ -248,6 +248,9 @@ def init_db():
 
 def is_article_scraped(link):
     print("Checking if ", link, " is scraped ")
+    # Trim whitespace from URL
+    link = link.strip()
+    
     conn = get_connection()
     cursor = conn.cursor()
     
@@ -592,26 +595,50 @@ def record_scraping_session(sources_scraped, articles_found, triggered_by="agent
 
 def is_article_classified(url):
     """Check if an article has already been classified (exists in cves or newsitems)"""
+    # Trim whitespace from URL
+    url = url.strip()
+    
     conn = get_connection()
     cursor = conn.cursor()
     
-    # Check both cves and newsitems tables
-    cursor.execute("SELECT 1 FROM cves WHERE url = ?", (url,))
-    cve_exists = cursor.fetchone()
+    # Debug: Check what type of connection we actually have
+    connection_type = "PostgreSQL" if hasattr(conn, 'server_version') else "SQLite"
+    print(f"🔍 DEBUG: is_article_classified using {connection_type} connection")
     
-    cursor.execute("SELECT 1 FROM newsitems WHERE url = ?", (url,))
-    news_exists = cursor.fetchone()
+    # Check both cves and newsitems tables
+    if hasattr(conn, 'server_version'):  # PostgreSQL connection
+        cursor.execute("SELECT 1 FROM cves WHERE url = %s", (url,))
+        cve_exists = cursor.fetchone()
+        
+        cursor.execute("SELECT 1 FROM newsitems WHERE url = %s", (url,))
+        news_exists = cursor.fetchone()
+    else:  # SQLite connection
+        cursor.execute("SELECT 1 FROM cves WHERE url = ?", (url,))
+        cve_exists = cursor.fetchone()
+        
+        cursor.execute("SELECT 1 FROM newsitems WHERE url = ?", (url,))
+        news_exists = cursor.fetchone()
     
     conn.close()
     return cve_exists is not None or news_exists is not None
 
 def get_classified_article(url):
     """Get already classified article data by URL"""
+    # Trim whitespace from URL
+    url = url.strip()
+    
     conn = get_connection()
     cursor = conn.cursor()
     
+    # Debug: Check what type of connection we actually have
+    connection_type = "PostgreSQL" if hasattr(conn, 'server_version') else "SQLite"
+    print(f"🔍 DEBUG: get_classified_article using {connection_type} connection")
+    
     # Check cves table first
-    cursor.execute("SELECT * FROM cves WHERE url = ?", (url,))
+    if hasattr(conn, 'server_version'):  # PostgreSQL connection
+        cursor.execute("SELECT * FROM cves WHERE url = %s", (url,))
+    else:  # SQLite connection
+        cursor.execute("SELECT * FROM cves WHERE url = ?", (url,))
     cve_row = cursor.fetchone()
     
     if cve_row:
@@ -635,7 +662,10 @@ def get_classified_article(url):
         }
     
     # Check newsitems table
-    cursor.execute("SELECT * FROM newsitems WHERE url = ?", (url,))
+    if hasattr(conn, 'server_version'):  # PostgreSQL connection
+        cursor.execute("SELECT * FROM newsitems WHERE url = %s", (url,))
+    else:  # SQLite connection
+        cursor.execute("SELECT * FROM newsitems WHERE url = ?", (url,))
     news_row = cursor.fetchone()
     
     if news_row:
