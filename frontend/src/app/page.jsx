@@ -331,6 +331,32 @@ const CyberSecurityApp = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* About Sentinel */}
+        <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700 p-6 mb-6 relative">
+          <div className="absolute top-4 right-4 group">
+            <AlertTriangle className="h-5 w-5 text-yellow-400 cursor-help" />
+            <div className="absolute top-full right-0 mt-2 w-80 bg-slate-900 border border-slate-600 rounded-lg p-3 text-sm text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none group-hover:pointer-events-auto z-[9999]">
+              <div className="flex items-start">
+                <AlertTriangle className="h-4 w-4 text-yellow-400 mr-2 mt-0.5 flex-shrink-0" />
+                <div>
+                  <strong className="text-yellow-300">Demo Notice:</strong> This is a demonstration platform. 
+                  If new scraping is triggered, it may take up to 90 seconds due to cloud microservice free tiers being used.
+                </div>
+              </div>
+              <div className="absolute bottom-full right-4 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-slate-900"></div>
+            </div>
+          </div>
+          <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
+            <Shield className="h-6 w-6 mr-2 text-cyan-400" />
+            About Sentinel
+          </h2>
+          <p className="text-slate-300">
+            Sentinel is an cybersecurity threat intelligence platform that aggregates and analyzes 
+            vulnerabilities (CVEs) and security news from multiple international sources. It provides real-time insights 
+            into emerging threats, helping security professionals stay informed about the latest cybersecurity developments.
+          </p>
+        </div>
+
         {/* Search Form */}
         <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700 p-8 mb-8">
           <h2 className="text-2xl font-semibold text-white mb-6 flex items-center">
