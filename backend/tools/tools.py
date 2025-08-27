@@ -565,7 +565,8 @@ def classify_intelligence(content_type: str = "both", severity: Optional[str] = 
            
                         cves.append(vul)
                         try:
-                            insert_cve(vul)
+                            session_id = agent.current_session.get('session_id', 'unknown')
+                            insert_cve(vul, session_id)
                         except Exception as e:
                             print(f"⚠️ Error inserting CVE: {e}")
                         print(f"✅ Added CVE to list: {cve_id}")
@@ -584,7 +585,8 @@ def classify_intelligence(content_type: str = "both", severity: Optional[str] = 
                         
                         news.append(news_item)
                         try:
-                            insert_newsitem(news_item)
+                            session_id = agent.current_session.get('session_id', 'unknown')
+                            insert_newsitem(news_item, session_id)
                         except Exception as e:
                             print(f"⚠️ Error inserting news item: {e}")
                     

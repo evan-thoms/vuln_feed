@@ -7,11 +7,34 @@ from datetime import datetime
 import json
 import time
 import os
+import sys
 
 # Import your agent
 from agent import IntelligentCyberAgent, set_websocket_manager
 from models import QueryParams
 from db import get_data_freshness_info, init_db
+
+# Add this near the top of main.py, after the imports
+import os
+import sys
+
+# Run database migration on startup
+def run_startup_migration():
+    """Run database migration on startup"""
+    try:
+        print("🔄 Running database migration on startup...")
+        from migrate_database import migrate_database
+        success = migrate_database()
+        if success:
+            print("✅ Database migration completed successfully")
+        else:
+            print("⚠️ Database migration failed, but continuing...")
+    except Exception as e:
+        print(f"⚠️ Migration error on startup: {e}, but continuing...")
+
+# Run migration when the app starts
+if __name__ == "__main__":
+    run_startup_migration()
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -104,7 +127,7 @@ async def search_intelligence(request: SearchRequest):
                 "status": "Analyzing data requirements...",
                 "progress": 10
             }))
-        except:
+        except Exception:
             pass  # Ignore WebSocket errors
 
         params = {
@@ -178,9 +201,9 @@ async def search_intelligence(request: SearchRequest):
             }))
         except:
             pass  # Ignore WebSocket errors
-        
-        return agent_response
 
+        return agent_response
+        
     except Exception as e:
         # Send error status
         try:
@@ -189,9 +212,91 @@ async def search_intelligence(request: SearchRequest):
                 "status": f"Error: {str(e)}",
                 "progress": 0
             }))
-        except:
+        except Exception:
             pass  # Ignore WebSocket errors
         raise HTTPException(status_code=500, detail=f"Agent failed: {str(e)}")
+
+@app.post("/manual-trigger")
+async def manual_trigger_intelligence():
+    """Manual trigger endpoint for intelligence gathering"""
+    try:
+        # Import the cron scheduler
+        from cron_scheduler import SentinelCronScheduler
+        
+        # Create scheduler instance
+        scheduler = SentinelCronScheduler()
+        
+        # Run intelligence gathering
+        result = scheduler.run_scheduled_intelligence_gathering()
+        
+        return {
+            "success": True,
+            "message": "Manual intelligence gathering triggered successfully",
+            "result": result
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to trigger manual intelligence gathering"
+        }
+
+@app.post("/run-migration")
+async def run_migration_endpoint():
+    """Run database migration via API endpoint"""
+    try:
+        from migrate_database import migrate_database
+        success = migrate_database()
+        
+        if success:
+            return {
+                "success": True,
+                "message": "Database migration completed successfully"
+            }
+        else:
+            return {
+                "success": False,
+                "message": "Database migration failed"
+            }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Database migration error"
+        }
+
+@app.get("/scheduler-status")
+async def get_scheduler_status():
+    """Get status of scheduled intelligence gathering"""
+    try:
+        # Read log file to get last execution info
+        log_file = "scheduled_intelligence.log"
+        last_execution = None
+        
+        if os.path.exists(log_file):
+            with open(log_file, "r") as f:
+                lines = f.readlines()
+                if lines:
+                    # Get last line (most recent execution)
+                    last_line = lines[-1].strip()
+                    try:
+                        last_execution = json.loads(last_line)
+                    except:
+                        pass
+        
+        return {
+            "success": True,
+            "scheduler_status": "active",
+            "last_execution": last_execution,
+            "next_scheduled": "Every 3 days via Render Cron Job"
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
 
 @app.post("/search-minimal")
 async def search_intelligence_minimal(request: SearchRequest):

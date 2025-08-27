@@ -257,7 +257,7 @@ def is_article_scraped(link):
     
     # Debug: Check what type of connection we actually have
     connection_type = "PostgreSQL" if hasattr(conn, 'server_version') else "SQLite"
-    print(f"🔍 DEBUG: Using {connection_type} connection")
+    # print(f"🔍 DEBUG: Using {connection_type} connection")
     
     # Fix: Use proper placeholder based on actual connection type, not DATABASE_URL
     if hasattr(conn, 'server_version'):  # PostgreSQL connection
@@ -315,15 +315,15 @@ def mark_as_processed(raw_article_id):
     conn.commit()
     conn.close()
 
-def insert_cve(cve):
+def insert_cve(cve, session_id='unknown'):
     conn = get_connection()
     cursor = conn.cursor()
     try:
         if hasattr(conn, 'server_version'):  # PostgreSQL connection
             # Use proper PostgreSQL conflict handling
             cursor.execute("""
-                INSERT INTO cves (cve_id, title, title_translated, summary, severity, cvss_score, published_date, original_language, source, url, intrigue, affected_products)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO cves (cve_id, title, title_translated, summary, severity, cvss_score, published_date, original_language, source, url, intrigue, affected_products, session_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (url) DO NOTHING
             """, (
                 cve.cve_id,
@@ -337,13 +337,14 @@ def insert_cve(cve):
                 cve.source,
                 cve.url,
                 cve.intrigue,
-                ",".join(cve.affected_products)
+                ",".join(cve.affected_products),
+                session_id
             ))
         else:  # SQLite connection
             ignore_clause = get_ignore_clause()
             cursor.execute(f"""
-                INSERT {ignore_clause} INTO cves (cve_id, title, title_translated, summary, severity, cvss_score, published_date, original_language, source, url, intrigue, affected_products)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT {ignore_clause} INTO cves (cve_id, title, title_translated, summary, severity, cvss_score, published_date, original_language, source, url, intrigue, affected_products, session_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 cve.cve_id,
                 cve.title,
@@ -356,7 +357,8 @@ def insert_cve(cve):
                 cve.source,
                 cve.url,
                 cve.intrigue,
-                ",".join(cve.affected_products)
+                ",".join(cve.affected_products),
+                session_id
             ))
         conn.commit()
     except Exception as e:
@@ -365,15 +367,15 @@ def insert_cve(cve):
     finally:
         conn.close()
 
-def insert_newsitem(news):
+def insert_newsitem(news, session_id='unknown'):
     conn = get_connection()
     cursor = conn.cursor()
     try:
         if hasattr(conn, 'server_version'):  # PostgreSQL connection
             # Use proper PostgreSQL conflict handling
             cursor.execute("""
-                INSERT INTO newsitems (title, title_translated, summary, published_date, original_language, source, url, intrigue)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO newsitems (title, title_translated, summary, published_date, original_language, source, url, intrigue, session_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (url) DO NOTHING
             """, (
                 news.title,
@@ -383,13 +385,14 @@ def insert_newsitem(news):
                 news.original_language,
                 news.source,
                 news.url,
-                news.intrigue
+                news.intrigue,
+                session_id
             ))
         else:  # SQLite connection
             ignore_clause = get_ignore_clause()
             cursor.execute(f"""
-                INSERT {ignore_clause} INTO newsitems (title, title_translated, summary, published_date, original_language, source, url, intrigue)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT {ignore_clause} INTO newsitems (title, title_translated, summary, published_date, original_language, source, url, intrigue, session_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 news.title,
                 news.title_translated,
@@ -398,7 +401,8 @@ def insert_newsitem(news):
                 news.original_language,
                 news.source,
                 news.url,
-                news.intrigue
+                news.intrigue,
+                session_id
             ))
         conn.commit()
     except Exception as e:
@@ -415,7 +419,7 @@ def get_cves_by_filters(severity_filter=None, after_date=None, limit=50):
         
         # Debug: Check what type of connection we actually have
         connection_type = "PostgreSQL" if hasattr(conn, 'server_version') else "SQLite"
-        print(f"🔍 DEBUG: get_cves_by_filters using {connection_type} connection")
+        # print(f"🔍 DEBUG: get_cves_by_filters using {connection_type} connection")
         
         query = "SELECT * FROM cves WHERE 1=1"
         params = []
@@ -490,7 +494,7 @@ def get_news_by_filters(after_date=None, limit=50):
     
     # Debug: Check what type of connection we actually have
     connection_type = "PostgreSQL" if hasattr(conn, 'server_version') else "SQLite"
-    print(f"🔍 DEBUG: get_news_by_filters using {connection_type} connection")
+    # print(f"🔍 DEBUG: get_news_by_filters using {connection_type} connection")
     
     query = "SELECT * FROM newsitems WHERE 1=1"
     params = []
@@ -622,7 +626,7 @@ def is_article_classified(url):
     
     # Debug: Check what type of connection we actually have
     connection_type = "PostgreSQL" if hasattr(conn, 'server_version') else "SQLite"
-    print(f"🔍 DEBUG: is_article_classified using {connection_type} connection")
+    # print(f"🔍 DEBUG: is_article_classified using {connection_type} connection")
     
     # Check both cves and newsitems tables
     if hasattr(conn, 'server_version'):  # PostgreSQL connection
@@ -651,7 +655,7 @@ def get_classified_article(url):
     
     # Debug: Check what type of connection we actually have
     connection_type = "PostgreSQL" if hasattr(conn, 'server_version') else "SQLite"
-    print(f"🔍 DEBUG: get_classified_article using {connection_type} connection")
+    # print(f"🔍 DEBUG: get_classified_article using {connection_type} connection")
     
     # Check cves table first
     if hasattr(conn, 'server_version'):  # PostgreSQL connection
@@ -1000,6 +1004,80 @@ def get_cached_intelligence(content_type="both", severity=None, days_back=7, max
         "news": news,
         "total_found": len(cves) + len(news)
     }
+
+def get_items_by_session(session_id: str, limit: int = 50):
+    """Get items added in a specific session"""
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        # Get CVEs from session
+        cursor.execute("""
+            SELECT cve_id, title, severity, summary, created_at 
+            FROM cves 
+            WHERE session_id = ? 
+            ORDER BY created_at DESC 
+            LIMIT ?
+        """, (session_id, limit))
+        cves = cursor.fetchall()
+        
+        # Get news from session
+        cursor.execute("""
+            SELECT title, source, summary, created_at 
+            FROM newsitems 
+            WHERE session_id = ? 
+            ORDER BY created_at DESC 
+            LIMIT ?
+        """, (session_id, limit))
+        news = cursor.fetchall()
+        
+        conn.close()
+        
+        return {
+            "session_id": session_id,
+            "cves": cves,
+            "news": news,
+            "total_cves": len(cves),
+            "total_news": len(news)
+        }
+    except Exception as e:
+        print(f"Error getting items by session: {e}")
+        return {"session_id": session_id, "cves": [], "news": [], "total_cves": 0, "total_news": 0}
+
+def get_recent_sessions(hours_back: int = 24):
+    """Get recent sessions and their statistics"""
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        # Get recent sessions with counts
+        cursor.execute("""
+            SELECT session_id, COUNT(*) as cve_count, MIN(created_at) as first_item, MAX(created_at) as last_item
+            FROM cves 
+            WHERE created_at >= datetime('now', '-{} hours')
+            GROUP BY session_id 
+            ORDER BY MAX(created_at) DESC
+        """.format(hours_back))
+        cve_sessions = cursor.fetchall()
+        
+        cursor.execute("""
+            SELECT session_id, COUNT(*) as news_count, MIN(created_at) as first_item, MAX(created_at) as last_item
+            FROM newsitems 
+            WHERE created_at >= datetime('now', '-{} hours')
+            GROUP BY session_id 
+            ORDER BY MAX(created_at) DESC
+        """.format(hours_back))
+        news_sessions = cursor.fetchall()
+        
+        conn.close()
+        
+        return {
+            "cve_sessions": cve_sessions,
+            "news_sessions": news_sessions
+        }
+    except Exception as e:
+        print(f"Error getting recent sessions: {e}")
+        return {"cve_sessions": [], "news_sessions": []}
 
 if __name__ == "__main__":
     # Initialize DB first if needed
