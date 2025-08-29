@@ -476,24 +476,15 @@ def classify_intelligence(content_type: str = "both", severity: Optional[str] = 
     try:
         # Prepare data for parallel processing
         articles_data = []
-        skipped_already_classified = 0
         
         for i, art in enumerate(articles_to_process):
-            # Skip if already classified
-            try:
-                if is_article_classified(art.url):
-                    skipped_already_classified += 1
-                    print(f"⏭️  Skipping already classified: {art.url}")
-                    continue
-            except Exception as e:
-                print(f"⚠️ Error checking if article classified: {e}")
-                
+            # All articles here are already unscraped, so they can't be classified
             content_to_classify = art.content_translated or art.content
             if content_to_classify:  # Only include articles with content
                 articles_data.append((i, content_to_classify, art.url))
         
         print(f"📊 Prepared {len(articles_data)} articles for parallel classification")
-        print(f"⏭️  Skipped {skipped_already_classified} already classified articles")
+        print(f"⏭️  All articles are new (already filtered out scraped ones)")
         
         if not articles_data:
             print("⚠️ No articles with content to classify - returning empty results")
@@ -614,48 +605,8 @@ def classify_intelligence(content_type: str = "both", severity: Optional[str] = 
         print(f"  📈 CVEs found: {len(cves)}")
         print(f"  📰 News found: {len(news)}")
         
-        # Add already classified articles to the results
-        already_classified_articles = agent.current_session.get("already_classified_articles", [])
-        print(f"📋 Including {len(already_classified_articles)} already classified articles")
-        
-        for classified_data in already_classified_articles:
-            if classified_data["type"] == "CVE" and content_type in ["cve", "both"]:
-                data = classified_data["data"]
-                # Check severity filter
-                if severity_list and data["severity"].upper() not in severity_list:
-                    continue
-                    
-                vul = Vulnerability(
-                    cve_id=data["cve_id"],
-                    title=data["title"],
-                    title_translated=data["title_translated"],
-                    summary=data["summary"],
-                    severity=data["severity"],
-                    cvss_score=data["cvss_score"],
-                    published_date=parse_date_safe(data["published_date"]) or datetime.now(),
-                    original_language=data["original_language"],
-                    source=data["source"],
-                    url=data["url"],
-                    intrigue=data["intrigue"],
-                    affected_products=data["affected_products"]
-                )
-                cves.append(vul)
-                print(f"📋 Added already classified CVE: {data['cve_id']}")
-                
-            elif classified_data["type"] == "News" and content_type in ["news", "both"]:
-                data = classified_data["data"]
-                news_item = NewsItem(
-                    title=data["title"],
-                    title_translated=data["title_translated"],
-                    summary=data["summary"],
-                    published_date=parse_date_safe(data["published_date"]) or datetime.now(),
-                    original_language=data["original_language"],
-                    source=data["source"],
-                    url=data["url"],
-                    intrigue=data["intrigue"]
-                )
-                news.append(news_item)
-                print(f"📋 Added already classified news: {data['title'][:50]}...")
+        # Already classified articles will be queried from database at the end
+        # No need to add them here since the database query handles this
         
         # QUERY DATABASE FOR EXISTING HIGH-QUALITY ARTICLES
         print(f"🗄️ Querying database for existing high-quality articles...")
@@ -1027,20 +978,9 @@ def scrape_fresh_intel(content_type: str = "both", max_results: int = None) -> s
         except Exception as e:
             print(f"⚠️ Error processing unprocessed articles: {e}")
         
-        # Check for already classified articles and add them to output
-        already_classified_articles = []
-        for art in articles:
-            try:
-                if is_article_classified(art.url):
-                    classified_data = get_classified_article(art.url)
-                    if classified_data:
-                        already_classified_articles.append(classified_data)
-            except Exception as e:
-                print(f"⚠️ Error checking classified article {art.url}: {e}")
-        
-        # Filter out already classified articles from processing pipeline
-        articles_to_process = [art for art in articles if not is_article_classified(art.url)]
-        print(f"📊 Processing {len(articles_to_process)} new articles (skipping {len(already_classified_articles)} already classified)")
+        # All articles are already filtered for unscraped ones, so no need to check classification
+        articles_to_process = articles
+        print(f"📊 Processing {len(articles_to_process)} new articles (already filtered for unscraped ones)")
         
         # Translate and truncate only new articles
         for art in articles_to_process:
@@ -1060,16 +1000,14 @@ def scrape_fresh_intel(content_type: str = "both", max_results: int = None) -> s
         
         translated_articles = translate_articles_parallel(articles_to_process)
         
-        # Store both new and already classified articles
+        # Store new articles only (already classified ones will be queried from database)
         agent = scrape_fresh_intel._agent_instance
         agent.current_session["scraped_articles"] = translated_articles
-        agent.current_session["already_classified_articles"] = already_classified_articles
         
         print(f"✅ Fresh intel collected: {len(translated_articles)} articles")
         print(f"📊 Detailed breakdown:")
         print(f"  - Total raw articles collected: {len(articles)}")
         print(f"  - Articles to process: {len(articles_to_process)}")
-        print(f"  - Already classified: {len(already_classified_articles)}")
         print(f"  - Final translated articles: {len(translated_articles)}")
         
         # Debug the first few articles for troubleshooting

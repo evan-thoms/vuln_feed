@@ -154,11 +154,13 @@ Return only the final JSON from present_results. No additional commentary."""),
             result = self.agent_executor.invoke({"input": enhanced_input})
             
             # Send progress updates (non-blocking)
+            # Note: send_progress_update is async but we're not awaiting it to avoid blocking
+            # This will generate a RuntimeWarning but won't affect functionality
             try:
                 import asyncio
-                # Send initial progress
+                # Send initial progress (fire and forget)
                 asyncio.create_task(send_progress_update("Analyzing data requirements...", 10))
-                # Send completion progress
+                # Send completion progress (fire and forget)
                 asyncio.create_task(send_progress_update("Complete!", 100))
             except Exception as e:
                 print(f"⚠️ Progress update failed: {e}")

@@ -69,6 +69,12 @@ class SentinelCronScheduler:
         
         try:
             # Initialize database
+            # Ensure DATABASE_URL is set for production
+            if not os.getenv('DATABASE_URL'):
+                logger.warning("⚠️ DATABASE_URL not set - will use SQLite fallback")
+            else:
+                logger.info("✅ DATABASE_URL configured for PostgreSQL")
+            
             init_db()
             
             logger.info(f"📊 Cron job parameters: {self.config}")

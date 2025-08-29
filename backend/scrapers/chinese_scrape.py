@@ -1,4 +1,5 @@
 import feedparser
+import os
 from datetime import datetime
 from models import Article
 import requests
@@ -18,34 +19,91 @@ class ChineseScraper:
     def _create_fast_session(self):
         """Fast session with minimal retry and proper timeout"""
         session = requests.Session()
-        retry_strategy = Retry(total=2, backoff_factor=0.5)  # Quick retries
+        retry_strategy = Retry(total=3, backoff_factor=1.0, status_forcelist=[405, 429, 500, 502, 503, 504])  # More aggressive retries
         adapter = HTTPAdapter(max_retries=retry_strategy)
         session.mount("http://", adapter)
         session.mount("https://", adapter)
-        session.headers.update({'User-Agent': 'Mozilla/5.0 (compatible; scraper)'})
+        session.headers.update({
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'Accept-Language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-User': '?1',
+            'Cache-Lifecycle': 'no-cache',
+            'Pragma': 'no-cache',
+        })
+        
+        # Add proxy support if configured
+        proxy = os.getenv('HTTP_PROXY') or os.getenv('HTTPS_PROXY')
+        if proxy:
+            print(f"🔧 Using proxy: {proxy}")
+            session.proxies = {
+                'http': proxy,
+                'https': proxy
+            }
+        
         return session
 
     def scrape_freebuf(self, days_back: int = 7):
         print("[FreeBuf] Starting RSS scrape...")
-        feed_url = "https://www.freebuf.com/feed"
-        print(f"🔍 DEBUG: RSS feed URL: {feed_url}")
+        
+        # Try multiple FreeBuf RSS URLs in case one is blocked
+        feed_urls = [
+            "https://www.freebuf.com/feed",
+            "https://freebuf.com/feed",
+            "https://www.freebuf.com/rss",
+            "https://freebuf.com/rss"
+        ]
+        
+        for feed_url in feed_urls:
+            print(f"🔍 DEBUG: Trying RSS feed URL: {feed_url}")
+            try:
+                # Test the URL first
+                r = requests.head(feed_url, timeout=5)
+                if r.status_code == 200:
+                    print(f"✅ URL {feed_url} is accessible")
+                    break
+                else:
+                    print(f"❌ URL {feed_url} returned status {r.status_code}")
+            except Exception as e:
+                print(f"❌ URL {feed_url} failed: {e}")
+                continue
+        else:
+            print("❌ All FreeBuf URLs failed, using default")
+            feed_url = "https://www.freebuf.com/feed"
         
         try:
             print(f"🔍 DEBUG: Attempting to parse RSS feed...")
             
+            # Check if FreeBuf scraping is disabled
+            if os.getenv('DISABLE_FREEBUF_SCRAPING', 'false').lower() == 'true':
+                print("⚠️ FreeBuf scraping disabled via environment variable")
+                return []
+            
             # First try to fetch the RSS feed directly with requests to see what we get
             try:
                 print(f"🔍 DEBUG: Testing direct RSS fetch...")
-                # Use different headers to avoid 405 errors
+                # Use more aggressive headers to avoid 405 errors
                 headers = {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                    'Accept-Language': 'en-US,en;q=0.5',
-                    'Accept-Encoding': 'gzip, deflate',
+                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+                    'Accept-Language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7',
+                    'Accept-Encoding': 'gzip, deflate, br',
                     'Connection': 'keep-alive',
                     'Upgrade-Insecure-Requests': '1',
+                    'Sec-Fetch-Dest': 'document',
+                    'Sec-Fetch-Mode': 'navigate',
+                    'Sec-Fetch-Site': 'none',
+                    'Sec-Fetch-User': '?1',
+                    'Cache-Lifecycle': 'no-cache',
+                    'Pragma': 'no-cache',
                 }
-                r = requests.get(feed_url, headers=headers, timeout=10)
+                r = requests.get(feed_url, headers=headers, timeout=15)
                 print(f"🔍 DEBUG: Direct RSS response status: {r.status_code}")
                 print(f"🔍 DEBUG: Direct RSS response headers: {dict(r.headers)}")
                 print(f"🔍 DEBUG: Direct RSS response content length: {len(r.text)}")
@@ -97,7 +155,11 @@ class ChineseScraper:
                 else:
                     print(f"⚠️ RSS attempt {attempts} returned no entries")
                     if attempts < max_attempts:
-                        time.sleep(2)  # Wait 2 seconds between attempts
+                        # Random delay to avoid detection
+                        import random
+                        delay = random.uniform(3, 8)
+                        print(f"⏳ Waiting {delay:.1f} seconds before retry...")
+                        time.sleep(delay)
             
             if hasattr(feed, 'entries') and len(feed.entries) > 0:
                 print(f"Found {len(feed.entries)} articles in the RSS feed.")
