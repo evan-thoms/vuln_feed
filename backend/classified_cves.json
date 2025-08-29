@@ -1,92 +1,124 @@
 [
   {
-    "cve_id": "CVE-2025-20265",
-    "title": "思科披露重大RCE漏洞（CVE-2025-20265，CVSS 10）：未认证攻击者可劫持防火墙",
-    "title_translated": "Cisco disclosed a critical RCE vulnerability (CVE-2025-20265, CVSS 10): Unauthenticated attackers can hijack firewalls.",
-    "summary": "Cisco's Secure Firewall Management Center (FMC) software has a critical remote code execution vulnerability due to insufficient input validation in the RADIUS subsystem. Unauthenticated attackers can exploit this flaw to execute arbitrary commands with high privileges on affected devices. Only specific versions with RADIUS authentication enabled are vulnerable.",
+    "cve_id": "CVE-2025-5245",
+    "title": "Alpine Linux: CVE-2025-5245: Improper Restriction of Operations within the Bounds of a Memory Buffer",
+    "title_translated": "Alpine Linux: CVE-2025-5245: Improper Restriction of Operations within the Bounds of a Memory Buffer",
+    "summary": "A critical vulnerability in GNU Binutils up to version 2.44 allows for memory corruption through the debug_type_samep function in objdump. Local access is required for exploitation, and a patch is recommended to mitigate the risk.",
     "severity": "Critical",
-    "cvss_score": 10.0,
-    "published_date": "2025-08-15T17:05:18",
-    "original_language": "zh",
-    "source": "Anquanke",
-    "url": "https://www.anquanke.com/post/id/311204",
-    "intrigue": 9.0,
+    "cvss_score": 9.0,
+    "published_date": "2025-08-28T19:45:15.141000+00:00",
+    "original_language": "en",
+    "source": "Rapid7",
+    "url": "https://security.alpinelinux.org/vuln/CVE-2025-5245",
+    "intrigue": 8.0,
     "affected_products": [
-      "Cisco Secure Firewall Management Center"
+      "GNU Binutils"
     ]
   },
   {
-    "cve_id": "CVE-2025-54336",
-    "title": "CVE-2025-54336（CVSS评分9.8）：Plesk Obsidian关键漏洞使服务器面临完全被控风险",
-    "title_translated": "CVE-2025-54336 (CVSS score 9.8): Critical vulnerability in Plesk Obsidian exposes servers to full control risk.",
-    "summary": "A high-severity vulnerability in Plesk Obsidian allows attackers to bypass admin login verification due to a flawed authentication logic. By exploiting loose comparison in the password validation process, attackers can gain full control of the server using specific numeric strings. This affects Plesk Obsidian version 18.0.70.",
+    "cve_id": "CVE-2025-5244",
+    "title": "Alpine Linux: CVE-2025-5244: Improper Restriction of Operations within the Bounds of a Memory Buffer",
+    "title_translated": "Alpine Linux: CVE-2025-5244: Improper Restriction of Operations within the Bounds of a Memory Buffer",
+    "summary": "A critical vulnerability in GNU Binutils up to version 2.44 allows for improper restriction of operations within the bounds of a memory buffer, leading to memory corruption. The exploit requires local access and has been publicly disclosed, making it a significant risk. Upgrading to version 2.45 is recommended to mitigate this issue.",
     "severity": "Critical",
-    "cvss_score": 9.8,
-    "published_date": "2025-08-20T17:51:00",
-    "original_language": "zh",
-    "source": "Anquanke",
-    "url": "https://www.anquanke.com/post/id/311338",
-    "intrigue": 9.0,
+    "cvss_score": 9.0,
+    "published_date": "2025-08-28T19:45:15.133000+00:00",
+    "original_language": "en",
+    "source": "Rapid7",
+    "url": "https://security.alpinelinux.org/vuln/CVE-2025-5244",
+    "intrigue": 8.0,
     "affected_products": [
-      "Plesk Obsidian 18.0.70"
+      "GNU Binutils"
     ]
   },
   {
-    "cve_id": "CVE-2025-7384",
-    "title": "WordPress 插件曝RCE高危漏洞（CVE-2025-7384，CVSS 9.8），逾 7 万网站面临数据泄露与破坏风险",
-    "title_translated": "WordPress plugin has a critical RCE vulnerability (CVE-2025-7384, CVSS 9.8), posing a risk of data leakage and damage to over 70,000 websites.",
-    "summary": "CVE-2025-7384 is a critical vulnerability affecting WordPress plugins like Contact Form 7, WPforms, and Elementor Forms, allowing attackers to exploit it without authentication. This can lead to denial of service or remote code execution, impacting over 70,000 active installations.",
+    "cve_id": "CVE-2025-9478",
+    "title": "谷歌Chrome紧急发布ANGLE高危补丁，人工智能安全研究员Big Sleep发现零日漏洞（CVE-2025-9478）",
+    "title_translated": "Google Chrome has urgently released a high-risk patch for ANGLE. AI security researcher Big Sleep discovered a zero-day vulnerability (CVE-2025-9478).",
+    "summary": "Google has released a critical security update for Chrome to address a vulnerability in the ANGLE graphics engine, discovered by its AI agent Big Sleep. This vulnerability poses a significant risk as it could be exploited by attackers, highlighting the importance of proactive AI-driven security measures.",
     "severity": "Critical",
-    "cvss_score": 9.8,
-    "published_date": "2025-08-15T17:22:15",
+    "cvss_score": 9.0,
+    "published_date": "2025-08-27T17:51:48",
     "original_language": "zh",
     "source": "Anquanke",
-    "url": "https://www.anquanke.com/post/id/311249",
-    "intrigue": 9.0,
+    "url": "https://www.anquanke.com/post/id/311513",
+    "intrigue": 8.0,
     "affected_products": [
-      "Contact Form 7",
-      "WPforms",
-      "Elementor Forms"
+      "Google Chrome"
     ]
   },
   {
-    "cve_id": "CVE-2025-25256",
-    "title": "FortiSIEM CVE-2025-25256（CVSS 9.8）：远程未授权命令注入漏洞，野外已出现利用代码",
-    "title_translated": "FortiSIEM CVE-2025-25256 (CVSS 9.8): Remote unauthorized command injection vulnerability, exploit code already in the wild.",
-    "summary": "Fortinet has disclosed a critical remote command injection vulnerability in multiple versions of the FortiSIEM platform, allowing attackers to execute arbitrary commands without authentication. The flaw arises from improper handling of special characters, enabling remote exploitation through crafted CLI requests. Affected versions include 7.3.0-7.3.1, 7.2.0-7.2.5, and 7.1, with patches available in later releases.",
+    "cve_id": "CVE-2025-7775",
+    "title": "Citrix NetScaler曝零日漏洞（CVE-2023-6548）黑客正利用RCE漏洞发动攻击",
+    "title_translated": "Citrix NetScaler has a zero-day vulnerability (CVE-2023-6548) being exploited by hackers to launch attacks using Remote Code Execution (RCE).",
+    "summary": "Multiple high-risk vulnerabilities in NetScaler ADC and NetScaler Gateway could lead to remote code execution and denial of service attacks. CVE-2025-7775 is actively exploited, prompting immediate upgrades for affected versions. Secure Private Access deployments are also impacted.",
     "severity": "Critical",
-    "cvss_score": 9.8,
-    "published_date": "2025-08-13T16:32:52",
+    "cvss_score": 9.0,
+    "published_date": "2025-08-27T16:40:24",
     "original_language": "zh",
     "source": "Anquanke",
-    "url": "https://www.anquanke.com/post/id/311142",
-    "intrigue": 9.0,
+    "url": "https://www.anquanke.com/post/id/311559",
+    "intrigue": 8.0,
     "affected_products": [
-      "FortiSIEM 7.3.0",
-      "FortiSIEM 7.3.1",
-      "FortiSIEM 7.2.0",
-      "FortiSIEM 7.2.1",
-      "FortiSIEM 7.2.2",
-      "FortiSIEM 7.2.3",
-      "FortiSIEM 7.2.4",
-      "FortiSIEM 7.2.5",
-      "FortiSIEM 7.1"
+      "NetScaler ADC 14.1",
+      "NetScaler Gateway 14.1",
+      "NetScaler ADC 13.1",
+      "NetScaler Gateway 13.1",
+      "NetScaler ADC 13.1-FIPS/NDcPP",
+      "NetScaler ADC 12.1-FIPS/NDcPP"
     ]
   },
   {
-    "cve_id": "CVE-2025-54782",
-    "title": "NestJS DevTools 存在严重RCE漏洞（CVE-2025-54782）",
-    "title_translated": "NestJS DevTools has a critical RCE vulnerability (CVE-2025-54782).",
-    "summary": "A critical vulnerability in the @nestjs/devtools-integration package allows attackers to execute arbitrary code on a developer's local machine by tricking them into visiting a malicious website. The issue arises from improper sandbox isolation and the exposure of dangerous endpoints that accept and execute JSON input.",
-    "severity": "Critical",
-    "cvss_score": 9.4,
-    "published_date": "2025-08-04T17:19:45",
+    "cve_id": "CVE-2025-48384",
+    "title": "CISA紧急警告：Git代码执行漏洞正遭黑客利用",
+    "title_translated": "CISA issues urgent warning: Hackers exploiting Git code execution vulnerability.",
+    "summary": "A remote code execution vulnerability in Git allows attackers to exploit mishandled carriage returns in configuration files, leading to arbitrary code execution when victims clone repositories. This high-risk vulnerability has been added to CISA's KEV catalog, requiring federal agencies to patch it by September 15.",
+    "severity": "High",
+    "cvss_score": 8.0,
+    "published_date": "2025-08-27T17:35:15",
     "original_language": "zh",
     "source": "Anquanke",
-    "url": "https://www.anquanke.com/post/id/310849",
-    "intrigue": 9.0,
+    "url": "https://www.anquanke.com/post/id/311567",
+    "intrigue": 8.0,
     "affected_products": [
-      "@nestjs/devtools-integration"
+      "Git",
+      "GitHub",
+      "GitLab",
+      "Bitbucket"
+    ]
+  },
+  {
+    "cve_id": "CVE-2024-8069",
+    "title": "Citrix Session Recording Deserialization of Untrusted Data Vulnerability",
+    "title_translated": "Citrix Session Recording Deserialization of Untrusted Data Vulnerability",
+    "summary": "CVE-2024-8069 is a deserialization of untrusted data vulnerability in Citrix Session Recording that allows limited remote code execution with NetworkService Account privileges. An attacker must be an authenticated user on the same intranet as the session recording server to exploit this vulnerability. Mitigations are advised per vendor instructions.",
+    "severity": "High",
+    "cvss_score": 7.5,
+    "published_date": "2025-08-25T00:00:00",
+    "original_language": "en",
+    "source": "CISA KEV",
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-8069",
+    "intrigue": 8.0,
+    "affected_products": [
+      "Citrix Session Recording"
+    ]
+  },
+  {
+    "cve_id": "CVE-2025-43300",
+    "title": "Apple iOS, iPadOS, and macOS Out-of-Bounds Write Vulnerability",
+    "title_translated": "Apple iOS, iPadOS, and macOS Out-of-Bounds Write Vulnerability",
+    "summary": "Apple iOS, iPadOS, and macOS have an out-of-bounds write vulnerability in the Image I/O framework that could allow attackers to exploit the system. Users are advised to apply mitigations as per vendor instructions or discontinue use if mitigations are unavailable.",
+    "severity": "High",
+    "cvss_score": 7.5,
+    "published_date": "2025-08-21T00:00:00",
+    "original_language": "en",
+    "source": "CISA KEV",
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-43300",
+    "intrigue": 8.0,
+    "affected_products": [
+      "iOS",
+      "iPadOS",
+      "macOS"
     ]
   }
 ]

@@ -19,12 +19,10 @@ vulners==1.4.0
 
 # Translation handled by OpenAI
 
-# Task queue
-celery==5.3.4
-redis==4.4.4
-
 # Database (for Supabase PostgreSQL)
 psycopg2-binary>=2.9.5
+
+# Email notifications (smtplib is built into Python)
 
 # Utilities
 python-dotenv==1.1.1

@@ -380,49 +380,116 @@ async def root():
 async def health_check():
     return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 
-@app.get("/test-celery")
-async def test_celery():
-    """Test endpoint to manually trigger Celery tasks"""
+@app.post("/test-cron")
+async def test_cron():
+    """Test endpoint to manually trigger cron job (testing mode)"""
     try:
-        from celery.celery_tasks import weekly_intelligence_task
+        from cron_scheduler import SentinelCronScheduler
         
-        # Trigger the task
-        result = weekly_intelligence_task.delay()
+        # Create scheduler in testing mode
+        scheduler = SentinelCronScheduler("testing")
+        
+        # Run the scheduler
+        result = scheduler.run_scheduled_intelligence_gathering()
         
         return {
-            "success": True,
-            "task_id": result.id,
-            "message": "Celery task triggered successfully",
-            "status": "Check logs for task execution"
+            "success": result.get("success", False),
+            "session_id": result.get("session_id", "unknown"),
+            "schedule_type": "testing",
+            "results": result.get("results", {}),
+            "message": "Cron job test executed successfully" if result.get("success") else "Cron job test failed",
+            "error": result.get("error", None)
         }
     except Exception as e:
         return {
             "success": False,
             "error": str(e),
-            "message": "Failed to trigger Celery task"
+            "message": "Failed to trigger cron job test"
         }
 
-@app.get("/celery-status")
-async def celery_status():
-    """Check Celery worker and beat status"""
+@app.post("/trigger-production-cron")
+async def trigger_production_cron():
+    """Manual trigger endpoint for production cron job"""
     try:
-        from celery.celery_tasks import celery_app
+        from cron_scheduler import SentinelCronScheduler
         
-        # Check if workers are available
-        inspect = celery_app.control.inspect()
-        active_workers = inspect.active()
+        # Create scheduler in production mode
+        scheduler = SentinelCronScheduler("production")
+        
+        # Run the scheduler
+        result = scheduler.run_scheduled_intelligence_gathering()
         
         return {
-            "success": True,
-            "active_workers": active_workers,
-            "worker_count": len(active_workers) if active_workers else 0,
-            "message": "Celery status check completed"
+            "success": result.get("success", False),
+            "session_id": result.get("session_id", "unknown"),
+            "schedule_type": "production",
+            "results": result.get("results", {}),
+            "message": "Production cron job executed successfully" if result.get("success") else "Production cron job failed",
+            "error": result.get("error", None)
         }
     except Exception as e:
         return {
             "success": False,
             "error": str(e),
-            "message": "Failed to check Celery status"
+            "message": "Failed to trigger production cron job"
+        }
+
+@app.get("/cron-status")
+async def cron_status():
+    """Check cron job status and recent executions"""
+    try:
+        # Read log files to get recent execution info
+        log_files = [
+            "scheduled_intelligence_testing.log",
+            "scheduled_intelligence_production.log",
+            "cron_scheduler.log"
+        ]
+        
+        status_info = {
+            "testing_log": None,
+            "production_log": None,
+            "scheduler_log": None,
+            "last_testing_execution": None,
+            "last_production_execution": None
+        }
+        
+        for log_file in log_files:
+            if os.path.exists(log_file):
+                try:
+                    with open(log_file, "r") as f:
+                        lines = f.readlines()
+                        if lines:
+                            # Get last line (most recent execution)
+                            last_line = lines[-1].strip()
+                            try:
+                                log_entry = json.loads(last_line)
+                                if "testing" in log_file:
+                                    status_info["testing_log"] = log_entry
+                                    status_info["last_testing_execution"] = log_entry.get("timestamp")
+                                elif "production" in log_file:
+                                    status_info["production_log"] = log_entry
+                                    status_info["last_production_execution"] = log_entry.get("timestamp")
+                                else:
+                                    status_info["scheduler_log"] = log_entry
+                            except:
+                                pass
+                except Exception as e:
+                    print(f"Error reading log file {log_file}: {e}")
+        
+        return {
+            "success": True,
+            "cron_status": "active",
+            "schedule_type": os.getenv('CRON_SCHEDULE_TYPE', 'production'),
+            "last_testing_execution": status_info["last_testing_execution"],
+            "last_production_execution": status_info["last_production_execution"],
+            "next_scheduled": "Every 30 minutes (testing) or 3 days (production) via Render Cron Job",
+            "log_files_exist": [f for f in log_files if os.path.exists(f)]
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
         }
 
 @app.get("/cache")

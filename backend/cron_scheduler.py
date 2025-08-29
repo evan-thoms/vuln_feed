@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Cron Job Scheduler for Sentinel Intelligence Gathering
-Runs every 3 days to collect CVEs and news automatically
+Supports both 30-minute testing and 3-day production schedules
 """
 
 import os
@@ -30,36 +30,50 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 class SentinelCronScheduler:
-    def __init__(self):
-        """Initialize the cron scheduler"""
+    def __init__(self, schedule_type: str = "production"):
+        """
+        Initialize the cron scheduler
+        schedule_type: "testing" (30 min) or "production" (3 days)
+        """
         self.agent = IntelligentCyberAgent()
         self.session_id = f"cron_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        self.schedule_type = schedule_type
+        
+        # Configuration based on schedule type
+        if schedule_type == "testing":
+            self.config = {
+                'content_type': 'both',
+                'severity': ['Critical', 'High'],  # Focus on high priority for testing
+                'days_back': 1,  # Last 24 hours
+                'max_results': 15,  # Smaller batch for frequent runs
+                'output_format': 'json'
+            }
+            self.schedule_name = "30-minute testing"
+        else:  # production
+            self.config = {
+                'content_type': 'both',
+                'severity': ['Critical', 'High', 'Medium', 'Low'],  # All severities
+                'days_back': 3,  # Last 3 days
+                'max_results': 30,  # Larger batch for less frequent runs
+                'output_format': 'json'
+            }
+            self.schedule_name = "3-day production"
         
     def run_scheduled_intelligence_gathering(self) -> Dict[str, Any]:
         """
-        Main cron job function - runs every 3 days
-        Collects 30 results (CVEs + news) from last 3 days
+        Main cron job function - runs based on schedule type
         """
-        logger.info(f"🔄 Starting scheduled intelligence gathering - Session: {self.session_id}")
+        logger.info(f"🔄 Starting {self.schedule_name} intelligence gathering - Session: {self.session_id}")
         
         try:
             # Initialize database
             init_db()
             
-            # Set parameters for 3-day collection
-            params = {
-                'content_type': 'both',  # Both CVEs and news
-                'severity': ['Critical', 'High', 'Medium', 'Low'],  # All severities
-                'days_back': 3,  # Last 3 days
-                'max_results': 30,  # 30 total results
-                'output_format': 'json'
-            }
-            
-            logger.info(f"📊 Cron job parameters: {params}")
+            logger.info(f"📊 Cron job parameters: {self.config}")
             
             # Execute intelligence gathering
             start_time = datetime.now()
-            result = self.agent.query(params)
+            result = self.agent.query(self.config)
             end_time = datetime.now()
             
             # Calculate statistics
@@ -72,9 +86,10 @@ class SentinelCronScheduler:
             log_entry = {
                 "timestamp": datetime.now().isoformat(),
                 "session_id": self.session_id,
+                "schedule_type": self.schedule_type,
                 "task": "scheduled_intelligence_gathering",
                 "success": result.get("success", False),
-                "parameters": params,
+                "parameters": self.config,
                 "results": {
                     "cves_found": cves_found,
                     "news_found": news_found,
@@ -87,39 +102,45 @@ class SentinelCronScheduler:
             # Save to log file
             self._save_log_entry(log_entry)
             
-            # Send email notification
-            self._send_email_notification(log_entry)
+            # Send email notification (only for production or if explicitly enabled)
+            if self.schedule_type == "production" or os.getenv('SEND_TEST_NOTIFICATIONS', 'false').lower() == 'true':
+                self._send_email_notification(log_entry)
             
-            logger.info(f"✅ Scheduled intelligence gathering completed: {cves_found} CVEs, {news_found} news items")
+            logger.info(f"✅ {self.schedule_name} intelligence gathering completed: {cves_found} CVEs, {news_found} news items")
             
             return {
                 "success": True,
                 "session_id": self.session_id,
+                "schedule_type": self.schedule_type,
                 "results": log_entry
             }
             
         except Exception as e:
-            error_msg = f"❌ Scheduled intelligence gathering failed: {e}"
+            error_msg = f"❌ {self.schedule_name} intelligence gathering failed: {e}"
             logger.error(error_msg)
             
             # Log error
             error_log = {
                 "timestamp": datetime.now().isoformat(),
                 "session_id": self.session_id,
+                "schedule_type": self.schedule_type,
                 "task": "scheduled_intelligence_gathering",
                 "success": False,
                 "error": str(e)
             }
             
             self._save_log_entry(error_log)
-            self._send_error_notification(error_log)
+            
+            # Send error notification
+            if self.schedule_type == "production" or os.getenv('SEND_TEST_NOTIFICATIONS', 'false').lower() == 'true':
+                self._send_error_notification(error_log)
             
             return {"success": False, "error": str(e)}
     
     def _save_log_entry(self, log_entry: Dict[str, Any]) -> None:
         """Save log entry to file"""
         try:
-            log_file = "scheduled_intelligence.log"
+            log_file = f"scheduled_intelligence_{self.schedule_type}.log"
             with open(log_file, "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
         except Exception as e:
@@ -142,7 +163,8 @@ class SentinelCronScheduler:
                 email_address=email_address,
                 session_id=log_entry['session_id'],
                 results=log_entry['results'],
-                success=True
+                success=True,
+                schedule_type=self.schedule_type
             )
             
             logger.info(f"📧 Email notification sent to {email_address}")
@@ -162,7 +184,8 @@ class SentinelCronScheduler:
             send_error_notification(
                 email_address=email_address,
                 session_id=error_log['session_id'],
-                error=error_log['error']
+                error=error_log['error'],
+                schedule_type=self.schedule_type
             )
             
             logger.info(f"📧 Error notification sent to {email_address}")
@@ -172,7 +195,14 @@ class SentinelCronScheduler:
 
 def main():
     """Main entry point for cron job"""
-    scheduler = SentinelCronScheduler()
+    # Determine schedule type from environment variable
+    schedule_type = os.getenv('CRON_SCHEDULE_TYPE', 'production')
+    
+    if schedule_type not in ['testing', 'production']:
+        logger.error(f"Invalid schedule type: {schedule_type}. Must be 'testing' or 'production'")
+        sys.exit(1)
+    
+    scheduler = SentinelCronScheduler(schedule_type)
     result = scheduler.run_scheduled_intelligence_gathering()
     
     # Exit with appropriate code

@@ -26,3 +26,4 @@ REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0') if ENABLE_CELERY 
 # Cost-optimized settings
 CACHE_TTL = 3600  # 1 hour cache
 BATCH_SIZE = 100  # Process in smaller batches
+

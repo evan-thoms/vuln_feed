@@ -1,22 +1,22 @@
 [
   {
-    "title": "SNI5GECT: учёные показали новый вектор атак на 5G без фейковых вышек",
-    "title_translated": "SNI5GECT: Scientists have demonstrated a new vector of attacks on 5G without fake towers.",
-    "summary": "Researchers have developed SNI5GECT, a framework that allows for the interception of traffic and injection of malicious packets in 5G networks without the need for a fake base station. Tests indicate a high effectiveness in message interception and injection, posing significant risks to device security.",
-    "published_date": "2025-08-19T00:00:00",
+    "title": "PromptLock стал первым вымогателем с применением технологий ИИ",
+    "title_translated": "PromptLock became the first ransomware to utilize AI technologies.",
+    "summary": "ESET has reported a new ransomware named PromptLock that utilizes artificial intelligence to generate Lua scripts for scanning, data extraction, and encryption. It employs the SPECK (128-bit) encryption algorithm and is capable of operating on both Windows and Linux systems.",
+    "published_date": "2025-08-28T00:00:00",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-08-19-111332/47034",
+    "url": "https://www.anti-malware.ru/news/2025-08-28-111332/47133",
     "intrigue": 9.0
   },
   {
-    "title": "安装量超10万的\"合法\"Chrome VPN扩展暗中截屏窃取敏感数据",
-    "title_translated": "\"Legitimate\" Chrome VPN extension with over 100,000 installations secretly takes screenshots to steal sensitive data.",
-    "summary": "The FreeVPN.One Chrome extension, masquerading as a legitimate privacy tool, has been identified as advanced spyware that captures screenshots and steals sensitive data without user consent. Despite its Google certification, the extension has a backdoor feature that allows extensive monitoring of user activities, posing a significant threat to privacy and security.",
-    "published_date": "2025-08-20T08:04:58+08:00",
-    "original_language": "zh",
-    "source": "FreeBuf",
-    "url": "https://www.freebuf.com/articles/database/445104.html",
+    "title": "Первый иск к OpenAI: родители винят ChatGPT в трагедии подростка",
+    "title_translated": "First lawsuit against OpenAI: parents blame ChatGPT for teenager's tragedy.",
+    "summary": "The lawsuit against OpenAI highlights a significant vulnerability in their AI chatbot, ChatGPT, which failed to prevent a minor from discussing suicide methods under the guise of writing a fictional story. This incident raises concerns about the effectiveness of protective mechanisms in consumer AI chatbots.",
+    "published_date": "2025-08-27T00:00:00",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-08-27-111332/47130",
     "intrigue": 9.0
   },
   {
@@ -40,13 +40,43 @@
     "intrigue": 9.0
   },
   {
-    "title": "iPhone и Android: RCS-переписки станут защищёнными в iOS 26",
-    "title_translated": "iPhone and Android: RCS messaging will become secure in iOS 26.",
-    "summary": "Apple is set to enhance security in RCS chats on iPhone by introducing end-to-end encryption, which was previously missing. The implementation will utilize the MLS protocol as part of the GSMA Universal Profile standard, improving user privacy in communications between iPhone and Android users.",
-    "published_date": "2025-08-20T00:00:00",
+    "title": "Минобороны США использует Node.js-пакет, который пишет россиянин",
+    "title_translated": "The US Department of Defense uses a Node.js package written by a Russian.",
+    "summary": "The Node.js package fast-glob, maintained by a single developer, raises security concerns due to its widespread use in thousands of projects, including US Department of Defense systems. Although it currently has no registered vulnerabilities, its high download rate and reliance on a single maintainer pose potential risks.",
+    "published_date": "2025-08-28T00:00:00",
     "original_language": "ru",
     "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-08-20-111332/47041",
+    "url": "https://www.anti-malware.ru/news/2025-08-28-111332/47135",
+    "intrigue": 8.0
+  },
+  {
+    "title": "ZIP, RAR и 7Z: брешь Zip Slip снова бьёт по популярным форматам",
+    "title_translated": "ZIP, RAR, and 7Z: Zip Slip vulnerability strikes popular formats again.",
+    "summary": "The Zip Slip vulnerability allows attackers to exploit path traversal issues in archive utilities, enabling them to write files outside permitted directories. This can lead to sensitive files being compromised, resulting in potential security breaches on affected systems.",
+    "published_date": "2025-08-28T00:00:00",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-08-28-111332/47134",
+    "intrigue": 8.0
+  },
+  {
+    "title": "Новая версия Android-трояна SpyNote маскируется под Google Play",
+    "title_translated": "The new version of the Android trojan SpyNote is disguised as Google Play.",
+    "summary": "Cybercriminals are distributing the Android Trojan SpyNote by disguising malicious APK files as legitimate apps on fake Google Play pages. Users are tricked into installing these harmful files, which can lead to significant security breaches.",
+    "published_date": "2025-08-27T00:00:00",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-08-27-111332/47125",
+    "intrigue": 8.0
+  },
+  {
+    "title": "研究人员揭露针对100多款戴尔笔记本中ControlVault3固件的ReVault攻击",
+    "title_translated": "Researchers reveal ReVault attack targeting ControlVault3 firmware in over 100 Dell laptops.",
+    "summary": "Multiple security vulnerabilities in Dell ControlVault3 firmware allow attackers to bypass Windows login authentication, extract encryption keys, and implant undetectable malware. These vulnerabilities, named ReVault, affect over 100 Dell laptops with Broadcom BCM5820X series chips, posing significant risks to high-security environments.",
+    "published_date": "2025-08-11T17:23:53",
+    "original_language": "zh",
+    "source": "Anquanke",
+    "url": "https://www.anquanke.com/post/id/311070",
     "intrigue": 8.0
   }
 ]

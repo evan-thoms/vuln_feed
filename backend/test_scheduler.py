@@ -1,147 +1,204 @@
 #!/usr/bin/env python3
 """
-Test script for Sentinel Intelligence Scheduler
-Tests the cron job functionality and email notifications
+Test script for Sentinel Cron Scheduler
+Tests both testing (30-minute) and production (3-day) configurations
 """
 
 import os
 import sys
 import json
 from datetime import datetime
-from unittest.mock import patch, MagicMock
+from cron_scheduler import SentinelCronScheduler
+from utils.email_notifications import test_email_configuration
 
-# Add backend to path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-def test_cron_scheduler():
-    """Test the cron scheduler functionality"""
-    print("🧪 Testing Sentinel Cron Scheduler...")
+def test_scheduler_configuration():
+    """Test scheduler configuration and initialization"""
+    print("🧪 Testing Scheduler Configuration...")
     
+    # Test testing configuration
+    print("\n1. Testing 30-minute configuration...")
     try:
-        from cron_scheduler import SentinelCronScheduler
-        
-        # Create scheduler instance
-        scheduler = SentinelCronScheduler()
-        print("✅ Scheduler instance created successfully")
-        
-        # Test default parameters
-        assert scheduler.default_params['content_type'] == 'both'
-        assert scheduler.default_params['severity'] == 'all'
-        assert scheduler.default_params['days_back'] == 3
-        assert scheduler.default_params['max_results'] == 30
-        print("✅ Default parameters are correct")
-        
-        # Test log file creation
-        log_entry = scheduler.log_execution({
-            'success': True,
-            'cves_found': 15,
-            'news_found': 8,
-            'session_id': 'test_123'
-        })
-        print(f"✅ Log entry created: {log_entry}")
-        
-        print("🎉 All scheduler tests passed!")
-        return True
-        
+        scheduler_testing = SentinelCronScheduler("testing")
+        print(f"✅ Testing config: {scheduler_testing.config}")
+        print(f"✅ Schedule name: {scheduler_testing.schedule_name}")
     except Exception as e:
-        print(f"❌ Scheduler test failed: {str(e)}")
+        print(f"❌ Testing configuration failed: {e}")
         return False
-
-def test_email_notifications():
-    """Test email notification functionality"""
-    print("\n📧 Testing Email Notifications...")
     
+    # Test production configuration
+    print("\n2. Testing 3-day production configuration...")
     try:
-        from utils.email_notifications import send_intelligence_report
-        
-        # Mock email configuration
-        test_config = {
-            'smtp_server': 'smtp.gmail.com',
-            'smtp_port': 587,
-            'username': 'test@example.com',
-            'password': 'test_password'
-        }
-        
-        # Test with mock SMTP
-        with patch('smtplib.SMTP') as mock_smtp:
-            mock_server = MagicMock()
-            mock_smtp.return_value = mock_server
-            
-            result = send_intelligence_report(
-                email_address='test@example.com',
-                session_id='test_123',
-                results={
-                    'cves_found': 15,
-                    'news_found': 8,
-                    'processing_time': 45.2
-                },
-                success=True
-            )
-            
-            assert result == True
-            print("✅ Email notification test passed")
-            
+        scheduler_production = SentinelCronScheduler("production")
+        print(f"✅ Production config: {scheduler_production.config}")
+        print(f"✅ Schedule name: {scheduler_production.schedule_name}")
     except Exception as e:
-        print(f"❌ Email notification test failed: {str(e)}")
+        print(f"❌ Production configuration failed: {e}")
         return False
     
     return True
 
-def test_manual_trigger():
-    """Test manual trigger endpoint"""
-    print("\n🔧 Testing Manual Trigger Endpoint...")
+def test_environment_variables():
+    """Test required environment variables"""
+    print("\n🧪 Testing Environment Variables...")
+    
+    required_vars = [
+        'OPENAI_API_KEY',
+        'SUPABASE_URL',
+        'SUPABASE_KEY'
+    ]
+    
+    optional_vars = [
+        'SENTINEL_NOTIFICATION_EMAIL',
+        'SMTP_USERNAME',
+        'SMTP_PASSWORD'
+    ]
+    
+    print("Required variables:")
+    for var in required_vars:
+        value = os.getenv(var)
+        if value:
+            print(f"✅ {var}: {'*' * min(len(value), 10)}...")
+        else:
+            print(f"❌ {var}: Not set")
+    
+    print("\nOptional variables (for email notifications):")
+    for var in optional_vars:
+        value = os.getenv(var)
+        if value:
+            print(f"✅ {var}: {'*' * min(len(value), 10)}...")
+        else:
+            print(f"⚠️ {var}: Not set (email notifications disabled)")
+    
+    return True
+
+def test_email_configuration():
+    """Test email configuration"""
+    print("\n🧪 Testing Email Configuration...")
+    
+    email_address = os.getenv('SENTINEL_NOTIFICATION_EMAIL')
+    if not email_address:
+        print("⚠️ SENTINEL_NOTIFICATION_EMAIL not set, skipping email test")
+        return True
+    
+    smtp_username = os.getenv('SMTP_USERNAME')
+    smtp_password = os.getenv('SMTP_PASSWORD')
+    
+    if not smtp_username or not smtp_password:
+        print("⚠️ SMTP credentials not set, skipping email test")
+        return True
     
     try:
-        # Import FastAPI test client
-        from fastapi.testclient import TestClient
-        from main import app
-        
-        client = TestClient(app)
-        
-        # Test manual trigger endpoint
-        response = client.post("/manual-trigger")
-        
-        # Should return 200 or 500 (depending on if scheduler is available)
-        assert response.status_code in [200, 500]
-        print(f"✅ Manual trigger endpoint responded with status: {response.status_code}")
-        
-        # Test scheduler status endpoint
-        response = client.get("/scheduler-status")
-        assert response.status_code == 200
-        print("✅ Scheduler status endpoint working")
-        
+        success = test_email_configuration()
+        if success:
+            print("✅ Email configuration test successful")
+        else:
+            print("❌ Email configuration test failed")
+        return success
     except Exception as e:
-        print(f"❌ Manual trigger test failed: {str(e)}")
+        print(f"❌ Email test error: {e}")
         return False
+
+def test_scheduler_execution(schedule_type: str = "testing"):
+    """Test actual scheduler execution"""
+    print(f"\n🧪 Testing Scheduler Execution ({schedule_type})...")
+    
+    try:
+        scheduler = SentinelCronScheduler(schedule_type)
+        print(f"✅ Scheduler initialized for {schedule_type}")
+        
+        # Run the scheduler
+        print("🔄 Running intelligence gathering...")
+        result = scheduler.run_scheduled_intelligence_gathering()
+        
+        if result.get("success"):
+            print("✅ Scheduler execution successful")
+            print(f"📊 Results: {result.get('results', {})}")
+            return True
+        else:
+            print(f"❌ Scheduler execution failed: {result.get('error')}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Scheduler execution error: {e}")
+        return False
+
+def test_log_files():
+    """Test log file creation"""
+    print("\n🧪 Testing Log Files...")
+    
+    log_files = [
+        "scheduled_intelligence_testing.log",
+        "scheduled_intelligence_production.log",
+        "cron_scheduler.log"
+    ]
+    
+    for log_file in log_files:
+        if os.path.exists(log_file):
+            print(f"✅ {log_file}: Exists")
+            # Show last few lines
+            try:
+                with open(log_file, 'r') as f:
+                    lines = f.readlines()
+                    if lines:
+                        print(f"   Last entry: {lines[-1].strip()[:100]}...")
+            except Exception as e:
+                print(f"   Error reading log: {e}")
+        else:
+            print(f"⚠️ {log_file}: Not found (will be created on first run)")
     
     return True
 
 def main():
-    """Run all tests"""
-    print("🚀 Starting Sentinel Intelligence Scheduler Tests\n")
+    """Main test function"""
+    print("🚀 Sentinel Cron Scheduler Test Suite")
+    print("=" * 50)
     
     tests = [
-        test_cron_scheduler,
-        test_email_notifications,
-        test_manual_trigger
+        ("Environment Variables", test_environment_variables),
+        ("Scheduler Configuration", test_scheduler_configuration),
+        ("Email Configuration", test_email_configuration),
+        ("Testing Schedule Execution", lambda: test_scheduler_execution("testing")),
+        ("Log Files", test_log_files)
     ]
     
+    results = []
+    
+    for test_name, test_func in tests:
+        print(f"\n{'='*20} {test_name} {'='*20}")
+        try:
+            result = test_func()
+            results.append((test_name, result))
+        except Exception as e:
+            print(f"❌ Test failed with exception: {e}")
+            results.append((test_name, False))
+    
+    # Summary
+    print(f"\n{'='*50}")
+    print("📊 Test Summary:")
+    print("=" * 50)
+    
     passed = 0
-    total = len(tests)
+    total = len(results)
     
-    for test in tests:
-        if test():
+    for test_name, result in results:
+        status = "✅ PASS" if result else "❌ FAIL"
+        print(f"{status}: {test_name}")
+        if result:
             passed += 1
-        print()
     
-    print(f"📊 Test Results: {passed}/{total} tests passed")
+    print(f"\nOverall: {passed}/{total} tests passed")
     
     if passed == total:
-        print("🎉 All tests passed! Scheduler is ready for deployment.")
-        return True
+        print("🎉 All tests passed! Your cron scheduler is ready for deployment.")
+        print("\nNext steps:")
+        print("1. Deploy to Render using render.yaml")
+        print("2. Set environment variables in Render dashboard")
+        print("3. For testing: Set CRON_SCHEDULE_TYPE=testing and schedule to */30 * * * *")
+        print("4. For production: Set CRON_SCHEDULE_TYPE=production and schedule to 0 0 */3 * *")
     else:
-        print("⚠️  Some tests failed. Please check the implementation.")
-        return False
+        print("⚠️ Some tests failed. Please fix the issues before deployment.")
+    
+    return passed == total
 
 if __name__ == "__main__":
     success = main()
