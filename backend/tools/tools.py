@@ -655,6 +655,8 @@ def classify_intelligence(content_type: str = "both", severity: Optional[str] = 
                 print(f"⚠️ Error querying existing news: {e}")
         
         print(f"📊 Combined results: {len(cves)} CVEs, {len(news)} news items")
+        print(f"🔍 DEBUG: CVE sources - New: {len([c for c in cves if c.source in ['FreeBuf', 'Anquanke', 'Anti-Malware']])}, Database: {len([c for c in cves if c.source not in ['FreeBuf', 'Anquanke', 'Anti-Malware']])}")
+        print(f"🔍 DEBUG: News sources - New: {len([n for n in news if n.source in ['FreeBuf', 'Anquanke', 'Anti-Malware']])}, Database: {len([n for n in news if n.source not in ['FreeBuf', 'Anquanke', 'Anti-Malware']])}")
         
         # Rank and store in session (same logic as before)
         ranked_cves = sorted(
@@ -675,35 +677,47 @@ def classify_intelligence(content_type: str = "both", severity: Optional[str] = 
             final_cves = []
             final_news = ranked_news[:max_results]
         else:  # both - proper ranking across all items
-            # Create a combined list of all items with their scores
-            combined_items = []
+            # For "both" content type, ensure 50/50 split of max_results
+            half_results = max_results // 2
             
-            for cve in ranked_cves:
-                combined_items.append({
-                    'item': cve,
-                    'score': cve.cvss_score * 0.6 + cve.intrigue * 0.4,
-                    'type': 'CVE'
-                })
+            # Take top CVEs (up to half)
+            final_cves = ranked_cves[:half_results]
             
-            for news_item in ranked_news:
-                combined_items.append({
-                    'item': news_item,
-                    'score': news_item.intrigue,
-                    'type': 'News'
-                })
+            # Take top news items (up to half)
+            final_news = ranked_news[:half_results]
             
-            # Sort combined items by score (highest first)
-            combined_items.sort(key=lambda x: x['score'], reverse=True)
-            
-            # Take top items up to max_results
-            final_cves = []
-            final_news = []
-            
-            for combined_item in combined_items[:max_results]:
-                if combined_item['type'] == 'CVE':
-                    final_cves.append(combined_item['item'])
-                else:
-                    final_news.append(combined_item['item'])
+            # If we have room for more items, fill with the best remaining
+            remaining_slots = max_results - len(final_cves) - len(final_news)
+            if remaining_slots > 0:
+                # Create a combined list of remaining items
+                remaining_cves = ranked_cves[half_results:]
+                remaining_news = ranked_news[half_results:]
+                
+                combined_remaining = []
+                
+                for cve in remaining_cves:
+                    combined_remaining.append({
+                        'item': cve,
+                        'score': cve.cvss_score * 0.6 + cve.intrigue * 0.4,
+                        'type': 'CVE'
+                    })
+                
+                for news_item in remaining_news:
+                    combined_remaining.append({
+                        'item': news_item,
+                        'score': news_item.intrigue,
+                        'type': 'News'
+                    })
+                
+                # Sort remaining items by score
+                combined_remaining.sort(key=lambda x: x['score'], reverse=True)
+                
+                # Add best remaining items
+                for combined_item in combined_remaining[:remaining_slots]:
+                    if combined_item['type'] == 'CVE':
+                        final_cves.append(combined_item['item'])
+                    else:
+                        final_news.append(combined_item['item'])
         
         agent.current_session["classified_cves"] = final_cves
         agent.current_session["classified_news"] = final_news
@@ -717,6 +731,8 @@ def classify_intelligence(content_type: str = "both", severity: Optional[str] = 
         
         print(f"🎯 PARALLEL classification complete!")
         print(f"🚀 Final results: {len(final_cves)} CVEs and {len(final_news)} news items")
+        print(f"🔍 DEBUG: Final CVE sources - New: {len([c for c in final_cves if c.source in ['FreeBuf', 'Anquanke', 'Anti-Malware']])}, Database: {len([c for c in final_cves if c.source not in ['FreeBuf', 'Anquanke', 'Anti-Malware']])}")
+        print(f"🔍 DEBUG: Final News sources - New: {len([n for n in final_news if n.source in ['FreeBuf', 'Anquanke', 'Anti-Malware']])}, Database: {len([n for n in final_news if n.source not in ['FreeBuf', 'Anquanke', 'Anti-Malware']])}")
         
         # Return summary
         return json.dumps({
