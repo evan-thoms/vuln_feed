@@ -36,7 +36,16 @@ class ChineseScraper:
             # First try to fetch the RSS feed directly with requests to see what we get
             try:
                 print(f"🔍 DEBUG: Testing direct RSS fetch...")
-                r = self.session.get(feed_url, timeout=10)
+                # Use different headers to avoid 405 errors
+                headers = {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                    'Accept-Language': 'en-US,en;q=0.5',
+                    'Accept-Encoding': 'gzip, deflate',
+                    'Connection': 'keep-alive',
+                    'Upgrade-Insecure-Requests': '1',
+                }
+                r = requests.get(feed_url, headers=headers, timeout=10)
                 print(f"🔍 DEBUG: Direct RSS response status: {r.status_code}")
                 print(f"🔍 DEBUG: Direct RSS response headers: {dict(r.headers)}")
                 print(f"🔍 DEBUG: Direct RSS response content length: {len(r.text)}")

@@ -248,14 +248,14 @@ class EnglishScraperWithVulners:
         rapid7_articles = self.scrape_rapid_7()
         all_articles.extend(rapid7_articles)
         
-        # Scrape from Vulners (high CVE density)
-        vulners_articles = self.scrape_vulners_cves()
-        all_articles.extend(vulners_articles)
+        # # Scrape from Vulners (high CVE density)
+        # vulners_articles = self.scrape_vulners_cves()
+        # all_articles.extend(vulners_articles)
         
         print(f"\n📊 Total articles collected: {len(all_articles)}")
         print(f"   - CISA KEV: {len(cisa_articles)}")
         print(f"   - Rapid7: {len(rapid7_articles)}")
-        print(f"   - Vulners: {len(vulners_articles)}")
+        # print(f"   - Vulners: {len(vulners_articles)}")
         
         return all_articles
 

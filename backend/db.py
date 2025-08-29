@@ -38,7 +38,10 @@ def get_db_path():
                     test_conn = sqlite3.connect(test_path)
                     test_conn.close()
                     os.remove(test_path)  # Clean up test file
-                    print(f"✅ Using database path: {path}")
+                    # Only print this once per process to avoid spam
+                    if not hasattr(get_db_path, '_path_printed'):
+                        print(f"✅ Using SQLite database path: {path}")
+                        get_db_path._path_printed = True
                     return path
                 except (sqlite3.OperationalError, PermissionError, OSError):
                     continue
