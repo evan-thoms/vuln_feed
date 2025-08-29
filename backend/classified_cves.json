@@ -1,124 +1,107 @@
 [
   {
-    "cve_id": "CVE-2025-5245",
-    "title": "Alpine Linux: CVE-2025-5245: Improper Restriction of Operations within the Bounds of a Memory Buffer",
-    "title_translated": "Alpine Linux: CVE-2025-5245: Improper Restriction of Operations within the Bounds of a Memory Buffer",
-    "summary": "A critical vulnerability in GNU Binutils up to version 2.44 allows for memory corruption through the debug_type_samep function in objdump. Local access is required for exploitation, and a patch is recommended to mitigate the risk.",
+    "cve_id": "CVE-2025-57819",
+    "title": "FreePBX紧急披露CVSS10分零日漏洞，可致远程代码执行",
+    "title_translated": "FreePBX has urgently disclosed a CVSS 10.0 zero-day vulnerability that can lead to remote code execution.",
+    "summary": "A critical vulnerability in Sangoma FreePBX allows unauthenticated attackers to bypass login protections, manipulate databases, and achieve remote code execution. Active exploitation has been observed since August 21, 2025, affecting FreePBX 16 and 17 systems exposed to the public internet.",
     "severity": "Critical",
-    "cvss_score": 9.0,
-    "published_date": "2025-08-28T19:45:15.141000+00:00",
+    "cvss_score": 10.0,
+    "published_date": "2025-08-29T02:16:30",
+    "original_language": "zh",
+    "source": "FreeBuf",
+    "url": "https://www.freebuf.com/articles/system/446451.html",
+    "intrigue": 9.0,
+    "affected_products": [
+      "FreePBX 16",
+      "FreePBX 17"
+    ]
+  },
+  {
+    "cve_id": "CVE-2024-52006",
+    "title": "VMware Photon OS: CVE-2024-52006",
+    "title_translated": "VMware Photon OS: CVE-2024-52006",
+    "summary": "A vulnerability in Git affects credential helpers that misinterpret Carriage Return characters, leading to incomplete protections against previous CVEs. Users are strongly advised to upgrade to the latest versions to mitigate this critical risk.",
+    "severity": "Critical",
+    "cvss_score": 10.0,
+    "published_date": "2025-08-26T19:18:34.470000",
     "original_language": "en",
     "source": "Rapid7",
-    "url": "https://security.alpinelinux.org/vuln/CVE-2025-5245",
+    "url": "https://www.rapid7.com/db/vulnerabilities/vmware-photon_os-cve-2024-52006/",
     "intrigue": 8.0,
     "affected_products": [
-      "GNU Binutils"
+      "VMware Photon OS",
+      "Git"
     ]
   },
   {
-    "cve_id": "CVE-2025-5244",
-    "title": "Alpine Linux: CVE-2025-5244: Improper Restriction of Operations within the Bounds of a Memory Buffer",
-    "title_translated": "Alpine Linux: CVE-2025-5244: Improper Restriction of Operations within the Bounds of a Memory Buffer",
-    "summary": "A critical vulnerability in GNU Binutils up to version 2.44 allows for improper restriction of operations within the bounds of a memory buffer, leading to memory corruption. The exploit requires local access and has been publicly disclosed, making it a significant risk. Upgrading to version 2.45 is recommended to mitigate this issue.",
+    "cve_id": "CVE-2025-36157",
+    "title": "IBM发布紧急补丁修复Jazz Team Server高危漏洞（CVE-2025-36157）",
+    "title_translated": "IBM has released an emergency patch to fix a critical vulnerability (CVE-2025-36157) in Jazz Team Server.",
+    "summary": "IBM's Jazz Team Server has a critical vulnerability that allows unauthorized remote attackers to update server configuration files, potentially leading to unauthorized operations and denial of service. This affects multiple products within the IBM Engineering Lifecycle Management suite.",
     "severity": "Critical",
-    "cvss_score": 9.0,
-    "published_date": "2025-08-28T19:45:15.133000+00:00",
-    "original_language": "en",
-    "source": "Rapid7",
-    "url": "https://security.alpinelinux.org/vuln/CVE-2025-5244",
-    "intrigue": 8.0,
-    "affected_products": [
-      "GNU Binutils"
-    ]
-  },
-  {
-    "cve_id": "CVE-2025-9478",
-    "title": "谷歌Chrome紧急发布ANGLE高危补丁，人工智能安全研究员Big Sleep发现零日漏洞（CVE-2025-9478）",
-    "title_translated": "Google Chrome has urgently released a high-risk patch for ANGLE. AI security researcher Big Sleep discovered a zero-day vulnerability (CVE-2025-9478).",
-    "summary": "Google has released a critical security update for Chrome to address a vulnerability in the ANGLE graphics engine, discovered by its AI agent Big Sleep. This vulnerability poses a significant risk as it could be exploited by attackers, highlighting the importance of proactive AI-driven security measures.",
-    "severity": "Critical",
-    "cvss_score": 9.0,
-    "published_date": "2025-08-27T17:51:48",
+    "cvss_score": 9.8,
+    "published_date": "2025-08-25T17:48:18",
     "original_language": "zh",
     "source": "Anquanke",
-    "url": "https://www.anquanke.com/post/id/311513",
+    "url": "https://www.anquanke.com/post/id/311445",
     "intrigue": 8.0,
     "affected_products": [
-      "Google Chrome"
+      "IBM Engineering Lifecycle Management – Jazz Foundation",
+      "IBM Engineering Workflow Management",
+      "IBM Engineering Test Management",
+      "IBM Engineering Requirements Management DOORS"
     ]
   },
   {
-    "cve_id": "CVE-2025-7775",
-    "title": "Citrix NetScaler曝零日漏洞（CVE-2023-6548）黑客正利用RCE漏洞发动攻击",
-    "title_translated": "Citrix NetScaler has a zero-day vulnerability (CVE-2023-6548) being exploited by hackers to launch attacks using Remote Code Execution (RCE).",
-    "summary": "Multiple high-risk vulnerabilities in NetScaler ADC and NetScaler Gateway could lead to remote code execution and denial of service attacks. CVE-2025-7775 is actively exploited, prompting immediate upgrades for affected versions. Secure Private Access deployments are also impacted.",
+    "cve_id": "CVE-2025-9288",
+    "title": "CVE-2025-9288安全警报：热门JS库曝关键漏洞 全球网络安全受严重威胁",
+    "title_translated": "CVE-2025-9288 Security Alert: Critical vulnerability in popular JS library poses a serious threat to global cybersecurity.",
+    "summary": "The sha.js encryption library has a critical vulnerability due to missing input type checks, allowing attackers to exploit hash state rollbacks and convert tagged hashes to untagged hashes. This flaw can lead to significant data integrity issues and potential exploitation through crafted malicious inputs.",
     "severity": "Critical",
-    "cvss_score": 9.0,
-    "published_date": "2025-08-27T16:40:24",
+    "cvss_score": 9.1,
+    "published_date": "2025-08-22T17:14:59",
     "original_language": "zh",
     "source": "Anquanke",
-    "url": "https://www.anquanke.com/post/id/311559",
-    "intrigue": 8.0,
+    "url": "https://www.anquanke.com/post/id/311424",
+    "intrigue": 9.0,
     "affected_products": [
-      "NetScaler ADC 14.1",
-      "NetScaler Gateway 14.1",
-      "NetScaler ADC 13.1",
-      "NetScaler Gateway 13.1",
-      "NetScaler ADC 13.1-FIPS/NDcPP",
-      "NetScaler ADC 12.1-FIPS/NDcPP"
-    ]
-  },
-  {
-    "cve_id": "CVE-2025-48384",
-    "title": "CISA紧急警告：Git代码执行漏洞正遭黑客利用",
-    "title_translated": "CISA issues urgent warning: Hackers exploiting Git code execution vulnerability.",
-    "summary": "A remote code execution vulnerability in Git allows attackers to exploit mishandled carriage returns in configuration files, leading to arbitrary code execution when victims clone repositories. This high-risk vulnerability has been added to CISA's KEV catalog, requiring federal agencies to patch it by September 15.",
-    "severity": "High",
-    "cvss_score": 8.0,
-    "published_date": "2025-08-27T17:35:15",
-    "original_language": "zh",
-    "source": "Anquanke",
-    "url": "https://www.anquanke.com/post/id/311567",
-    "intrigue": 8.0,
-    "affected_products": [
-      "Git",
-      "GitHub",
-      "GitLab",
-      "Bitbucket"
-    ]
-  },
-  {
-    "cve_id": "CVE-2024-8069",
-    "title": "Citrix Session Recording Deserialization of Untrusted Data Vulnerability",
-    "title_translated": "Citrix Session Recording Deserialization of Untrusted Data Vulnerability",
-    "summary": "CVE-2024-8069 is a deserialization of untrusted data vulnerability in Citrix Session Recording that allows limited remote code execution with NetworkService Account privileges. An attacker must be an authenticated user on the same intranet as the session recording server to exploit this vulnerability. Mitigations are advised per vendor instructions.",
-    "severity": "High",
-    "cvss_score": 7.5,
-    "published_date": "2025-08-25T00:00:00",
-    "original_language": "en",
-    "source": "CISA KEV",
-    "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-8069",
-    "intrigue": 8.0,
-    "affected_products": [
-      "Citrix Session Recording"
+      "sha.js",
+      "Node.js",
+      "browser applications"
     ]
   },
   {
     "cve_id": "CVE-2025-43300",
-    "title": "Apple iOS, iPadOS, and macOS Out-of-Bounds Write Vulnerability",
-    "title_translated": "Apple iOS, iPadOS, and macOS Out-of-Bounds Write Vulnerability",
-    "summary": "Apple iOS, iPadOS, and macOS have an out-of-bounds write vulnerability in the Image I/O framework that could allow attackers to exploit the system. Users are advised to apply mitigations as per vendor instructions or discontinue use if mitigations are unavailable.",
-    "severity": "High",
-    "cvss_score": 7.5,
-    "published_date": "2025-08-21T00:00:00",
-    "original_language": "en",
-    "source": "CISA KEV",
-    "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-43300",
-    "intrigue": 8.0,
+    "title": "CISA紧急警报：苹果iOS/iPadOS/macOS零日漏洞遭主动利用 数百万设备面临威胁",
+    "title_translated": "CISA emergency alert: Apple iOS/iPadOS/macOS zero-day vulnerability actively exploited, posing a threat to millions of devices.",
+    "summary": "A critical zero-day vulnerability in Apple's Image I/O framework allows for code execution through malicious images, affecting iOS, iPadOS, and macOS systems. Attackers can exploit this buffer overflow flaw to execute arbitrary code, leading to potential system crashes or privilege escalation. Immediate action is required to install security updates.",
+    "severity": "Critical",
+    "cvss_score": 9.0,
+    "published_date": "2025-08-25T17:50:02",
+    "original_language": "zh",
+    "source": "Anquanke",
+    "url": "https://www.anquanke.com/post/id/311464",
+    "intrigue": 9.0,
     "affected_products": [
       "iOS",
       "iPadOS",
       "macOS"
+    ]
+  },
+  {
+    "cve_id": "CVE-2025-55746",
+    "title": "CVE-2025-55746漏洞预警：Directus高危漏洞曝出 未授权文件上传可致服务器沦陷",
+    "title_translated": "CVE-2025-55746 Vulnerability Alert: High-risk vulnerability in Directus exposed, unauthorized file upload could lead to server compromise.",
+    "summary": "The Directus project has disclosed a critical vulnerability that allows unauthenticated attackers to upload or modify files on affected servers due to a flaw in the file handling route. Attackers can exploit this vulnerability to bypass security mechanisms and upload malicious files, posing a significant risk to earlier versions of the software.",
+    "severity": "Critical",
+    "cvss_score": 9.3,
+    "published_date": "2025-08-22T17:15:42",
+    "original_language": "zh",
+    "source": "Anquanke",
+    "url": "https://www.anquanke.com/post/id/311421",
+    "intrigue": 8.0,
+    "affected_products": [
+      "Directus"
     ]
   }
 ]

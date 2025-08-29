@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Cron Job Scheduler for Sentinel Intelligence Gathering
-Supports both 30-minute testing and 3-day production schedules
+Designed for Render cron service deployment
 """
 
 import os
@@ -18,13 +18,12 @@ from agent import IntelligentCyberAgent
 from db import init_db, get_data_statistics
 from models import QueryParams
 
-# Configure logging
+# Configure logging for Render
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('cron_scheduler.log'),
-        logging.StreamHandler()
+        logging.StreamHandler()  # Render captures stdout/stderr
     ]
 )
 logger = logging.getLogger(__name__)
@@ -33,10 +32,10 @@ class SentinelCronScheduler:
     def __init__(self, schedule_type: str = "production"):
         """
         Initialize the cron scheduler
-        schedule_type: "testing" (30 min) or "production" (3 days)
+        schedule_type: "testing" (30 min) or "production" (6 hours)
         """
         self.agent = IntelligentCyberAgent()
-        self.session_id = f"cron_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        self.session_id = f"render_cron_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         self.schedule_type = schedule_type
         
         # Configuration based on schedule type
@@ -57,13 +56,16 @@ class SentinelCronScheduler:
                 'max_results': 30,  # Larger batch for less frequent runs
                 'output_format': 'json'
             }
-            self.schedule_name = "3-day production"
+            self.schedule_name = "6-hour production"
         
     def run_scheduled_intelligence_gathering(self) -> Dict[str, Any]:
         """
         Main cron job function - runs based on schedule type
         """
         logger.info(f"🔄 Starting {self.schedule_name} intelligence gathering - Session: {self.session_id}")
+        logger.info(f"📁 Working directory: {os.getcwd()}")
+        logger.info(f"🐍 Python executable: {sys.executable}")
+        logger.info(f"🌐 Render environment: {os.getenv('RENDER', 'false')}")
         
         try:
             # Initialize database
@@ -107,6 +109,7 @@ class SentinelCronScheduler:
                 self._send_email_notification(log_entry)
             
             logger.info(f"✅ {self.schedule_name} intelligence gathering completed: {cves_found} CVEs, {news_found} news items")
+            logger.info(f"⏱️ Execution time: {execution_time:.2f} seconds")
             
             return {
                 "success": True,
@@ -118,6 +121,8 @@ class SentinelCronScheduler:
         except Exception as e:
             error_msg = f"❌ {self.schedule_name} intelligence gathering failed: {e}"
             logger.error(error_msg)
+            import traceback
+            logger.error(f"Full traceback: {traceback.format_exc()}")
             
             # Log error
             error_log = {
@@ -126,7 +131,8 @@ class SentinelCronScheduler:
                 "schedule_type": self.schedule_type,
                 "task": "scheduled_intelligence_gathering",
                 "success": False,
-                "error": str(e)
+                "error": str(e),
+                "traceback": traceback.format_exc()
             }
             
             self._save_log_entry(error_log)
@@ -143,6 +149,7 @@ class SentinelCronScheduler:
             log_file = f"scheduled_intelligence_{self.schedule_type}.log"
             with open(log_file, "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
+            logger.info(f"📝 Log saved to {log_file}")
         except Exception as e:
             logger.error(f"Failed to save log entry: {e}")
     
@@ -195,8 +202,12 @@ class SentinelCronScheduler:
 
 def main():
     """Main entry point for cron job"""
-    # Determine schedule type from environment variable
+    # For Render, use environment variable to determine schedule type
+    # This allows different cron jobs for different schedules
     schedule_type = os.getenv('CRON_SCHEDULE_TYPE', 'production')
+    
+    logger.info(f"🚀 Starting Render cron job with schedule type: {schedule_type}")
+    logger.info(f"📅 Current time: {datetime.now()}")
     
     if schedule_type not in ['testing', 'production']:
         logger.error(f"Invalid schedule type: {schedule_type}. Must be 'testing' or 'production'")
@@ -207,8 +218,10 @@ def main():
     
     # Exit with appropriate code
     if result.get("success"):
+        logger.info("✅ Cron job completed successfully")
         sys.exit(0)
     else:
+        logger.error(f"❌ Cron job failed: {result.get('error')}")
         sys.exit(1)
 
 if __name__ == "__main__":

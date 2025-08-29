@@ -39,25 +39,15 @@ class EnglishScraperWithVulners:
             
             # Try different API methods based on vulners package version
             try:
-                search_result = self.vulners_api.find(
+                # Use requests timeout instead of signal (works on all platforms)
+                search_result = self.vulners_api.search(
                     query,
-                    limit=self.max_arts * 2,  # Get more Vulners results since they're high quality
-                    fields=[
-                        "id", "title", "description", "short_description",
-                        "type", "bulletinFamily", "cvss", "published", 
-                        "modified", "href", "cvelist", "references"
-                    ]
+                    limit=self.max_arts * 2
                 )
-            except AttributeError:
-                # Fallback for different API structure
-                try:
-                    search_result = self.vulners_api.search(
-                        query,
-                        limit=self.max_arts * 2
-                    )
-                except AttributeError:
-                    print("❌ Vulners API methods not available")
-                    return []
+                    
+            except (AttributeError, Exception) as e:
+                print(f"⚠️ Vulners API search method failed: {e}")
+                return []
             
             # Debug: Print Vulners API response
             print(f"🔍 Vulners API Debug:")
@@ -146,6 +136,8 @@ class EnglishScraperWithVulners:
             
         except Exception as e:
             print(f"❌ Error fetching from Vulners: {e}")
+            # Return empty list to prevent pipeline from hanging
+            return []
         
         return articles
     

@@ -37,7 +37,7 @@ async def send_progress_update(status: str, progress: int):
 # Import your existing functions
 from scrapers.chinese_scrape import ChineseScraper
 from scrapers.russian_scrape import RussianScraper
-from scrapers.english_scrape_with_vulners import EnglishScraperWithVulners
+# EnglishScraperWithVulners will be imported conditionally to handle Vulners API failures
 from classify import classify_article, classify_articles_parallel
 from db import (
     init_db, insert_raw_article, is_article_scraped, mark_as_processed,
@@ -385,10 +385,12 @@ def classify_intelligence(content_type: str = "both", severity: Optional[str] = 
     agent = classify_intelligence._agent_instance
     print(f"🤖 Starting PARALLEL classification...")
     
-    # Send progress update
-    import asyncio
+    # Send progress update (non-blocking)
     try:
-        asyncio.create_task(send_progress_update("Classifying threats...", 75))
+        import asyncio
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            loop.create_task(send_progress_update("Classifying threats...", 75))
     except:
         pass
     
@@ -655,6 +657,54 @@ def classify_intelligence(content_type: str = "both", severity: Optional[str] = 
                 news.append(news_item)
                 print(f"📋 Added already classified news: {data['title'][:50]}...")
         
+        # QUERY DATABASE FOR EXISTING HIGH-QUALITY ARTICLES
+        print(f"🗄️ Querying database for existing high-quality articles...")
+        
+        # Query existing CVEs from database
+        if content_type in ["cve", "both"]:
+            try:
+                existing_cves = get_cves_by_filters(
+                    severity_filter=severity_list,
+                    after_date=cutoff_date,
+                    limit=max_results * 3  # Get more existing CVEs for ranking
+                )
+                print(f"📊 Found {len(existing_cves)} existing CVEs in database")
+                
+                # Add existing CVEs to our list
+                for existing_cve in existing_cves:
+                    # Avoid duplicates by checking URL
+                    if not any(cve.url == existing_cve.url for cve in cves):
+                        cves.append(existing_cve)
+                        print(f"📋 Added existing CVE from database: {existing_cve.cve_id}")
+                    else:
+                        print(f"⚠️ Skipping duplicate CVE: {existing_cve.cve_id}")
+                        
+            except Exception as e:
+                print(f"⚠️ Error querying existing CVEs: {e}")
+        
+        # Query existing news from database
+        if content_type in ["news", "both"]:
+            try:
+                existing_news = get_news_by_filters(
+                    after_date=cutoff_date,
+                    limit=max_results * 3  # Get more existing news for ranking
+                )
+                print(f"📊 Found {len(existing_news)} existing news items in database")
+                
+                # Add existing news to our list
+                for existing_news_item in existing_news:
+                    # Avoid duplicates by checking URL
+                    if not any(news_item.url == existing_news_item.url for news_item in news):
+                        news.append(existing_news_item)
+                        print(f"📋 Added existing news from database: {existing_news_item.title[:50]}...")
+                    else:
+                        print(f"⚠️ Skipping duplicate news: {existing_news_item.title[:50]}...")
+                        
+            except Exception as e:
+                print(f"⚠️ Error querying existing news: {e}")
+        
+        print(f"📊 Combined results: {len(cves)} CVEs, {len(news)} news items")
+        
         # Rank and store in session (same logic as before)
         ranked_cves = sorted(
             cves,
@@ -673,16 +723,36 @@ def classify_intelligence(content_type: str = "both", severity: Optional[str] = 
         elif content_type == "news":
             final_cves = []
             final_news = ranked_news[:max_results]
-        else:  # both - dynamic allocation
-            target_cves = max_results // 2
-            target_news = max_results // 2
+        else:  # both - proper ranking across all items
+            # Create a combined list of all items with their scores
+            combined_items = []
             
-            # Take what we can get for CVEs
-            final_cves = ranked_cves[:target_cves]
-            remaining_slots = max_results - len(final_cves)
+            for cve in ranked_cves:
+                combined_items.append({
+                    'item': cve,
+                    'score': cve.cvss_score * 0.6 + cve.intrigue * 0.4,
+                    'type': 'CVE'
+                })
             
-            # Fill remaining slots with news
-            final_news = ranked_news[:remaining_slots]
+            for news_item in ranked_news:
+                combined_items.append({
+                    'item': news_item,
+                    'score': news_item.intrigue,
+                    'type': 'News'
+                })
+            
+            # Sort combined items by score (highest first)
+            combined_items.sort(key=lambda x: x['score'], reverse=True)
+            
+            # Take top items up to max_results
+            final_cves = []
+            final_news = []
+            
+            for combined_item in combined_items[:max_results]:
+                if combined_item['type'] == 'CVE':
+                    final_cves.append(combined_item['item'])
+                else:
+                    final_news.append(combined_item['item'])
         
         agent.current_session["classified_cves"] = final_cves
         agent.current_session["classified_news"] = final_news
@@ -899,10 +969,12 @@ def scrape_fresh_intel(content_type: str = "both", max_results: int = None) -> s
             else:
                 max_results = 10
         
-        # Send progress update
-        import asyncio
+        # Send progress update (non-blocking)
         try:
-            asyncio.create_task(send_progress_update("Scraping intelligence sources...", 25))
+            import asyncio
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                loop.create_task(send_progress_update("Scraping intelligence sources...", 25))
         except:
             pass
         
@@ -915,8 +987,16 @@ def scrape_fresh_intel(content_type: str = "both", max_results: int = None) -> s
         scrapers = [
             ChineseScraper(target_per_source),
             RussianScraper(target_per_source),
-            EnglishScraperWithVulners(target_per_source)  # Enhanced English scraper with Vulners integration
         ]
+        
+        # Add English scraper with Vulners
+        try:
+            from scrapers.english_scrape_with_vulners import EnglishScraperWithVulners
+            scrapers.append(EnglishScraperWithVulners(target_per_source))
+            print("✅ Using Vulners scraper")
+        except Exception as e:
+            print(f"❌ Vulners scraper failed: {e}")
+            # Continue with just Chinese and Russian scrapers
         
         articles = []
         with ThreadPoolExecutor(max_workers=6) as executor:
@@ -969,9 +1049,12 @@ def scrape_fresh_intel(content_type: str = "both", max_results: int = None) -> s
             except Exception as e:
                 print(f"⚠️ Error truncating article {art.url}: {e}")
         
-        # Send translation progress update
+        # Send translation progress update (non-blocking)
         try:
-            asyncio.create_task(send_progress_update("Translating articles...", 50))
+            import asyncio
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                loop.create_task(send_progress_update("Translating articles...", 50))
         except:
             pass
         

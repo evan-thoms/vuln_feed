@@ -38,45 +38,5 @@
     "source": "Anquanke",
     "url": "https://www.anquanke.com/post/id/311088",
     "intrigue": 9.0
-  },
-  {
-    "title": "Минобороны США использует Node.js-пакет, который пишет россиянин",
-    "title_translated": "The US Department of Defense uses a Node.js package written by a Russian.",
-    "summary": "The Node.js package fast-glob, maintained by a single developer, raises security concerns due to its widespread use in thousands of projects, including US Department of Defense systems. Although it currently has no registered vulnerabilities, its high download rate and reliance on a single maintainer pose potential risks.",
-    "published_date": "2025-08-28T00:00:00",
-    "original_language": "ru",
-    "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-08-28-111332/47135",
-    "intrigue": 8.0
-  },
-  {
-    "title": "ZIP, RAR и 7Z: брешь Zip Slip снова бьёт по популярным форматам",
-    "title_translated": "ZIP, RAR, and 7Z: Zip Slip vulnerability strikes popular formats again.",
-    "summary": "The Zip Slip vulnerability allows attackers to exploit path traversal issues in archive utilities, enabling them to write files outside permitted directories. This can lead to sensitive files being compromised, resulting in potential security breaches on affected systems.",
-    "published_date": "2025-08-28T00:00:00",
-    "original_language": "ru",
-    "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-08-28-111332/47134",
-    "intrigue": 8.0
-  },
-  {
-    "title": "Новая версия Android-трояна SpyNote маскируется под Google Play",
-    "title_translated": "The new version of the Android trojan SpyNote is disguised as Google Play.",
-    "summary": "Cybercriminals are distributing the Android Trojan SpyNote by disguising malicious APK files as legitimate apps on fake Google Play pages. Users are tricked into installing these harmful files, which can lead to significant security breaches.",
-    "published_date": "2025-08-27T00:00:00",
-    "original_language": "ru",
-    "source": "Anti-Malware",
-    "url": "https://www.anti-malware.ru/news/2025-08-27-111332/47125",
-    "intrigue": 8.0
-  },
-  {
-    "title": "研究人员揭露针对100多款戴尔笔记本中ControlVault3固件的ReVault攻击",
-    "title_translated": "Researchers reveal ReVault attack targeting ControlVault3 firmware in over 100 Dell laptops.",
-    "summary": "Multiple security vulnerabilities in Dell ControlVault3 firmware allow attackers to bypass Windows login authentication, extract encryption keys, and implant undetectable malware. These vulnerabilities, named ReVault, affect over 100 Dell laptops with Broadcom BCM5820X series chips, posing significant risks to high-security environments.",
-    "published_date": "2025-08-11T17:23:53",
-    "original_language": "zh",
-    "source": "Anquanke",
-    "url": "https://www.anquanke.com/post/id/311070",
-    "intrigue": 8.0
   }
 ]

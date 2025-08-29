@@ -28,19 +28,89 @@ class ChineseScraper:
     def scrape_freebuf(self, days_back: int = 7):
         print("[FreeBuf] Starting RSS scrape...")
         feed_url = "https://www.freebuf.com/feed"
+        print(f"🔍 DEBUG: RSS feed URL: {feed_url}")
         
         try:
-            feed = feedparser.parse(feed_url)
-            print(f"Found {len(feed.entries)} articles in the RSS feed.")
+            print(f"🔍 DEBUG: Attempting to parse RSS feed...")
             
-            # If RSS feed is empty, try alternative method
-            if not feed.entries:
-                print("⚠️ RSS feed empty, trying alternative FreeBuf scraping...")
-                return self.scrape_freebuf_vuls()
+            # First try to fetch the RSS feed directly with requests to see what we get
+            try:
+                print(f"🔍 DEBUG: Testing direct RSS fetch...")
+                r = self.session.get(feed_url, timeout=10)
+                print(f"🔍 DEBUG: Direct RSS response status: {r.status_code}")
+                print(f"🔍 DEBUG: Direct RSS response headers: {dict(r.headers)}")
+                print(f"🔍 DEBUG: Direct RSS response content length: {len(r.text)}")
+                print(f"🔍 DEBUG: Direct RSS response content preview: {r.text[:200]}...")
+            except Exception as e:
+                print(f"🔍 DEBUG: Direct RSS fetch failed: {e}")
+            
+            feed = feedparser.parse(feed_url)
+            print(f"🔍 DEBUG: Feed object type: {type(feed)}")
+            print(f"🔍 DEBUG: Feed has entries attribute: {hasattr(feed, 'entries')}")
+            print(f"🔍 DEBUG: Feed entries length: {len(feed.entries) if hasattr(feed, 'entries') else 'No entries attribute'}")
+            print(f"🔍 DEBUG: Feed status: {getattr(feed, 'status', 'No status')}")
+            print(f"🔍 DEBUG: Feed bozo: {getattr(feed, 'bozo', 'No bozo')}")
+            
+            # Try RSS parsing up to 3 times with different approaches
+            attempts = 0
+            max_attempts = 3
+            
+            while attempts < max_attempts:
+                attempts += 1
+                print(f"🔍 DEBUG: RSS parsing attempt {attempts}/{max_attempts}")
+                
+                if attempts == 1:
+                    # First attempt: standard feedparser
+                    feed = feedparser.parse(feed_url)
+                elif attempts == 2:
+                    # Second attempt: with session
+                    try:
+                        r = self.session.get(feed_url, timeout=10)
+                        feed = feedparser.parse(r.content)
+                        print(f"🔍 DEBUG: Second attempt using session")
+                    except Exception as e:
+                        print(f"🔍 DEBUG: Second attempt failed: {e}")
+                        continue
+                elif attempts == 3:
+                    # Third attempt: with different user agent
+                    try:
+                        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+                        r = requests.get(feed_url, headers=headers, timeout=10)
+                        feed = feedparser.parse(r.content)
+                        print(f"🔍 DEBUG: Third attempt with different user agent")
+                    except Exception as e:
+                        print(f"🔍 DEBUG: Third attempt failed: {e}")
+                        continue
+                
+                if hasattr(feed, 'entries') and len(feed.entries) > 0:
+                    print(f"✅ RSS parsing successful on attempt {attempts}: Found {len(feed.entries)} articles")
+                    break
+                else:
+                    print(f"⚠️ RSS attempt {attempts} returned no entries")
+                    if attempts < max_attempts:
+                        time.sleep(2)  # Wait 2 seconds between attempts
+            
+            if hasattr(feed, 'entries') and len(feed.entries) > 0:
+                print(f"Found {len(feed.entries)} articles in the RSS feed.")
+            else:
+                print("⚠️ All RSS attempts failed, trying alternative FreeBuf scraping...")
+                api_results = self.scrape_freebuf_vuls()
+                if not api_results:
+                    print("❌ Both RSS and API methods failed for FreeBuf")
+                    return []
+                return api_results
                 
         except Exception as e:
-            print(f"❌ RSS feed error: {e}, trying alternative method...")
-            return self.scrape_freebuf_vuls()
+            print(f"❌ RSS feed error: {e}")
+            print(f"🔍 DEBUG: Exception type: {type(e)}")
+            import traceback
+            print(f"🔍 DEBUG: Full traceback: {traceback.format_exc()}")
+            print(f"Trying alternative method...")
+            api_results = self.scrape_freebuf_vuls()
+            if not api_results:
+                print("❌ Both RSS and API methods failed for FreeBuf")
+                return []
+            return api_results
 
         articles = []
 
@@ -53,10 +123,10 @@ class ChineseScraper:
             print(f"\nFetching: {article_url}")
             
             try:
-                headers = {"User-Agent": "Mozilla/5.0"}
+                # Use session for consistent headers and timeout
                 print(f"[INFO] Sending request to {article_url}")
                 try:
-                    res = requests.get(article_url, headers=headers, timeout=10)
+                    res = self.session.get(article_url, timeout=10)
                     res.raise_for_status()
                     print("[INFO] Response received")
                 except Exception as e:
@@ -214,14 +284,28 @@ class ChineseScraper:
             }
 
             try:
-                r = requests.get(API_URL, params=params)
+                # Use session with proper headers and timeout
+                r = self.session.get(API_URL, params=params, timeout=10)
                 r.raise_for_status()
                 data = r.json()
+            except requests.exceptions.HTTPError as e:
+                if e.response.status_code == 405:
+                    print(f"⚠️ FreeBuf API returned 405 (Method Not Allowed) - API may be blocked")
+                    print(f"   Falling back to RSS method only")
+                    return []  # Return empty list instead of breaking
+                else:
+                    print(f"Error on page {page}: {e}")
+                    break
             except Exception as e:
                 print(f"Error on page {page}: {e}")
                 break
 
-            article_items = data["data"]["data_list"]
+            try:
+                article_items = data["data"]["data_list"]
+            except (KeyError, TypeError) as e:
+                print(f"❌ Unexpected API response structure: {e}")
+                print(f"   Response data: {data}")
+                break
            
             print(f"[FreeBuf] Page {page}: Found {len(article_items)} items")
 
@@ -237,8 +321,6 @@ class ChineseScraper:
                 print("\nGathering:", post_title)
                 print("URL:", url)
                 print("Published:", published)
-
-                
 
                 article = Article(
                     id=None,
@@ -260,14 +342,19 @@ class ChineseScraper:
     def scrape_all(self):
         freeBuf = self.scrape_freebuf()
         anquanke = self.scrape_anquanke()
-        print("anquan len, ", len(anquanke), " freebuf len ", len(freeBuf))
-        freeBuf.extend(anquanke)
-        return freeBuf
+        print(f"[ChineseScraper] Anquanke: {len(anquanke)} articles, FreeBuf: {len(freeBuf)} articles")
+        
+        if len(freeBuf) == 0:
+            print("⚠️ FreeBuf returned no articles - this may indicate API blocking or rate limiting")
+        
+        all_articles = freeBuf + anquanke
+        print(f"[ChineseScraper] Total collected: {len(all_articles)} articles")
+        return all_articles
 
 
 if __name__ == "__main__":
     scraper = ChineseScraper(10)
-    articles = scraper.scrape_anquanke()
+    articles = scraper.scrape_freebuf()
     for art in articles:
         print(f"ID: {art.id}")
         # print(f"Source: {art.source}")
