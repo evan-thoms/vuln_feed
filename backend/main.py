@@ -32,9 +32,9 @@ def run_startup_migration():
     except Exception as e:
         print(f"⚠️ Migration error on startup: {e}, but continuing...")
 
-# Run migration when the app starts
-if __name__ == "__main__":
-    run_startup_migration()
+# Run migration when the app starts (disabled for Render stability)
+# if __name__ == "__main__":
+#     run_startup_migration()
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -65,16 +65,22 @@ class ConnectionManager:
 # Initialize WebSocket manager
 manager = ConnectionManager()
 
-# Initialize database and agent
+# Initialize database and agent with better error handling
 try:
     init_db()
     print("✅ Database initialized successfully")
 except Exception as e:
     print(f"⚠️ Database initialization warning: {e}")
 
-# Initialize agent and set WebSocket manager
-agent = IntelligentCyberAgent()
-set_websocket_manager(manager)
+# Initialize agent and set WebSocket manager with error handling
+try:
+    agent = IntelligentCyberAgent()
+    set_websocket_manager(manager)
+    print("✅ Agent initialized successfully")
+except Exception as e:
+    print(f"❌ Agent initialization failed: {e}")
+    # Don't crash the app, create a minimal agent
+    agent = None
 
 # Add CORS middleware
 app.add_middleware(
@@ -96,7 +102,21 @@ class SearchRequest(BaseModel):
 @app.get("/health")
 async def health_check():
     """Simple health check endpoint"""
-    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
+    try:
+        # Basic health check that doesn't depend on database or agent
+        return {
+            "status": "healthy", 
+            "timestamp": datetime.now().isoformat(),
+            "render": os.getenv('RENDER') is not None,
+            "database_url_set": bool(os.getenv('DATABASE_URL')),
+            "openai_key_set": bool(os.getenv('OPENAI_API_KEY'))
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }
 
 @app.get("/")
 async def root():

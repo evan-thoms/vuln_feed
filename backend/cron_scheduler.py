@@ -82,9 +82,14 @@ class SentinelCronScheduler:
             # Execute intelligence gathering
             start_time = datetime.now()
             
-            # Set the session ID in the agent to match the cron session
-            self.agent.new_session()
-            self.agent.current_session["session_id"] = self.session_id
+                    # Set the session ID in the agent to match the cron session EXACTLY
+            # Don't call new_session() as it creates its own timestamp
+            self.agent.current_session = {
+                "scraped_articles": [],
+                "classified_cves": [],
+                "classified_news": [],
+                "session_id": self.session_id  # Use the cron session ID
+            }
             
             result = self.agent.query(self.config)
             end_time = datetime.now()
