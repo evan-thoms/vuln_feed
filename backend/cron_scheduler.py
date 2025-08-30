@@ -127,11 +127,15 @@ class SentinelCronScheduler:
             logger.info(f"✅ {self.schedule_name} intelligence gathering completed: {cves_found} CVEs, {news_found} news items")
             logger.info(f"⏱️ Execution time: {execution_time:.2f} seconds")
             
+            # Run database cleanup after successful intelligence gathering
+            cleanup_result = self._run_database_cleanup()
+            
             return {
                 "success": True,
                 "session_id": self.session_id,
                 "schedule_type": self.schedule_type,
-                "results": log_entry
+                "results": log_entry,
+                "cleanup": cleanup_result
             }
             
         except Exception as e:
@@ -215,6 +219,37 @@ class SentinelCronScheduler:
             
         except Exception as e:
             logger.error(f"Failed to send error notification: {e}")
+    
+    def _run_database_cleanup(self) -> Dict[str, Any]:
+        """Run database cleanup to remove old data"""
+        try:
+            logger.info("🧹 Starting database cleanup...")
+            
+            # Import cleanup function
+            from db_cleanup import cleanup_old_data
+            
+            # Run cleanup (3 months old data)
+            cleanup_stats = cleanup_old_data(months_old=3, dry_run=False)
+            
+            if cleanup_stats["success"]:
+                logger.info(f"✅ Database cleanup completed: {cleanup_stats['total_deleted']} items deleted")
+                
+                # Log detailed cleanup stats
+                for table, stats in cleanup_stats["tables_cleaned"].items():
+                    logger.info(f"  📊 {table}: {stats['deleted_count']} items deleted")
+                
+                return cleanup_stats
+            else:
+                logger.error(f"❌ Database cleanup failed: {cleanup_stats['error']}")
+                return cleanup_stats
+                
+        except Exception as e:
+            logger.error(f"❌ Database cleanup error: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "total_deleted": 0
+            }
 
 def main():
     """Main entry point for cron job"""

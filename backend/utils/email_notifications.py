@@ -128,6 +128,12 @@ def _create_report_body(
     total_results = results.get('total_results', 0)
     execution_time = results.get('execution_time_seconds', 0)
     
+    # Get cleanup stats
+    cleanup_stats = results.get('cleanup', {})
+    cleanup_success = cleanup_stats.get('success', False)
+    total_deleted = cleanup_stats.get('total_deleted', 0)
+    cutoff_date = cleanup_stats.get('cutoff_date', 'N/A')
+    
     status_emoji = "✅" if success else "⚠️"
     status_text = "SUCCESS" if success else "PARTIAL SUCCESS"
     
@@ -169,6 +175,15 @@ def _create_report_body(
                 <ul>
                     <li><strong>Processing Speed:</strong> {total_results/execution_time:.1f} items/second</li>
                     <li><strong>Success Rate:</strong> {"100%" if success else "Partial"}</li>
+                </ul>
+            </div>
+            
+            <div class="stats">
+                <h3>🧹 Database Cleanup</h3>
+                <ul>
+                    <li><strong>Status:</strong> {'✅ Successful' if cleanup_success else '❌ Failed'}</li>
+                    <li><strong>Items Deleted:</strong> {total_deleted}</li>
+                    <li><strong>Cutoff Date:</strong> {cutoff_date}</li>
                 </ul>
             </div>
         </div>
