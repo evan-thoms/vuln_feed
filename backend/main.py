@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
@@ -13,28 +13,14 @@ import sys
 from agent import IntelligentCyberAgent, set_websocket_manager
 from models import QueryParams
 from db import get_data_freshness_info, init_db
+from rate_limiter import rate_limiter
 
 # Add this near the top of main.py, after the imports
 import os
 import sys
 
-# Run database migration on startup
-def run_startup_migration():
-    """Run database migration on startup"""
-    try:
-        print("🔄 Running database migration on startup...")
-        from migrate_database import migrate_database
-        success = migrate_database()
-        if success:
-            print("✅ Database migration completed successfully")
-        else:
-            print("⚠️ Database migration failed, but continuing...")
-    except Exception as e:
-        print(f"⚠️ Migration error on startup: {e}, but continuing...")
-
-# Run migration when the app starts (disabled for Render stability)
-# if __name__ == "__main__":
-#     run_startup_migration()
+# Database migration is handled automatically by init_db()
+# No separate migration needed for production
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -123,6 +109,17 @@ async def root():
     """Root endpoint"""
     return {"message": "Cybersecurity Intelligence API", "status": "online"}
 
+@app.get("/rate-limit-info")
+async def get_rate_limit_info(request: Request):
+    """Get current rate limit information for the client"""
+    client_ip = request.client.host
+    if request.headers.get("x-forwarded-for"):
+        client_ip = request.headers.get("x-forwarded-for").split(",")[0].strip()
+    elif request.headers.get("x-real-ip"):
+        client_ip = request.headers.get("x-real-ip")
+    
+    return rate_limiter.get_rate_limit_info(client_ip, "/search")
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
@@ -135,9 +132,31 @@ async def websocket_endpoint(websocket: WebSocket):
         manager.disconnect(websocket)
 
 @app.post("/search")
-async def search_intelligence(request: SearchRequest):
+async def search_intelligence(request: SearchRequest, client_request: Request):
     """Main endpoint that activates the agent with real-time progress updates"""
     start_time = datetime.now()
+    
+    # Get client IP address
+    client_ip = client_request.client.host
+    if client_request.headers.get("x-forwarded-for"):
+        client_ip = client_request.headers.get("x-forwarded-for").split(",")[0].strip()
+    elif client_request.headers.get("x-real-ip"):
+        client_ip = client_request.headers.get("x-real-ip")
+    
+    # Check rate limit
+    is_allowed, retry_after = rate_limiter.check_rate_limit(client_ip, "/search")
+    if not is_allowed:
+        raise HTTPException(
+            status_code=429,
+            detail={
+                "error": "Rate limit exceeded",
+                "retry_after_seconds": retry_after,
+                "message": f"Too many requests. Please try again in {retry_after} seconds."
+            }
+        )
+    
+    # Record the request
+    rate_limiter.record_request(client_ip, "/search")
     
     try:
         # Send initial status

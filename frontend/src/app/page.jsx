@@ -26,8 +26,11 @@ const CyberSecurityApp = () => {
   const [isWakingUp, setIsWakingUp] = useState(false);
   const [serviceReady, setServiceReady] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [isLongLoading, setIsLongLoading] = useState(false);
+  const [rateLimitInfo, setRateLimitInfo] = useState(null);
   
   const wsRef = useRef(null);
+  const loadingTimeoutRef = useRef(null);
 
   // Smart service wake-up and health check
   useEffect(() => {
@@ -98,6 +101,53 @@ const CyberSecurityApp = () => {
     
     wakeUpService();
   }, [API_BASE_URL]);
+
+  // Fetch rate limit info on component mount
+  useEffect(() => {
+    const fetchRateLimitInfo = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/rate-limit-info`);
+        if (response.ok) {
+          const data = await response.json();
+          setRateLimitInfo(data);
+        }
+      } catch (error) {
+        console.log('Could not fetch rate limit info:', error);
+      }
+    };
+    
+    fetchRateLimitInfo();
+  }, [API_BASE_URL]);
+
+  // Handle long loading timeout
+  useEffect(() => {
+    if (loading) {
+      // Clear any existing timeout
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+      
+      // Set timeout to change message after 10 seconds
+      loadingTimeoutRef.current = setTimeout(() => {
+        setIsLongLoading(true);
+        setCurrentStatus('Further scraping needed, processing multilingual sources...');
+      }, 10000);
+    } else {
+      // Clear timeout when loading stops
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+        loadingTimeoutRef.current = null;
+      }
+      setIsLongLoading(false);
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+    };
+  }, [loading]);
 
   // Prevent hydration mismatch by only rendering on client
   useEffect(() => {
@@ -201,6 +251,7 @@ const CyberSecurityApp = () => {
     setResults(null);
     setShowValidationErrors(false);
     setProgress(0);
+    setIsLongLoading(false);
     setCurrentStatus('Starting intelligence gathering...');
     
     try {
@@ -219,7 +270,13 @@ const CyberSecurityApp = () => {
       clearTimeout(timeoutId);
       
       if (!response.ok) {
-        if (response.status === 502 || response.status === 503) {
+        if (response.status === 429) {
+          // Handle rate limit error
+          const errorData = await response.json();
+          const retryAfter = errorData.detail?.retry_after_seconds || 60;
+          const minutes = Math.ceil(retryAfter / 60);
+          throw new Error(`Rate limit exceeded. You've made too many requests. Please wait ${minutes} minute${minutes > 1 ? 's' : ''} before trying again.`);
+        } else if (response.status === 502 || response.status === 503) {
           throw new Error('Service is starting up. Please wait a moment and try again.');
         }
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -227,7 +284,7 @@ const CyberSecurityApp = () => {
 
       const data = await response.json();
       setResults(data);
-      setCurrentStatus('Complete!');
+      setCurrentStatus('Success!');
       setProgress(100);
     } catch (err) {
       if (err.name === 'AbortError') {
@@ -331,6 +388,32 @@ const CyberSecurityApp = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* About Sentinel */}
+        <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700 p-6 mb-6 relative">
+          <div className="absolute top-4 right-4 group">
+            <AlertTriangle className="h-5 w-5 text-yellow-400 cursor-help" />
+            <div className="absolute top-full right-0 mt-2 w-80 bg-slate-900 border border-slate-600 rounded-lg p-3 text-sm text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none group-hover:pointer-events-auto z-[9999]">
+              <div className="flex items-start">
+                <AlertTriangle className="h-4 w-4 text-yellow-400 mr-2 mt-0.5 flex-shrink-0" />
+                <div>
+                  <strong className="text-yellow-300">Demo Notice:</strong> This is a demonstration platform. 
+                  If new scraping is triggered, it may take up to 90 seconds due to cloud microservice free tiers being used.
+                </div>
+              </div>
+              <div className="absolute bottom-full right-4 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-slate-900"></div>
+            </div>
+          </div>
+          <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
+            <Shield className="h-6 w-6 mr-2 text-cyan-400" />
+            About Sentinel
+          </h2>
+          <p className="text-slate-300">
+            Sentinel is an cybersecurity threat intelligence platform that aggregates and analyzes 
+            vulnerabilities (CVEs) and security news from multiple international sources. It provides real-time insights
+            into emerging threats, helping security professionals stay informed about the latest cybersecurity developments.
+          </p>
+        </div>
+
         {/* Search Form */}
         <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700 p-8 mb-8">
           <h2 className="text-2xl font-semibold text-white mb-6 flex items-center">
@@ -349,6 +432,38 @@ const CyberSecurityApp = () => {
                   <li key={index} className="text-red-300 text-sm">{error}</li>
                 ))}
               </ul>
+            </div>
+          )}
+
+          {/* Rate Limit Status */}
+          {rateLimitInfo && !rateLimitInfo.error && (
+            <div className="mb-6 bg-slate-700/50 border border-slate-600 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <TrendingUp className="h-5 w-5 text-blue-400 mr-2" />
+                  <span className="text-slate-300 font-medium">Rate Limit Status</span>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm text-slate-400">
+                    {rateLimitInfo.current_requests} / {rateLimitInfo.limit} requests used
+                  </div>
+                  <div className="text-xs text-slate-500">
+                    Resets in {rateLimitInfo.window_minutes} minutes
+                  </div>
+                </div>
+              </div>
+              <div className="mt-2 w-full bg-slate-600 rounded-full h-2">
+                <div 
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    rateLimitInfo.current_requests >= rateLimitInfo.limit * 0.8 
+                      ? 'bg-red-500' 
+                      : rateLimitInfo.current_requests >= rateLimitInfo.limit * 0.6 
+                        ? 'bg-yellow-500' 
+                        : 'bg-green-500'
+                  }`}
+                  style={{ width: `${Math.min(100, (rateLimitInfo.current_requests / rateLimitInfo.limit) * 100)}%` }}
+                ></div>
+              </div>
             </div>
           )}
 

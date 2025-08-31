@@ -1,0 +1,93 @@
+[
+  {
+    "cve_id": "CVE-2025-20265",
+    "title": "思科披露重大RCE漏洞（CVE-2025-20265，CVSS 10）：未认证攻击者可劫持防火墙",
+    "title_translated": "Cisco disclosed a critical RCE vulnerability (CVE-2025-20265, CVSS 10): Unauthenticated attackers can hijack firewalls.",
+    "summary": "Cisco's Secure Firewall Management Center (FMC) software has a critical remote code execution vulnerability due to insufficient input validation in the RADIUS subsystem. Unauthenticated attackers can exploit this flaw to execute arbitrary commands with high privileges on affected devices. Only specific versions with RADIUS authentication enabled are vulnerable.",
+    "severity": "Critical",
+    "cvss_score": 10.0,
+    "published_date": "2025-08-15T17:05:18",
+    "original_language": "zh",
+    "source": "Anquanke",
+    "url": "https://www.anquanke.com/post/id/311204",
+    "intrigue": 9.0,
+    "affected_products": [
+      "Cisco Secure Firewall Management Center (FMC)"
+    ]
+  },
+  {
+    "cve_id": "CVE-2025-54336",
+    "title": "CVE-2025-54336（CVSS评分9.8）：Plesk Obsidian关键漏洞使服务器面临完全被控风险",
+    "title_translated": "CVE-2025-54336 (CVSS score 9.8): Critical vulnerability in Plesk Obsidian exposes servers to full control risk.",
+    "summary": "A high-severity vulnerability in Plesk Obsidian allows attackers to bypass admin login verification due to a flawed authentication logic. By exploiting loose comparison in password validation, attackers can gain full control of the server using specific numeric strings. This affects Plesk Obsidian version 18.0.70.",
+    "severity": "Critical",
+    "cvss_score": 9.8,
+    "published_date": "2025-08-20T17:51:00",
+    "original_language": "zh",
+    "source": "Anquanke",
+    "url": "https://www.anquanke.com/post/id/311338",
+    "intrigue": 9.0,
+    "affected_products": [
+      "Plesk Obsidian 18.0.70"
+    ]
+  },
+  {
+    "cve_id": "CVE-2025-25256",
+    "title": "FortiSIEM CVE-2025-25256（CVSS 9.8）：远程未授权命令注入漏洞，野外已出现利用代码",
+    "title_translated": "FortiSIEM CVE-2025-25256 (CVSS 9.8): Remote unauthorized command injection vulnerability, exploit code already in the wild.",
+    "summary": "Fortinet has disclosed a critical remote command injection vulnerability in multiple versions of the FortiSIEM platform, allowing attackers to execute arbitrary commands without authentication. The flaw arises from improper handling of special characters, enabling remote exploitation through crafted CLI requests. Affected versions include 7.3.0-7.3.1 and 7.2.0-7.2.5, with patches available in later releases.",
+    "severity": "Critical",
+    "cvss_score": 9.8,
+    "published_date": "2025-08-13T16:32:52",
+    "original_language": "zh",
+    "source": "Anquanke",
+    "url": "https://www.anquanke.com/post/id/311142",
+    "intrigue": 9.0,
+    "affected_products": [
+      "FortiSIEM 7.3.0",
+      "FortiSIEM 7.3.1",
+      "FortiSIEM 7.2.0",
+      "FortiSIEM 7.2.1",
+      "FortiSIEM 7.2.2",
+      "FortiSIEM 7.2.3",
+      "FortiSIEM 7.2.4",
+      "FortiSIEM 7.2.5",
+      "FortiSIEM 7.1"
+    ]
+  },
+  {
+    "cve_id": "CVE-2025-7775",
+    "title": "CISA 警告：Citrix NetScaler 零日远程代码执行漏洞正遭广泛利用",
+    "title_translated": "CISA warns: Citrix NetScaler zero-day remote code execution vulnerability being widely exploited.",
+    "summary": "A critical zero-day vulnerability in Citrix NetScaler systems allows for unauthenticated remote code execution. Attackers are actively exploiting this memory overflow defect, necessitating an immediate firmware update to prevent system compromise.",
+    "severity": "Critical",
+    "cvss_score": 9.0,
+    "published_date": "2025-08-29T16:14:28",
+    "original_language": "zh",
+    "source": "Anquanke",
+    "url": "https://www.anquanke.com/post/id/311702",
+    "intrigue": 9.0,
+    "affected_products": [
+      "Citrix NetScaler Application Delivery Controller (ADC)",
+      "Citrix NetScaler Gateway",
+      "Citrix SD-WAN products"
+    ]
+  },
+  {
+    "cve_id": "CVE-2025-54309",
+    "title": "CrushFTP零日漏洞（CVE-2025-54309）遭野外利用：概念验证代码已公开",
+    "title_translated": "CrushFTP zero-day vulnerability (CVE-2025-54309) exploited in the wild: Proof-of-concept code has been disclosed.",
+    "summary": "CVE-2025-54309 is a zero-day authentication bypass vulnerability in CrushFTP, allowing remote attackers to gain full admin control through a race condition in HTTP request processing. This flaw has been actively exploited since July 2025, affecting versions 10 < 10.8.5 and 11 < 11.3.4_23 with DMZ proxy function disabled.",
+    "severity": "Critical",
+    "cvss_score": 9.0,
+    "published_date": "2025-08-29T16:11:41",
+    "original_language": "zh",
+    "source": "Anquanke",
+    "url": "https://www.anquanke.com/post/id/311709",
+    "intrigue": 9.0,
+    "affected_products": [
+      "CrushFTP 10",
+      "CrushFTP 11"
+    ]
+  }
+]

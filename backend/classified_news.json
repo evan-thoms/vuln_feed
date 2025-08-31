@@ -1,0 +1,52 @@
+[
+  {
+    "title": "Salesloft OAuth漏洞影响范围大幅增加，波及所有集成应用",
+    "title_translated": "Salesloft OAuth vulnerability has significantly expanded its impact, affecting all integrated applications.",
+    "summary": "Attackers compromised authentication tokens connected to the Salesloft Drift platform, affecting all integrated applications and accessing some Google Workspace email accounts. The incident did not breach Google Workspace systems but targeted accounts with specific configurations.",
+    "published_date": "2025-08-29T12:54:00+08:00",
+    "original_language": "zh",
+    "source": "FreeBuf",
+    "url": "https://www.freebuf.com/articles/database/446484.html",
+    "intrigue": 8.0
+  },
+  {
+    "title": "FreePBX 服务器遭零日漏洞攻击，官方紧急发布修复方案",
+    "title_translated": "FreePBX server was attacked by a zero-day vulnerability, and the official emergency fix has been released.",
+    "summary": "A zero-day vulnerability has been identified in FreePBX systems with the Admin Control Panel exposed to the internet, allowing for active exploitation. Users are advised to restrict ACP access and a patch is being developed by the Sangoma FreePBX security team.",
+    "published_date": "2025-08-29T16:00:29",
+    "original_language": "zh",
+    "source": "Anquanke",
+    "url": "https://www.anquanke.com/post/id/311725",
+    "intrigue": 8.0
+  },
+  {
+    "title": "Мошенники крадут Google и Telegram-аккаунты через поддельный Zoom",
+    "title_translated": "Scammers are stealing Google and Telegram accounts through a fake Zoom.",
+    "summary": "Cybercriminals are targeting entrepreneurs and managers through Telegram, posing as clients and leading them to a phishing site. Victims are tricked into providing their Google account credentials and confirmation codes, which attackers use to gain access to their accounts.",
+    "published_date": "2025-08-28T00:00:00",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-08-28-111332/47142",
+    "intrigue": 8.0
+  },
+  {
+    "title": "Суд оштрафовал Яндекс за отказ предоставить ФСБ доступ к умному дому Алисы",
+    "title_translated": "The court fined Yandex for refusing to provide the FSB access to the Alice smart home.",
+    "summary": "Yandex was found guilty of not complying with FSB's demands for remote access to its smart home service, leading to a fine. This case highlights the enforcement of the 'Yarovaya Law' and its implications for data privacy and corporate compliance in Russia.",
+    "published_date": "2025-08-28T00:00:00",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-08-28-111332/47145",
+    "intrigue": 6.0
+  },
+  {
+    "title": "Менее 5% промышленных предприятий в России автоматизировали IAM-процессы",
+    "title_translated": "Less than 5% of industrial enterprises in Russia have automated IAM processes.",
+    "summary": "Only 4% of industrial organizations in Russia have implemented IAM systems, increasing risks of unauthorized access and supply chain attacks. Challenges such as outdated systems and insufficient investments hinder effective implementation.",
+    "published_date": "2025-08-28T00:00:00",
+    "original_language": "ru",
+    "source": "Anti-Malware",
+    "url": "https://www.anti-malware.ru/news/2025-08-28-111332/47144",
+    "intrigue": 6.0
+  }
+]
