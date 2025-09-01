@@ -27,7 +27,6 @@ const CyberSecurityApp = () => {
   const [serviceReady, setServiceReady] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [isLongLoading, setIsLongLoading] = useState(false);
-  const [rateLimitInfo, setRateLimitInfo] = useState(null);
   
   const wsRef = useRef(null);
   const loadingTimeoutRef = useRef(null);
@@ -100,23 +99,6 @@ const CyberSecurityApp = () => {
     };
     
     wakeUpService();
-  }, [API_BASE_URL]);
-
-  // Fetch rate limit info on component mount
-  useEffect(() => {
-    const fetchRateLimitInfo = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/rate-limit-info`);
-        if (response.ok) {
-          const data = await response.json();
-          setRateLimitInfo(data);
-        }
-      } catch (error) {
-        console.log('Could not fetch rate limit info:', error);
-      }
-    };
-    
-    fetchRateLimitInfo();
   }, [API_BASE_URL]);
 
   // Handle long loading timeout
@@ -435,37 +417,7 @@ const CyberSecurityApp = () => {
             </div>
           )}
 
-          {/* Rate Limit Status */}
-          {rateLimitInfo && !rateLimitInfo.error && (
-            <div className="mb-6 bg-slate-700/50 border border-slate-600 rounded-lg p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <TrendingUp className="h-5 w-5 text-blue-400 mr-2" />
-                  <span className="text-slate-300 font-medium">Rate Limit Status</span>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm text-slate-400">
-                    {rateLimitInfo.current_requests} / {rateLimitInfo.limit} requests used
-                  </div>
-                  <div className="text-xs text-slate-500">
-                    Resets in {rateLimitInfo.window_minutes} minutes
-                  </div>
-                </div>
-              </div>
-              <div className="mt-2 w-full bg-slate-600 rounded-full h-2">
-                <div 
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    rateLimitInfo.current_requests >= rateLimitInfo.limit * 0.8 
-                      ? 'bg-red-500' 
-                      : rateLimitInfo.current_requests >= rateLimitInfo.limit * 0.6 
-                        ? 'bg-yellow-500' 
-                        : 'bg-green-500'
-                  }`}
-                  style={{ width: `${Math.min(100, (rateLimitInfo.current_requests / rateLimitInfo.limit) * 100)}%` }}
-                ></div>
-              </div>
-            </div>
-          )}
+
 
           {/* Service Status Indicator */}
           {(isWakingUp || currentStatus) && (

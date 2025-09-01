@@ -143,20 +143,23 @@ async def search_intelligence(request: SearchRequest, client_request: Request):
     elif client_request.headers.get("x-real-ip"):
         client_ip = client_request.headers.get("x-real-ip")
     
-    # Check rate limit
-    is_allowed, retry_after = rate_limiter.check_rate_limit(client_ip, "/search")
-    if not is_allowed:
-        raise HTTPException(
-            status_code=429,
-            detail={
-                "error": "Rate limit exceeded",
-                "retry_after_seconds": retry_after,
-                "message": f"Too many requests. Please try again in {retry_after} seconds."
-            }
-        )
+    # Check rate limit (bypass if disabled)
+    rate_limit_disabled = os.getenv('DISABLE_RATE_LIMITING', 'false').lower() == 'true'
     
-    # Record the request
-    rate_limiter.record_request(client_ip, "/search")
+    if not rate_limit_disabled:
+        is_allowed, retry_after = rate_limiter.check_rate_limit(client_ip, "/search")
+        if not is_allowed:
+            raise HTTPException(
+                status_code=429,
+                detail={
+                    "error": "Rate limit exceeded",
+                    "retry_after_seconds": retry_after,
+                    "message": f"Too many requests. Please try again in {retry_after} seconds."
+                }
+            )
+        
+        # Record the request
+        rate_limiter.record_request(client_ip, "/search")
     
     try:
         # Send initial status

@@ -151,7 +151,10 @@ Return only the final JSON from present_results. No additional commentary."""),
             print("input print", enhanced_input)
             
             # Execute the agent
+            print(f"🚀 Executing agent with input: {enhanced_input[:100]}...")
             result = self.agent_executor.invoke({"input": enhanced_input})
+            print(f"✅ Agent execution completed. Result type: {type(result)}")
+            print(f"🔍 Agent result keys: {list(result.keys()) if isinstance(result, dict) else 'Not a dict'}")
             
             # Send progress updates (non-blocking)
             # Note: send_progress_update is async but we're not awaiting it to avoid blocking
@@ -165,6 +168,20 @@ Return only the final JSON from present_results. No additional commentary."""),
             except Exception as e:
                 print(f"⚠️ Progress update failed: {e}")
                 # Continue execution even if WebSocket fails
+
+            # Check if agent execution was successful
+            if not result or (isinstance(result, dict) and not result.get('output')):
+                print(f"⚠️ Agent execution returned empty result: {result}")
+                # Return a fallback response instead of crashing
+                return {
+                    "success": False,
+                    "error": "Agent execution failed to produce results",
+                    "cves": [],
+                    "news": [],
+                    "total_results": 0,
+                    "session_id": self.current_session.get('session_id', 'Unknown'),
+                    "generated_at": datetime.now().isoformat()
+                }
 
             return self._build_response_from_session()
         

@@ -272,12 +272,20 @@ def analyze_data_needs(content_type: str = "both", severity = None, days_back: i
         num_news = len(existing_news or [])
 
     # Simple decision: do we have enough items?
-    if num_cves >= needed_cves and num_news >=needed_news:
+    if num_cves >= needed_cves and num_news >= needed_news:
         recommendation = "sufficient"
-        reasoning = f"Found {num_cves}/{needed_cves} and {num_news}/{needed_news}  items in database"
+        reasoning = f"Found {num_cves}/{needed_cves} CVEs and {num_news}/{needed_news} news items in database"
     else:
         recommendation = "urgent_scrape"
-        reasoning = f"Need {needed_cves} cves and {needed_news} news items, only have {num_cves} cves and {num_news} news"
+        reasoning = f"Need {needed_cves} CVEs and {needed_news} news items, only have {num_cves} CVEs and {num_news} news items"
+    
+    # Debug logging for production troubleshooting
+    print(f"🔍 DEBUG: Content type: {content_type}")
+    print(f"🔍 DEBUG: Severity filter: {severity_list}")
+    print(f"🔍 DEBUG: Days back: {days_back} (cutoff: {cutoff_date.isoformat()})")
+    print(f"🔍 DEBUG: Found CVEs: {num_cves}, needed: {needed_cves}")
+    print(f"🔍 DEBUG: Found news: {num_news}, needed: {needed_news}")
+    print(f"🔍 DEBUG: Recommendation: {recommendation}")
     
     print(f"📊 Analysis: {recommendation} - {reasoning}")
     
