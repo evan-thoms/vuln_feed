@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Shield, AlertTriangle, Globe, Calendar, TrendingUp, Loader, CheckCircle, XCircle, AlertCircle} from 'lucide-react';
+import { Search, Shield, AlertTriangle, Globe, Calendar, TrendingUp, Loader, CheckCircle, XCircle, AlertCircle, Download} from 'lucide-react';
 
 const CyberSecurityApp = () => {
   // Get API URL from environment variable or use localhost for development
@@ -27,6 +27,7 @@ const CyberSecurityApp = () => {
   const [serviceReady, setServiceReady] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [isLongLoading, setIsLongLoading] = useState(false);
+  const [exportFormat, setExportFormat] = useState('csv');
   
   const wsRef = useRef(null);
   const loadingTimeoutRef = useRef(null);
@@ -333,6 +334,92 @@ const CyberSecurityApp = () => {
     }
   };
 
+  // Export functions
+  const exportToCSV = (data) => {
+    if (!data || (!data.cves && !data.news)) return;
+    
+    let csvContent = 'data:text/csv;charset=utf-8,';
+    
+    // Add CVEs
+    if (data.cves && data.cves.length > 0) {
+      csvContent += 'Type,Title,CVE ID,Severity,CVSS Score,Intrigue,Published Date,Source,Language,Summary,URL\n';
+      data.cves.forEach(cve => {
+        const row = [
+          'CVE',
+          `"${cve.title_translated}"`,
+          cve.cve_id || '',
+          cve.severity || '',
+          cve.cvss_score || '',
+          cve.intrigue || '',
+          cve.published_date || '',
+          cve.source || '',
+          cve.original_language || '',
+          `"${cve.summary || ''}"`,
+          cve.url || ''
+        ].join(',');
+        csvContent += row + '\n';
+      });
+    }
+    
+    // Add News
+    if (data.news && data.news.length > 0) {
+      if (data.cves && data.cves.length > 0) csvContent += '\n';
+      csvContent += 'Type,Title,Intrigue,Published Date,Source,Language,Summary,URL\n';
+      data.news.forEach(news => {
+        const row = [
+          'News',
+          `"${news.title_translated}"`,
+          news.intrigue || '',
+          news.published_date || '',
+          news.source || '',
+          news.original_language || '',
+          `"${news.summary || ''}"`,
+          news.url || ''
+        ].join(',');
+        csvContent += row + '\n';
+      });
+    }
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `cybersecurity-intelligence-${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportToJSON = (data) => {
+    if (!data || (!data.cves && !data.news)) return;
+    
+    const exportData = {
+      export_date: new Date().toISOString(),
+      processing_time: data.processing_time,
+      freshness: data.freshness,
+      cves: data.cves || [],
+      news: data.news || []
+    };
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `cybersecurity-intelligence-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExport = () => {
+    if (exportFormat === 'csv') {
+      exportToCSV(results);
+    } else {
+      exportToJSON(results);
+    }
+  };
+
   const getFreshnessColor = (isoString) => {
     if (!isoString) return 'text-slate-400';
     const date = new Date(isoString);
@@ -554,8 +641,8 @@ const CyberSecurityApp = () => {
             )}
           </div>
 
-         {/* Search Button */}
-         <div className="mt-8">
+         {/* Search Button and Export Controls */}
+         <div className="mt-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <button
               onClick={handleSearch}
               disabled={loading || isWakingUp || !serviceReady}
@@ -587,6 +674,35 @@ const CyberSecurityApp = () => {
                 </>
               )}
             </button>
+
+            {/* Export Controls */}
+            <div className="flex items-center space-x-3">
+              <select
+                value={exportFormat}
+                onChange={(e) => setExportFormat(e.target.value)}
+                disabled={!results}
+                className={`px-3 py-2 rounded-md text-sm border transition-all ${
+                  results 
+                    ? 'bg-slate-700 border-slate-600 text-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent' 
+                    : 'bg-slate-800 border-slate-700 text-slate-500 cursor-not-allowed'
+                }`}
+              >
+                <option value="csv">CSV</option>
+                <option value="json">JSON</option>
+              </select>
+              <button
+                onClick={handleExport}
+                disabled={!results}
+                className={`inline-flex items-center px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                  results
+                    ? 'bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white hover:shadow-lg hover:scale-105 focus:ring-2 focus:ring-cyan-500 focus:outline-none'
+                    : 'bg-slate-800 border border-slate-700 text-slate-500 cursor-not-allowed'
+                }`}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </button>
+            </div>
           </div>
         </div>
 
@@ -635,6 +751,8 @@ const CyberSecurityApp = () => {
                 </div>
               </div>
             </div>
+
+
 
             {/* Freshness Indicator */}
             {results.freshness && (
