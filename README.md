@@ -7,13 +7,13 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-13+-blue.svg)](https://postgresql.org)
 [![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4-orange.svg)](https://openai.com)
 
-> **Professional-grade cybersecurity intelligence platform** that leverages AI to automatically collect, analyze, and classify security vulnerabilities and threat intelligence from multiple sources in real-time.
+> **Professional-grade cybersecurity intelligence platform** that leverages AI to automatically collect, analyze, and classify security vulnerabilities and threat intelligence from multiple international sources in real-time.
 
 ## 🎯 Project Overview
 
 Sentinel Intelligence is a **full-stack web application** that demonstrates advanced software engineering practices including:
 
-- **AI/ML Integration** with OpenAI GPT-4 and LangChain
+- **AI/ML Integration** with OpenAI GPT-4 and LangChain for intelligent content classification
 - **Real-time Data Processing** with automated web scraping and API integration
 - **Production-Ready Architecture** with comprehensive error handling and monitoring
 - **Scalable Backend** built with FastAPI and PostgreSQL
@@ -55,7 +55,7 @@ Sentinel Intelligence is a **full-stack web application** that demonstrates adva
 - **Multi-Source Integration**: Unified intelligence from RSS feeds, CVE databases, and security blogs
 
 ### 📊 Real-Time Data Processing
-- **Automated Scraping**: Scheduled collection from 15+ security sources
+- **Automated Scraping**: Scheduled collection from multiple security sources including English, Chinese, and Russian sources
 - **Data Normalization**: Consistent formatting across multiple data sources
 - **Duplicate Detection**: Intelligent deduplication and content matching
 - **Historical Analysis**: Trend analysis and pattern recognition
@@ -70,64 +70,28 @@ Sentinel Intelligence is a **full-stack web application** that demonstrates adva
 ## 🛠️ Technical Implementation Highlights
 
 ### Advanced Python Patterns
-```python
-# Async/await with FastAPI
-@app.post("/analyze")
-async def analyze_threats(data: ThreatData) -> AnalysisResult:
-    async with aiohttp.ClientSession() as session:
-        results = await asyncio.gather(*[
-            process_source(session, source) for source in data.sources
-        ])
-    return await ai_classify(results)
-
-# Custom rate limiter with exponential backoff
-class IntelligentRateLimiter:
-    def __init__(self, max_requests: int, time_window: int):
-        self.requests = deque()
-        self.max_requests = max_requests
-        self.time_window = time_window
-```
+- **Async/Await Architecture**: Full asynchronous implementation with FastAPI
+- **Custom Rate Limiting**: Intelligent rate limiting with exponential backoff
+- **WebSocket Integration**: Real-time communication for live updates
+- **Agent-Based Processing**: LangChain-powered intelligent agent system
 
 ### Modern React Patterns
-```typescript
-// Custom hooks with TypeScript
-const useThreatData = (severity: SeverityLevel) => {
-  const [data, setData] = useState<ThreatData[]>([]);
-  const [loading, setLoading] = useState(false);
-  
-  useEffect(() => {
-    fetchThreats(severity).then(setData);
-  }, [severity]);
-  
-  return { data, loading };
-};
-
-// Component composition with proper typing
-interface ThreatCardProps {
-  threat: ThreatData;
-  onAnalyze: (id: string) => void;
-}
-```
+- **Custom Hooks**: TypeScript-powered state management and data fetching
+- **Component Composition**: Proper typing and reusable component architecture
+- **Performance Optimization**: Code splitting and efficient rendering
+- **Responsive Design**: Mobile-first approach with Tailwind CSS
 
 ### Database Design & Optimization
-```sql
--- Optimized schema with proper indexing
-CREATE TABLE threats (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    title TEXT NOT NULL,
-    severity SEVERITY_LEVEL NOT NULL,
-    source_url TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    ai_classification JSONB,
-    INDEX idx_severity_created (severity, created_at DESC)
-);
-```
+- **Optimized Schema**: Proper indexing and relationship design
+- **Connection Pooling**: Efficient database connection management
+- **Data Migration**: Automated schema updates and data integrity
+- **Query Optimization**: Efficient data retrieval and processing
 
 ## 📈 Performance & Scalability
 
-- **Response Time**: <200ms for API endpoints
-- **Throughput**: Handles 1000+ concurrent requests
-- **Data Processing**: Processes 100+ security sources simultaneously
+- **Response Time**: Optimized API endpoints with async processing
+- **Concurrent Processing**: Handles multiple simultaneous requests efficiently
+- **Data Processing**: Processes multiple security sources simultaneously
 - **Database**: Optimized queries with proper indexing and connection pooling
 - **Caching**: Intelligent caching strategies for frequently accessed data
 - **Monitoring**: Real-time performance metrics and alerting
@@ -187,13 +151,25 @@ sentinel-intelligence/
 │   ├── db.py               # Database models and operations
 │   ├── cron_scheduler.py   # Custom cron job scheduler
 │   ├── rate_limiter.py     # Intelligent rate limiting
-│   └── scrapers/           # Web scraping modules
+│   ├── classify.py         # AI classification logic
+│   ├── models.py           # Data models and schemas
+│   ├── config.py           # Configuration management
+│   ├── db_cleanup.py       # Database maintenance
+│   ├── schema.sql          # Database schema
+│   ├── scrapers/           # Web scraping modules
+│   │   ├── chinese_scrape.py
+│   │   ├── english_scrape_with_vulners.py
+│   │   └── russian_scrape.py
+│   ├── tools/              # LangChain tools
+│   └── utils/              # Utility functions
 ├── frontend/               # Next.js frontend
-│   ├── src/                # React components and pages
+│   ├── src/app/            # React components and pages
 │   ├── package.json        # Dependencies and scripts
-│   └── tailwind.config.js  # Styling configuration
+│   └── vercel.json         # Vercel deployment config
 ├── render.yaml             # Infrastructure as code
 ├── requirements.txt        # Python dependencies
+├── build.sh               # Build script
+├── start_local.sh         # Local development script
 └── README.md              # This file
 ```
 

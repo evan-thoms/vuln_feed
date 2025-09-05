@@ -119,19 +119,22 @@ Return only the final JSON from present_results. No additional commentary."""),
             return_intermediate_steps=True
         )
     
-    def new_session(self):
+    def new_session(self, session_id=None):
+        if session_id is None:
+            session_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+        
         self.current_session = {
             "scraped_articles": [],
             "classified_cves": [],
             "classified_news": [],
-            "session_id": datetime.now().strftime("%Y%m%d_%H%M%S")
+            "session_id": session_id
         }
     
-    def query(self, params: dict) -> dict:
+    def query(self, params: dict, session_id: str = None) -> dict:
         """Main query interface - keep existing logic"""
         try:
-            # Start new session
-            self.new_session()
+            # Start new session with provided session_id or generate new one
+            self.new_session(session_id)
 
             self.current_params = {
                 'content_type': params['content_type'],
